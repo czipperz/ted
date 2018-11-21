@@ -18,6 +18,13 @@ fn find_last_window(layout: &Layout) -> &Arc<Mutex<Window>> {
     }
 }
 
+/// Close the selected [`Window`] and select the next one in a clockwise fashion.
+///
+/// If the [`Layout`] is only a single [`Window`], then nothing happens.
+/// Otherwise, the immediate parent split is simplified to the other [`Layout`].
+///
+/// [`Window`]:../ted_core/struct.Window.html
+/// [`Layout`]:../ted_core/enum.Layout.html
 pub fn close_window_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     fn close_window_command_(layout: &mut Layout, window: &mut Arc<Mutex<Window>>) -> bool {
         let new_layout = match layout {
@@ -54,11 +61,18 @@ pub fn close_window_command(state: &mut State, _: &mut Display) -> Result<(), ()
     Ok(())
 }
 
+/// Close all other [`Window`]s but the selected [`Window`].
+///
+/// [`Window`]: ../ted_core/struct.Window.html
 pub fn close_other_windows_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     state.layout = Layout::Window(state.selected_window.clone());
     Ok(())
 }
 
+/// Change the selected [`Window`] to the clockwise successor of the
+/// current selected [`Window`].
+///
+/// [`Window`]: ../ted_core/struct.Window.html
 pub fn other_window_clockwise_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     fn other_window_clockwise_command(layout: &Layout, window: &mut Arc<Mutex<Window>>,
                                       top_level: bool) -> bool {
@@ -96,6 +110,10 @@ pub fn other_window_clockwise_command(state: &mut State, _: &mut Display) -> Res
     Ok(())
 }
 
+/// Change the selected [`Window`] to the counter clockwise successor
+/// of the current selected [`Window`].
+///
+/// [`Window`]: ../ted_core/struct.Window.html
 pub fn other_window_counter_clockwise_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     fn other_window_counter_clockwise_command(layout: &Layout, window: &mut Arc<Mutex<Window>>,
                                               top_level: bool) -> bool {
@@ -191,7 +209,7 @@ mod tests {
             let mut buffer = selected_window.buffer.lock();
             buffer.insert_str(0, "abcd").unwrap();
         }
-        state.update_window_cursors();
+        state.layout.update_window_cursors();
         {
             let mut selected_window = state.selected_window.lock();
             selected_window.set_cursor(2);

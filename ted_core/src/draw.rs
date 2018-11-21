@@ -26,7 +26,7 @@ pub trait DisplayDraw: Display {
 pub fn draw<D>(display: &mut D, state: &State, rows: usize, columns: usize)
                -> Result<(), ()>
                where D: DisplayDraw {
-    state.update_window_cursors();
+    state.layout.update_window_cursors();
     display.erase()?;
     draw_rect(display, &state.layout, &state.selected_window,
               0, 0, rows, columns)?;

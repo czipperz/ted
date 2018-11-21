@@ -1,3 +1,18 @@
+//! A modular thread-safe text editor written in Rust.
+//!
+//! This crate runs the main loop.  That is it handles which Display
+//! is used (terminal vs gui) and processing events.
+//!
+//! This isn't incredibly interesting.  Right now key binds are set up
+//! in this crate but that will change soon to allow more user
+//! customizability.
+//!
+//! To look at the overview of the software model, see the crate [`ted_core`].
+//! To look at some common commands that you can run, see the crate [`ted_common_commands`].
+//!
+//! [`ted_core`]: ../ted_core/index.html
+//! [`ted_common_commands`]: ../ted_common_commands/index.html
+
 extern crate parking_lot;
 extern crate ted_core;
 extern crate ted_common_commands;
@@ -21,7 +36,7 @@ fn setup_state(state: &mut State) {
     default_key_map.bind(kbd!(C-'n'), KeyBind::Action(Arc::new(forward_line_command)));
     default_key_map.bind(kbd!(C-'p'), KeyBind::Action(Arc::new(backward_line_command)));
 
-    default_key_map.bind(Input::Key { c: 'x', control: true, alt: false },
+    default_key_map.bind(kbd!(C-'x'),
                          KeyBind::SubMap(Arc::new(Mutex::new({
                              let mut cx = KeyMap::default();
                              cx.bind(kbd!(C-'c'), KeyBind::Action(Arc::new(|_, _| Err(()))));
@@ -76,10 +91,10 @@ fn increment_(state: &mut State, key_map: &Arc<Mutex<KeyMap>>, recursed: bool,
                 None => {
                     if !recursed {
                         match input {
-                            Input::Key { c, control: false, alt: false } => {
+                            Input::Key { key, control: false, alt: false } => {
                                 {
                                     let mut selected_window = state.selected_window.lock();
-                                    selected_window.insert(c).unwrap();
+                                    selected_window.insert(key).unwrap();
                                 }
                                 display.show(&state).unwrap();
                             },
@@ -102,11 +117,11 @@ mod tests {
     #[test]
     fn main_loop_immediate_quit() {
         let mut display = DebugDisplay::new(vec![
-            Input::Key { c: 'q', control: false, alt: false }]);
+            Input::Key { key: 'q', control: false, alt: false }]);
         let mut state = State::new();
         {
             let mut default_keyset = state.default_key_map.lock();
-            default_keyset.bind(Input::Key { c: 'q', control: false, alt: false },
+            default_keyset.bind(Input::Key { key: 'q', control: false, alt: false },
                                 KeyBind::Action(Arc::new(|_, _| Err(()))));
         }
         main_loop(&mut state, &mut display).unwrap_err();
@@ -131,10 +146,10 @@ mod tests {
     #[test]
     fn increment_1() {
         let mut display = DebugDisplay::new(vec![
-            Input::Key { c: 'a', control: false, alt: false },
-            Input::Key { c: 'b', control: false, alt: false },
-            Input::Key { c: 'c', control: false, alt: false },
-            Input::Key { c: 'q', control: false, alt: false },
+            Input::Key { key: 'a', control: false, alt: false },
+            Input::Key { key: 'b', control: false, alt: false },
+            Input::Key { key: 'c', control: false, alt: false },
+            Input::Key { key: 'q', control: false, alt: false },
         ]);
         let mut state = State::new();
         {
@@ -239,10 +254,10 @@ mod tests {
 
         {
             let mut default_keyset = state.default_key_map.lock();
-            default_keyset.bind(Input::Key { c: 'q', control: false, alt: false },
+            default_keyset.bind(Input::Key { key: 'q', control: false, alt: false },
                                 KeyBind::Action(Arc::new(|_, _| Err(()))));
         }
-        display.inputs.push_back(Input::Key { c: 'q', control: false, alt: false });
+        display.inputs.push_back(Input::Key { key: 'q', control: false, alt: false });
         increment(&mut state, &mut display).unwrap_err();
     }
 
@@ -250,15 +265,15 @@ mod tests {
     fn increment_vertical_split() {
         let mut state = State::new();
         let mut display = DebugDisplay::new(vec![
-            Input::Key { c: 'a', control: false, alt: false },
-            Input::Key { c: 'x', control: true, alt: false },
-            Input::Key { c: '3', control: false, alt: false },
-            Input::Key { c: 'b', control: false, alt: false },
+            Input::Key { key: 'a', control: false, alt: false },
+            Input::Key { key: 'x', control: true, alt: false },
+            Input::Key { key: '3', control: false, alt: false },
+            Input::Key { key: 'b', control: false, alt: false },
         ]);
 
         {
             let mut default_key_map = state.default_key_map.lock();
-            default_key_map.bind(Input::Key { c: 'x', control: true, alt: false },
+            default_key_map.bind(Input::Key { key: 'x', control: true, alt: false },
                                  KeyBind::SubMap(Arc::new(Mutex::new({
                                      let mut cx = KeyMap::default();
                                      cx.bind(kbd!('3'), KeyBind::Action(Arc::new(vertical_split_command)));

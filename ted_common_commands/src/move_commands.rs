@@ -1,17 +1,20 @@
 use ted_core::*;
 
+/// Move backwards one char on the selected [`Window`](../ted_core/struct.Window.html).
 pub fn backward_char_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     let mut selected_window = state.selected_window.lock();
     selected_window.increment_cursor(-1);
     Ok(())
 }
 
+/// Move forwards one char on the selected [`Window`](../ted_core/struct.Window.html).
 pub fn forward_char_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     let mut selected_window = state.selected_window.lock();
     selected_window.increment_cursor(1);
     Ok(())
 }
 
+/// Move to the beginning of the line the selected [`Window`](../ted_core/struct.Window.html)'s cursor is on.
 pub fn begin_of_line_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     let mut selected_window = state.selected_window.lock();
     let selected_window = &mut *selected_window;
@@ -21,6 +24,7 @@ pub fn begin_of_line_command(state: &mut State, _: &mut Display) -> Result<(), (
     Ok(())
 }
 
+/// Get the point representing the beginning of the line `location` is on.
 pub fn begin_of_line(buffer: &Buffer, mut location: usize) -> usize {
     loop {
         if location == 0 {
@@ -35,6 +39,7 @@ pub fn begin_of_line(buffer: &Buffer, mut location: usize) -> usize {
     location
 }
 
+/// Move to the end of the line the selected [`Window`](../ted_core/struct.Window.html)'s cursor is on.
 pub fn end_of_line_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     let mut selected_window = state.selected_window.lock();
     let selected_window = &mut *selected_window;
@@ -44,6 +49,7 @@ pub fn end_of_line_command(state: &mut State, _: &mut Display) -> Result<(), ()>
     Ok(())
 }
 
+/// Get the point representing the end of the line `location` is on.
 pub fn end_of_line(buffer: &Buffer, mut location: usize) -> usize {
     let buffer_len = buffer.len();
     loop {
@@ -58,6 +64,7 @@ pub fn end_of_line(buffer: &Buffer, mut location: usize) -> usize {
     location
 }
 
+/// Move forward one line in the selected [`Window`](../ted_core/struct.Window.html).
 pub fn forward_line_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     let mut selected_window = state.selected_window.lock();
     let selected_window = &mut *selected_window;
@@ -67,6 +74,7 @@ pub fn forward_line_command(state: &mut State, _: &mut Display) -> Result<(), ()
     Ok(())
 }
 
+/// Move backward one line in the selected [`Window`](../ted_core/struct.Window.html).
 pub fn backward_line_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     let mut selected_window = state.selected_window.lock();
     let selected_window = &mut *selected_window;
@@ -76,6 +84,7 @@ pub fn backward_line_command(state: &mut State, _: &mut Display) -> Result<(), (
     Ok(())
 }
 
+/// Get the point `times` lines after `location`.
 pub fn forward_line(buffer: &Buffer, location: usize, times: isize) -> usize {
     let begin = begin_of_line(buffer, location);
     let mut new_location = begin;
@@ -101,6 +110,7 @@ pub fn forward_line(buffer: &Buffer, location: usize, times: isize) -> usize {
     new_location
 }
 
+/// Move forward to the ending of the word in the selected [`Window`](../ted_core/struct.Window.html).
 pub fn forward_word_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     let mut selected_window = state.selected_window.lock();
     let selected_window = &mut *selected_window;
@@ -110,6 +120,7 @@ pub fn forward_word_command(state: &mut State, _: &mut Display) -> Result<(), ()
     Ok(())
 }
 
+/// Move backward to the beginning of the word in the selected [`Window`](../ted_core/struct.Window.html).
 pub fn backward_word_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     let mut selected_window = state.selected_window.lock();
     let selected_window = &mut *selected_window;
@@ -119,6 +130,7 @@ pub fn backward_word_command(state: &mut State, _: &mut Display) -> Result<(), (
     Ok(())
 }
 
+/// Get the point `times` words after `location`.
 pub fn forward_word(buffer: &Buffer, mut location: usize, times: isize) -> usize {
     if times < 0 {
         for _ in times..0 {

@@ -2,6 +2,7 @@ use std::sync::Arc;
 use parking_lot::Mutex;
 use ted_core::*;
 
+/// Split the selected [`Window`](../ted_core/struct.Window.html) in two vertically -- that is into a left and right part.
 pub fn vertical_split_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     fn vertical_split_command_(layout: &mut Layout, window: &Arc<Mutex<Window>>) {
         let split = match layout {
@@ -37,6 +38,7 @@ pub fn vertical_split_command(state: &mut State, _: &mut Display) -> Result<(), 
     Ok(())
 }
 
+/// Split the selected [`Window`](../ted_core/struct.Window.html) in two horizontally -- that is into a top and bottom part.
 pub fn horizontal_split_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     fn horizontal_split_command_(layout: &mut Layout, window: &Arc<Mutex<Window>>) {
         let split = match layout {

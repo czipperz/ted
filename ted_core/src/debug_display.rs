@@ -4,6 +4,82 @@ use input::Input;
 use state::State;
 use draw::*;
 
+/// An implementation of [`Display`] for debugging.
+///
+/// This renders a 20 column, 15 row display via a 2D array of
+/// characters and allow for normal usage as a [`Display`].
+///
+/// You can emulate the user typing by pushing to `inputs`.
+///
+/// # Examples
+///
+/// ```
+/// # use ted_core::{DebugDisplay, Display, State};
+/// let mut display = DebugDisplay::new(Vec::new());
+/// assert_eq!(display.buffer,
+///            vec!["                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>()]);
+///
+/// let state = State::new();
+/// display.show(&state).unwrap();
+/// assert_eq!(display.buffer,
+///            vec!["                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>()]);
+///
+/// {
+///     let mut selected_window = state.selected_window.lock();
+///     let selected_window = &mut *selected_window;
+///     let mut buffer = selected_window.buffer.lock();
+///     buffer.insert_str(0, "abcd").unwrap();
+/// }
+/// display.show(&state).unwrap();
+/// assert_eq!(display.selected_cursors, vec![(0, 4)]);
+/// assert_eq!(display.unselected_cursors, vec![]);
+/// assert_eq!(display.buffer,
+///            vec!["abcd                ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>(),
+///                 "                    ".chars().collect::<Vec<_>>()]);
+/// ```
+///
+/// [`Display`]: trait.Display.html
 pub struct DebugDisplay {
     pub inputs: VecDeque<Input>,
     pub buffer: Vec<Vec<char>>,

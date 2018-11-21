@@ -10,7 +10,7 @@ const PREFERRED_LENGTH_CHARS: usize = 512;
 #[cfg(test)]
 const PREFERRED_LENGTH_CHARS: usize = 2;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BufferContents {
     array: Vec<S>
 }
@@ -21,7 +21,7 @@ impl BufferContents {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct S {
     str: String,
     len_chars: usize,
@@ -93,13 +93,14 @@ impl BufferContents {
         self.insert_str(loc, &c.to_string())
     }
     pub fn insert_str(&mut self, mut loc: usize, str: &str) -> BufferContentsResult<()> {
+        let str_len = str.chars().count();
         for i in 0..self.array.len() {
             if loc <= self.array[i].len_chars {
-                if str.len() + self.array[i].str.len() <= MAX_LENGTH_CHARS {
+                if str_len + self.array[i].str.chars().count() <= MAX_LENGTH_CHARS {
                     let j = self.array[i].str.char_indices().skip(loc).next()
-                        .map(|(i, _)| i).unwrap_or(self.array[i].str.len());
+                        .map(|(j, _)| j).unwrap_or(self.array[i].str.len());
                     self.array[i].str.insert_str(j, str);
-                    self.array[i].len_chars += str.chars().count();
+                    self.array[i].len_chars += str_len;
                 } else {
                     let s = self.array.remove(i).str;
                     let mut i = i;
@@ -124,14 +125,14 @@ impl BufferContents {
         if loc == 0 {
             let mut i = 0;
             loop {
-                if str.len() == i {
+                if str_len == i {
                     break;
-                } else if str.len() < i + PREFERRED_LENGTH_CHARS {
-                    self.array.push(S { str: str[i..].to_string(),
-                                        len_chars: str.len() - i });
+                } else if str_len < i + PREFERRED_LENGTH_CHARS {
+                    self.array.push(S { str: str.chars().skip(i).collect(),
+                                        len_chars: str_len - i });
                     break;
                 } else {
-                    self.array.push(S { str: str[i..i + PREFERRED_LENGTH_CHARS].to_string(),
+                    self.array.push(S { str: str.chars().skip(i).take(PREFERRED_LENGTH_CHARS).collect(),
                                         len_chars: PREFERRED_LENGTH_CHARS });
                     i += PREFERRED_LENGTH_CHARS;
                 }
@@ -147,7 +148,10 @@ impl BufferContents {
         for i in 0..self.array.len() {
             let s = &mut self.array[i];
             if loc < s.len_chars {
-                s.str.remove(loc);
+                {
+                    let loc_chars = s.str.char_indices().skip(loc).next().unwrap().0;
+                    s.str.remove(loc_chars);
+                }
                 s.len_chars -= 1;
                 if s.len_chars == 0 {
                     i_ = Some(i);
@@ -431,6 +435,38 @@ mod tests {
         assert_eq!(buf.get(7).unwrap(), 'h');
         assert_eq!(buf.get(8).unwrap(), 'i');
         assert!(buf.get(9).is_err());
+    }
+
+    #[test]
+    fn insert_handle_char_boundary() {
+        let mut buf = BufferContents::new();
+        buf.insert_str(0, "aβ").unwrap();
+        assert_eq!(buf.array.len(), 1);
+        assert_eq!(buf.len(), 2);
+        assert_eq!(buf.array[0].str, "aβ");
+
+        buf.insert_str(2, "c").unwrap();
+        assert_eq!(format!("{}", buf), "aβc");
+    }
+
+    #[test]
+    fn delete_char_boundary() {
+        let mut buf = BufferContents::new();
+        buf.insert(0, 'β').unwrap();
+        buf.insert(1, 'χ').unwrap();
+        assert_eq!(format!("{}", buf), "βχ");
+
+        {
+            let mut buf = buf.clone();
+            buf.delete(0).unwrap();
+            assert_eq!(format!("{}", buf), "χ");
+        }
+
+        buf.insert(2, 'c').unwrap();
+        assert_eq!(format!("{}", buf), "βχc");
+
+        buf.delete(1).unwrap();
+        assert_eq!(format!("{}", buf), "βc");
     }
 
     #[test]

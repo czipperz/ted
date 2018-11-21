@@ -5,6 +5,10 @@ use input::Input;
 use draw::*;
 use logger::*;
 
+/// An implementation of [`Display`] for a curses backend.
+///
+/// This struct is used to wrap the curses process.
+/// The backend is implemented via the `pancurses` crate.
 pub struct CursesDisplay {
     window: pancurses::Window,
     cursor_y: i32,
@@ -21,6 +25,7 @@ fn check(code: i32) -> Result<(), ()> {
 }
 
 impl CursesDisplay {
+    /// Initialize the curses backend and wrap it in the CursesDisplay object.
     pub fn new() -> Result<Self, ()> {
         let window = pancurses::initscr();
         check(pancurses::raw())?;
@@ -47,17 +52,21 @@ impl Display for CursesDisplay {
         match self.window.getch() {
             Some(pancurses::Input::Character(c)) if c == 27 as char => {
                 self.stalling_escape = true;
-                None
+                self.getch()
             }
             Some(pancurses::Input::Character(c)) => {
                 let ch = convert_to_key(c, self.stalling_escape);
                 self.stalling_escape = false;
-                log(format!("{:?} ({:?} = {:?})", ch, c, c as u32));
+                if cfg!(debug_assertions) {
+                    log(format!("{:?} ({:?} = {:?})", ch, c, c as u32));
+                }
                 Some(ch)
             },
             k => {
                 if k.is_some() {
-                    log(format!("{:?}", k));
+                    if cfg!(debug_assertions) {
+                        log(format!("{:?}", k));
+                    }
                 }
                 None
             },
@@ -67,15 +76,15 @@ impl Display for CursesDisplay {
 
 fn convert_to_key(c: char, alt: bool) -> Input {
     if c == '\n' /* 10 */ {
-        Input::Key { c, control: false, alt }
+        Input::Key { key: c, control: false, alt }
     } else if c >= 1 as char && c <= 26 as char {
-        Input::Key { c: (c as u8 - 1 + 'a' as u8) as char,
+        Input::Key { key: (c as u8 - 1 + 'a' as u8) as char,
                      control: true, alt }
     /*} else if c >= 27 as char && c <= 31 as char {
         Input::Key { c: (c as u8 - 27 + '1' as u8) as char,
                      control: true, alt: false }*/
     } else {
-        Input::Key { c, control: false, alt }
+        Input::Key { key: c, control: false, alt }
     }
 }
 
@@ -107,6 +116,7 @@ impl DisplayDraw for CursesDisplay {
     }
 }
 
+/// Uninitialize the curses backend.
 impl Drop for CursesDisplay {
     fn drop(&mut self) {
         pancurses::endwin();
@@ -123,10 +133,10 @@ mod tests {
     #[test]
     fn convert_to_key_1() {
         assert_ne!(convert_to_key(2 as char, true),
-                   Input::Key { c: 'a', control: true, alt: true });
+                   Input::Key { key: 'a', control: true, alt: true });
         assert_eq!(convert_to_key(1 as char, true),
-                   Input::Key { c: 'a', control: true, alt: true });
+                   Input::Key { key: 'a', control: true, alt: true });
         assert_eq!(convert_to_key(2 as char, false),
-                   Input::Key { c: 'b', control: true, alt: false });
+                   Input::Key { key: 'b', control: true, alt: false });
     }
 }

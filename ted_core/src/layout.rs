@@ -2,14 +2,26 @@ use std::sync::Arc;
 use parking_lot::Mutex;
 use window::Window;
 
+/// The layout of the window.
+///
+/// This structure is recursively defined and thus it is easy to split
+/// up the screen into pieces.
 #[derive(Clone)]
 pub enum Layout {
+    /// A single window is at this point in the `Layout`.
     Window(Arc<Mutex<Window>>),
+    /// The screen is split into two vertical regions: the `left` and `right`.
     VSplit { left: Box<Layout>, right: Box<Layout> },
+    /// The screen is split into two horizontal regions: the `top` and `bottom`.
     HSplit { top: Box<Layout>, bottom: Box<Layout> },
 }
 
 impl Layout {
+    /// Recursively walk the `Layout` and update all the cursors along the way.
+    ///
+    /// See [`Window::update_cursor`].
+    ///
+    /// [`Window::update_cursor`]: struct.Window.html#method.update_cursor
     pub fn update_window_cursors(&self) {
         match self {
             Layout::Window(window) => {

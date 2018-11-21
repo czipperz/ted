@@ -6,6 +6,31 @@ use buffer_contents::*;
 use change::*;
 use std::collections::{HashSet, VecDeque};
 
+/// The actual text storage structure
+///
+/// This stores both the contents of the `Buffer` and the undo tree.
+/// All locations are stored by character position.
+///
+/// # Examples
+///
+/// Basic insertion:
+/// ```
+/// # use ted_core::Buffer;
+/// let mut buffer = Buffer::new();
+/// buffer.insert_str(0, "αγ").unwrap();
+/// buffer.insert_str(1, "βθ").unwrap();
+/// assert_eq!(buffer.len(), 4);
+/// assert_eq!(format!("{}", buffer), "αβθγ");
+/// ```
+///
+/// Basic deletion:
+/// ```
+/// # use ted_core::Buffer;
+/// let mut buffer = Buffer::from("abcd");
+/// buffer.delete_region(2, 4).unwrap();
+/// assert_eq!(buffer.len(), 2);
+/// assert_eq!(format!("{}", buffer), "ab");
+/// ```
 pub struct Buffer {
     buffer_contents: BufferContents,
     _initial_state: Option<Arc<Mutex<StateNode>>>,
@@ -13,6 +38,15 @@ pub struct Buffer {
 }
 
 impl Buffer {
+    /// Create a blank `Buffer`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use ted_core::Buffer;
+    /// let buffer = Buffer::new();
+    /// assert_eq!(buffer.len(), 0);
+    /// ```
     pub fn new() -> Self {
         Buffer {
             buffer_contents: BufferContents::new(),
@@ -21,24 +55,63 @@ impl Buffer {
         }
     }
 
+    /// Retrieve the number of characters in the `Buffer`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use ted_core::Buffer;
+    /// let buffer = Buffer::from("αβθγ");
+    /// assert_eq!(buffer.len(), 4);
+    /// ```
     pub fn len(&self) -> usize { self.buffer_contents.len() }
 
+    /// Iterate over the contents of the `Buffer`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use ted_core::Buffer;
+    /// let buffer = Buffer::from("αβθγ");
+    /// let mut iter = buffer.iter();
+    /// assert_eq!(iter.next(), Some('α'));
+    /// assert_eq!(iter.next(), Some('β'));
+    /// assert_eq!(iter.next(), Some('θ'));
+    /// assert_eq!(iter.next(), Some('γ'));
+    /// assert_eq!(iter.next(), None);
+    /// ```
     pub fn iter(&self) -> BufferContentsIterator { self.buffer_contents.iter() }
 
+    /// Get the character at position `loc`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use ted_core::Buffer;
+    /// let buffer = Buffer::from("αβθγ");
+    /// assert_eq!(buffer.get(0).unwrap(), 'α');
+    /// assert_eq!(buffer.get(1).unwrap(), 'β');
+    /// assert_eq!(buffer.get(2).unwrap(), 'θ');
+    /// assert_eq!(buffer.get(3).unwrap(), 'γ');
+    /// assert!(buffer.get(4).is_err());
+    /// ```
     pub fn get(&self, loc: usize) -> Result<char, ()> {
         self.buffer_contents.get(loc)
     }
 
+    /// Retrieve a substring from position `begin` up until `end`.
     pub fn substring(&self, begin: usize, end: usize) -> Result<String, ()> {
         self.buffer_contents.substring(begin, end)
     }
 
+    /// Insert char `c` at point `loc`.
     pub fn insert(&mut self, loc: usize, c: char) -> Result<(), ()> {
         self.buffer_contents.insert(loc, c)?;
         self.add_change(Change { loc, s: c.to_string(), len_chars: 1, is_insert: true });
         Ok(())
     }
 
+    /// Insert string `s` at point `loc`.
     pub fn insert_str(&mut self, loc: usize, s: &str) -> Result<(), ()> {
         self.buffer_contents.insert_str(loc, s)?;
         self.add_change(Change { loc, s: s.to_string(),
@@ -46,6 +119,7 @@ impl Buffer {
         Ok(())
     }
 
+    /// Delete the character at point `loc`.
     pub fn delete(&mut self, loc: usize) -> Result<(), ()> {
         let c = self.get(loc)?;
         self.buffer_contents.delete(loc)?;
@@ -53,6 +127,7 @@ impl Buffer {
         Ok(())
     }
 
+    /// Delete the region from position `begin` up until `end`.
     pub fn delete_region(&mut self, begin: usize, end: usize) -> Result<(), ()> {
         let s = self.substring(begin, end)?;
         self.buffer_contents.delete_region(begin, end)?;
@@ -62,6 +137,7 @@ impl Buffer {
         Ok(())
     }
 
+    /// Handle adding another node to the state graph and pointing `current_state` to it.
     fn add_change(&mut self, change: Change) {
         match self.current_state.take() {
             Some(current_state) => {
@@ -88,6 +164,33 @@ impl Buffer {
         }
     }
 
+    /// Undo the last change.
+    ///
+    /// This will revert the last change made to the buffer.  Any call
+    /// to `insert`, `insert_str`, `delete`, or `delete_range` is
+    /// considered a change.
+    ///
+    /// If there are no edits to undo, 
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// # use ted_core::Buffer;
+    ///
+    /// let mut buffer = Buffer::new();
+    /// buffer.insert_str(0, "ac").unwrap();
+    /// buffer.insert(1, 'b').unwrap();
+    /// assert_eq!(format!("{}", buffer), "abc");
+    ///
+    /// assert!(buffer.undo());
+    /// assert_eq!(format!("{}", buffer), "ac");
+    ///
+    /// assert!(buffer.undo());
+    /// assert_eq!(format!("{}", buffer), "");
+    ///
+    /// assert!(!buffer.undo());
+    /// assert_eq!(format!("{}", buffer), "");
+    /// ```
     pub fn undo(&mut self) -> bool {
         match self.current_state.take() {
             Some(current_state) => {
@@ -111,6 +214,29 @@ impl Buffer {
         }
     }
 
+    /// Redo the last change if it has been undone.
+    ///
+    /// This method specifically does not cause the last change to be
+    /// done twice, but reverts an `undo`.
+    ///
+    /// ```
+    /// # use ted_core::Buffer;
+    ///
+    /// let mut buffer = Buffer::new();
+    /// buffer.insert_str(0, "ac").unwrap();
+    /// buffer.insert(1, 'b').unwrap();
+    /// assert_eq!(format!("{}", buffer), "abc");
+    ///
+    /// // Redo has nothing to redo
+    /// assert!(!buffer.redo());
+    /// assert_eq!(format!("{}", buffer), "abc");
+    ///
+    /// assert!(buffer.undo());
+    /// assert_eq!(format!("{}", buffer), "ac");
+    ///
+    /// assert!(buffer.redo());
+    /// assert_eq!(format!("{}", buffer), "abc");
+    /// ```
     pub fn redo(&mut self) -> bool {
         match self.current_state.take() {
             Some(current_state_lock) => {

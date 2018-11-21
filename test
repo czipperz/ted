@@ -4,8 +4,14 @@ cd ~/ted || exit 1
 
 cargo build || exit 1
 
+if [ "$1" = "--doc" ]; then
+    tests=""
+else
+    tests="--tests"
+fi
+
 status=0
-RUST_BACKTRACE=1 cargo test -q -p ted_core || status=1
-RUST_BACKTRACE=1 cargo test -q -p ted_common_commands || status=1
-RUST_BACKTRACE=1 cargo test -q -p ted || status=1
+RUST_BACKTRACE=1 cargo test -q -p ted_core $tests || status=1
+RUST_BACKTRACE=1 cargo test -q -p ted_common_commands $tests || status=1
+RUST_BACKTRACE=1 cargo test -q -p ted $tests || status=1
 exit $status

@@ -1,3 +1,15 @@
+//! This crate implements the core functionality of ted.
+//!
+//! The central components of the text editor are implemented here.
+//!
+//! A high level overview is that the [`Display`] produces events.
+//! These events cause certain commands to be triggered.  The command
+//! then executes, modifying the [`State`].  Then the [`Display`] is
+//! reshown and the process restarts.
+//!
+//! [`Display`]: trait.Display.html
+//! [`State`]: struct.State.html
+
 #[macro_use]
 extern crate lazy_static;
 extern crate pancurses;

@@ -1,5 +1,6 @@
 use ted_core::*;
 
+/// Delete backwards one char in the selected [`Window`](../ted_core/struct.Window.html).
 pub fn backspace_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
     let mut selected_window = state.selected_window.lock();
     let selected_window = &mut *selected_window;
