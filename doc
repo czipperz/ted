@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd ~/ted || exit 1
+
+cargo doc -p ted -p ted_common_commands -p ted_core --no-deps --lib --bins || exit 1

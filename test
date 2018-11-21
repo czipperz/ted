@@ -1,7 +1,10 @@
 #!/bin/bash
-cd ~/ted
-status=0
+
+cd ~/ted || exit 1
+
 cargo build || exit 1
+
+status=0
 RUST_BACKTRACE=1 cargo test -q -p ted_core || status=1
 RUST_BACKTRACE=1 cargo test -q -p ted_common_commands || status=1
 RUST_BACKTRACE=1 cargo test -q -p ted || status=1
