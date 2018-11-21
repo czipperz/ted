@@ -1,0 +1,10 @@
+[package]
+name = "ted_core"
+version = "0.1.0"
+authors = ["Czipperz <czipperz@gmail.com>"]
+
+[dependencies]
+pancurses = "*"
+lazy_static = "*"
+parking_lot = "*"
+by_address = "*"

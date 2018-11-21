@@ -1,0 +1,9 @@
+[package]
+name = "ted"
+version = "0.1.0"
+authors = ["Czipperz <czipperz@gmail.com>"]
+
+[dependencies]
+parking_lot = "*"
+ted_core = { path = "ted_core" }
+ted_common_commands = { path = "ted_common_commands" }
