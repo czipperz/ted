@@ -132,11 +132,8 @@ mod tests {
 
     #[test]
     fn convert_to_key_1() {
-        assert_ne!(convert_to_key(2 as char, true),
-                   Input::Key { key: 'a', control: true, alt: true });
-        assert_eq!(convert_to_key(1 as char, true),
-                   Input::Key { key: 'a', control: true, alt: true });
-        assert_eq!(convert_to_key(2 as char, false),
-                   Input::Key { key: 'b', control: true, alt: false });
+        assert_ne!(convert_to_key(2 as char, true), kbd!(C-A-'a'));
+        assert_eq!(convert_to_key(1 as char, true), kbd!(C-A-'a'));
+        assert_eq!(convert_to_key(2 as char, false), kbd!(C-'b'));
     }
 }

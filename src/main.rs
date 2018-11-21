@@ -116,13 +116,11 @@ mod tests {
 
     #[test]
     fn main_loop_immediate_quit() {
-        let mut display = DebugDisplay::new(vec![
-            Input::Key { key: 'q', control: false, alt: false }]);
+        let mut display = DebugDisplay::new(vec![kbd!('q')]);
         let mut state = State::new();
         {
             let mut default_keyset = state.default_key_map.lock();
-            default_keyset.bind(Input::Key { key: 'q', control: false, alt: false },
-                                KeyBind::Action(Arc::new(|_, _| Err(()))));
+            default_keyset.bind(kbd!('q'), KeyBind::Action(Arc::new(|_, _| Err(()))));
         }
         main_loop(&mut state, &mut display).unwrap_err();
         assert_eq!(display.buffer,
@@ -145,12 +143,7 @@ mod tests {
 
     #[test]
     fn increment_1() {
-        let mut display = DebugDisplay::new(vec![
-            Input::Key { key: 'a', control: false, alt: false },
-            Input::Key { key: 'b', control: false, alt: false },
-            Input::Key { key: 'c', control: false, alt: false },
-            Input::Key { key: 'q', control: false, alt: false },
-        ]);
+        let mut display = DebugDisplay::new(vec![kbd!('a'), kbd!('b'), kbd!('c'), kbd!('q')]);
         let mut state = State::new();
         {
             let selected_window = state.selected_window.lock();
@@ -254,26 +247,20 @@ mod tests {
 
         {
             let mut default_keyset = state.default_key_map.lock();
-            default_keyset.bind(Input::Key { key: 'q', control: false, alt: false },
-                                KeyBind::Action(Arc::new(|_, _| Err(()))));
+            default_keyset.bind(kbd!('q'), KeyBind::Action(Arc::new(|_, _| Err(()))));
         }
-        display.inputs.push_back(Input::Key { key: 'q', control: false, alt: false });
+        display.inputs.push_back(kbd!('q'));
         increment(&mut state, &mut display).unwrap_err();
     }
 
     #[test]
     fn increment_vertical_split() {
         let mut state = State::new();
-        let mut display = DebugDisplay::new(vec![
-            Input::Key { key: 'a', control: false, alt: false },
-            Input::Key { key: 'x', control: true, alt: false },
-            Input::Key { key: '3', control: false, alt: false },
-            Input::Key { key: 'b', control: false, alt: false },
-        ]);
+        let mut display = DebugDisplay::new(vec![kbd!('a'), kbd!(C-'x'), kbd!('3'), kbd!('b')]);
 
         {
             let mut default_key_map = state.default_key_map.lock();
-            default_key_map.bind(Input::Key { key: 'x', control: true, alt: false },
+            default_key_map.bind(kbd!(C-'x'),
                                  KeyBind::SubMap(Arc::new(Mutex::new({
                                      let mut cx = KeyMap::default();
                                      cx.bind(kbd!('3'), KeyBind::Action(Arc::new(vertical_split_command)));

@@ -16,14 +16,15 @@ extern crate pancurses;
 extern crate parking_lot;
 extern crate by_address;
 
+#[macro_use]
+mod input;
+pub use input::*;
 mod curses_display;
 pub use curses_display::*;
 mod debug_display;
 pub use debug_display::*;
 mod display;
 pub use display::*;
-mod input;
-pub use input::*;
 mod key_map;
 pub use key_map::*;
 mod layout;
