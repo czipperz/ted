@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use parking_lot::Mutex;
-use buffer::Buffer;
+use buffer::*;
 use key_map::KeyMap;
 use cursor::Cursor;
 
@@ -19,7 +19,7 @@ impl Window {
     /// [`Buffer`]: struct.Buffer.html
     pub fn new() -> Self {
         Window {
-            buffer: Arc::new(Mutex::new(Buffer::new())),
+            buffer: Arc::new(Mutex::new(Buffer::new("*scratch*".into()))),
             buffer_key_map: Arc::new(Mutex::new(KeyMap::default())),
             cursor: Cursor::new(),
         }

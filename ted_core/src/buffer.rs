@@ -15,8 +15,8 @@ use std::collections::{HashSet, VecDeque};
 ///
 /// Basic insertion:
 /// ```
-/// # use ted_core::Buffer;
-/// let mut buffer = Buffer::new();
+/// # use ted_core::{Buffer, BufferName};
+/// let mut buffer = Buffer::new("*scratch*".into());
 /// buffer.insert_str(0, "αγ").unwrap();
 /// buffer.insert_str(1, "βθ").unwrap();
 /// assert_eq!(buffer.len(), 4);
@@ -25,8 +25,9 @@ use std::collections::{HashSet, VecDeque};
 ///
 /// Basic deletion:
 /// ```
-/// # use ted_core::Buffer;
-/// let mut buffer = Buffer::from("abcd");
+/// # use ted_core::{Buffer, BufferName};
+/// let mut buffer = Buffer::new("*scratch*".into());
+/// buffer.insert_str(0, "abcd");
 /// buffer.delete_region(2, 4).unwrap();
 /// assert_eq!(buffer.len(), 2);
 /// assert_eq!(format!("{}", buffer), "ab");
@@ -35,6 +36,8 @@ pub struct Buffer {
     buffer_contents: BufferContents,
     _initial_state: Option<Arc<Mutex<StateNode>>>,
     current_state: Option<Arc<Mutex<StateNode>>>,
+    /// The name of the buffer.
+    pub name: BufferName,
 }
 
 impl Buffer {
@@ -43,15 +46,16 @@ impl Buffer {
     /// # Examples
     ///
     /// ```
-    /// # use ted_core::Buffer;
-    /// let buffer = Buffer::new();
+    /// # use ted_core::{Buffer, BufferName};
+    /// let mut buffer = Buffer::new("*scratch*".into());
     /// assert_eq!(buffer.len(), 0);
     /// ```
-    pub fn new() -> Self {
+    pub fn new(name: BufferName) -> Self {
         Buffer {
             buffer_contents: BufferContents::new(),
             _initial_state: None,
             current_state: None,
+            name,
         }
     }
 
@@ -60,8 +64,9 @@ impl Buffer {
     /// # Examples
     ///
     /// ```
-    /// # use ted_core::Buffer;
-    /// let buffer = Buffer::from("αβθγ");
+    /// # use ted_core::{Buffer, BufferName};
+    /// let mut buffer = Buffer::new("*scratch*".into());
+    /// buffer.insert_str(0, "αβθγ");
     /// assert_eq!(buffer.len(), 4);
     /// ```
     pub fn len(&self) -> usize { self.buffer_contents.len() }
@@ -71,8 +76,9 @@ impl Buffer {
     /// # Examples
     ///
     /// ```
-    /// # use ted_core::Buffer;
-    /// let buffer = Buffer::from("αβθγ");
+    /// # use ted_core::{Buffer, BufferName};
+    /// let mut buffer = Buffer::new("*scratch*".into());
+    /// buffer.insert_str(0, "αβθγ");
     /// let mut iter = buffer.iter();
     /// assert_eq!(iter.next(), Some('α'));
     /// assert_eq!(iter.next(), Some('β'));
@@ -87,8 +93,9 @@ impl Buffer {
     /// # Examples
     ///
     /// ```
-    /// # use ted_core::Buffer;
-    /// let buffer = Buffer::from("αβθγ");
+    /// # use ted_core::{Buffer, BufferName};
+    /// let mut buffer = Buffer::new("*scratch*".into());
+    /// buffer.insert_str(0, "αβθγ");
     /// assert_eq!(buffer.get(0).unwrap(), 'α');
     /// assert_eq!(buffer.get(1).unwrap(), 'β');
     /// assert_eq!(buffer.get(2).unwrap(), 'θ');
@@ -175,9 +182,8 @@ impl Buffer {
     /// ## Examples
     ///
     /// ```
-    /// # use ted_core::Buffer;
-    ///
-    /// let mut buffer = Buffer::new();
+    /// # use ted_core::{Buffer, BufferName};
+    /// let mut buffer = Buffer::new("*scratch*".into());
     /// buffer.insert_str(0, "ac").unwrap();
     /// buffer.insert(1, 'b').unwrap();
     /// assert_eq!(format!("{}", buffer), "abc");
@@ -220,9 +226,8 @@ impl Buffer {
     /// done twice, but reverts an `undo`.
     ///
     /// ```
-    /// # use ted_core::Buffer;
-    ///
-    /// let mut buffer = Buffer::new();
+    /// # use ted_core::{Buffer, BufferName};
+    /// let mut buffer = Buffer::new("*scratch*".into());
     /// buffer.insert_str(0, "ac").unwrap();
     /// buffer.insert(1, 'b').unwrap();
     /// assert_eq!(format!("{}", buffer), "abc");
@@ -279,13 +284,15 @@ impl fmt::Display for Buffer {
     }
 }
 
-impl<'a> From<&'a str> for Buffer {
-    fn from(s: &str) -> Self {
-        Buffer {
-            buffer_contents: BufferContents::from(s),
-            _initial_state: None,
-            current_state: None,
-        }
+/// The name of the Buffer
+pub enum BufferName {
+    File { name: String, path: String },
+    Internal(String),
+}
+
+impl<T: Into<String>> From<T> for BufferName {
+    fn from(t: T) -> Self {
+        BufferName::Internal(t.into())
     }
 }
 
@@ -361,7 +368,7 @@ mod tests {
 
     #[test]
     fn undo_1() {
-        let mut buffer = Buffer::new();
+        let mut buffer = Buffer::new("*scratch*".into());
         assert_eq!(format!("{}", buffer), "");
         assert!(!buffer.undo());
         assert_eq!(format!("{}", buffer), "");
@@ -380,7 +387,7 @@ mod tests {
     #[test]
     fn undo_redo_1() {
         use cursor::Cursor;
-        let mut buffer = Buffer::new();
+        let mut buffer = Buffer::new("*scratch*".into());
         let mut cursor = Cursor::new();
 
         cursor.update(&buffer);
@@ -431,7 +438,7 @@ mod tests {
     #[test]
     fn undo_already_undone_all_changes() {
         use cursor::Cursor;
-        let mut buffer = Buffer::new();
+        let mut buffer = Buffer::new("*scratch*".into());
         let mut cursor = Cursor::new();
 
         cursor.update(&buffer);

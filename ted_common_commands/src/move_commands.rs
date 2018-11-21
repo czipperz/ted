@@ -266,14 +266,15 @@ mod tests {
 
     #[test]
     fn forward_line_empty_buffer() {
-        let buffer = Buffer::new();
+        let buffer = Buffer::new("*scratch*".into());
         assert_eq!(forward_line(&buffer, 0, 1), 0);
         assert_eq!(forward_line(&buffer, 0, -1), 0);
     }
 
     #[test]
     fn forward_line_two_lines_same_len() {
-        let buffer = Buffer::from("Hello\nWorld");
+        let mut buffer = Buffer::new("*scratch*".into());
+        buffer.insert_str(0, "Hello\nWorld").unwrap();
         assert_eq!(forward_line(&buffer, 0, 1), 6);
         assert_eq!(forward_line(&buffer, 2, 1), 8);
         assert_eq!(forward_line(&buffer, 8, 1), 8);
@@ -286,7 +287,8 @@ mod tests {
 
     #[test]
     fn forward_line_two_lines_bigger_first() {
-        let buffer = Buffer::from("Hello\nW");
+        let mut buffer = Buffer::new("*scratch*".into());
+        buffer.insert_str(0, "Hello\nW").unwrap();
         assert_eq!(forward_line(&buffer, 0, 1), 6);
         assert_eq!(forward_line(&buffer, 2, 1), 7);
         assert_eq!(forward_line(&buffer, 7, 1), 7);
@@ -299,7 +301,8 @@ mod tests {
 
     #[test]
     fn forward_line_two_lines_bigger_second() {
-        let buffer = Buffer::from("H\nWorld");
+        let mut buffer = Buffer::new("*scratch*".into());
+        buffer.insert_str(0, "H\nWorld").unwrap();
         assert_eq!(forward_line(&buffer, 0, 1), 2);
         assert_eq!(forward_line(&buffer, 1, 1), 3);
         assert_eq!(forward_line(&buffer, 3, 1), 3);
@@ -312,7 +315,7 @@ mod tests {
 
     #[test]
     fn forward_line_multiple_lines() {
-        let mut buffer = Buffer::new();
+        let mut buffer = Buffer::new("*scratch*".into());
         buffer.insert_str(0, "H\n").unwrap();
         buffer.insert_str(2, "ello\n").unwrap();
         buffer.insert_str(7, "\n").unwrap();
@@ -334,7 +337,7 @@ mod tests {
 
     #[test]
     fn forward_word_empty_buffer() {
-        let buffer = Buffer::new();
+        let buffer = Buffer::new("*scratch*".into());
         assert_eq!(forward_word(&buffer, 0, 1), 0);
         assert_eq!(forward_word(&buffer, 0, 0), 0);
         assert_eq!(forward_word(&buffer, 0, -1), 0);
@@ -342,7 +345,7 @@ mod tests {
 
     #[test]
     fn forward_word_multiple_lines() {
-        let mut buffer = Buffer::new();
+        let mut buffer = Buffer::new("*scratch*".into());
         buffer.insert_str(0, "Hello\n").unwrap();
         buffer.insert_str(6, "\n").unwrap();
         buffer.insert_str(7, "World").unwrap();
@@ -358,7 +361,7 @@ mod tests {
 
     #[test]
     fn forward_word_multiple_lines_spaces() {
-        let mut buffer = Buffer::new();
+        let mut buffer = Buffer::new("*scratch*".into());
         buffer.insert_str(0, " Hello \n").unwrap();
         buffer.insert_str(8, " \n").unwrap();
         buffer.insert_str(10, " World ").unwrap();

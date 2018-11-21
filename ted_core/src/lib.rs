@@ -36,7 +36,7 @@ pub use window::*;
 mod logger;
 pub use logger::*;
 mod buffer;
-pub use buffer::Buffer;
+pub use buffer::{Buffer, BufferName};
 
 // private modules
 mod draw;
