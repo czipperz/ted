@@ -192,7 +192,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
         assert_eq!((display.selected_cursors, display.unselected_cursors),
                    (vec![(0, 4)], vec![]));
     }
@@ -223,7 +223,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>(),
                         "--------------------".chars().collect::<Vec<_>>(),
                         "abcd                ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -231,7 +231,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
         assert_eq!(display.selected_cursors, vec![(0, 2)]);
         assert_eq!(display.unselected_cursors, vec![(0, 15), (8, 4)]);
 
@@ -244,7 +244,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
+                        "*scratch*           ".chars().collect::<Vec<_>>(),
                         "--------------------".chars().collect::<Vec<_>>(),
                         "abcd                ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -252,7 +252,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
         assert_eq!((display.selected_cursors, display.unselected_cursors),
                    (vec![(0, 4)], vec![(8, 4)]));
     }
@@ -283,7 +283,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
         assert_eq!(display.selected_cursors, vec![(0, 4)]);
         assert_eq!(display.unselected_cursors, vec![]);
 
@@ -305,7 +305,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>(),
                         "--------------------".chars().collect::<Vec<_>>(),
                         "abcd                ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -313,7 +313,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
         assert_eq!(display.selected_cursors, vec![(0, 2)]);
         assert_eq!(display.unselected_cursors, vec![(0, 11), (8, 0)]);
 
@@ -334,7 +334,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
         assert_eq!((display.selected_cursors, display.unselected_cursors),
                    (vec![(0, 2)], vec![]));
     }
@@ -365,7 +365,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
 
         horizontal_split_command(&mut state, &mut display).unwrap();
         vertical_split_command(&mut state, &mut display).unwrap();
@@ -377,7 +377,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>(),
                         "--------------------".chars().collect::<Vec<_>>(),
                         "abcd                ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -385,7 +385,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
         assert_eq!(display.selected_cursors, vec![(0, 4)]);
         assert_eq!(display.unselected_cursors, vec![(0, 15), (8, 4)]);
 
@@ -398,7 +398,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>(),
                         "--------------------".chars().collect::<Vec<_>>(),
                         "abcd                ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -406,7 +406,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
         assert_eq!((&display.selected_cursors, &display.unselected_cursors),
                    (&vec![(0, 15)], &vec![(0, 4), (8, 4)]));
 
@@ -419,7 +419,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>(),
                         "--------------------".chars().collect::<Vec<_>>(),
                         "abcd                ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -427,7 +427,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
         assert_eq!((&display.selected_cursors, &display.unselected_cursors),
                    (&vec![(8, 4)], &vec![(0, 4), (0, 15)]));
 
@@ -440,7 +440,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>(),
                         "--------------------".chars().collect::<Vec<_>>(),
                         "abcd                ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -448,7 +448,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
         assert_eq!((&display.selected_cursors, &display.unselected_cursors),
                    (&vec![(0, 4)], &vec![(0, 15), (8, 4)]));
     }
@@ -479,7 +479,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
 
         vertical_split_command(&mut state, &mut display).unwrap();
         other_window_clockwise_command(&mut state, &mut display).unwrap();
@@ -496,7 +496,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "          |*scratch*".chars().collect::<Vec<_>>(),
                         "          |---------".chars().collect::<Vec<_>>(),
                         "          |abcd     ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
@@ -504,7 +504,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
         assert_eq!(display.selected_cursors, vec![(0, 13)]);
         assert_eq!(display.unselected_cursors, vec![(0, 4), (8, 15)]);
 
@@ -517,7 +517,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "          |*scratch*".chars().collect::<Vec<_>>(),
                         "          |---------".chars().collect::<Vec<_>>(),
                         "          |abcd     ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
@@ -525,7 +525,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
         assert_eq!((&display.selected_cursors, &display.unselected_cursors),
                    (&vec![(8, 15)], &vec![(0, 4), (0, 13)]));
 
@@ -538,7 +538,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "          |*scratch*".chars().collect::<Vec<_>>(),
                         "          |---------".chars().collect::<Vec<_>>(),
                         "          |abcd     ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
@@ -546,7 +546,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
         assert_eq!((&display.selected_cursors, &display.unselected_cursors),
                    (&vec![(0, 4)], &vec![(0, 13), (8, 15)]));
 
@@ -559,7 +559,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "          |*scratch*".chars().collect::<Vec<_>>(),
                         "          |---------".chars().collect::<Vec<_>>(),
                         "          |abcd     ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
@@ -567,7 +567,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
         assert_eq!((&display.selected_cursors, &display.unselected_cursors),
                    (&vec![(0, 13)], &vec![(0, 4), (8, 15)]));
     }
@@ -595,7 +595,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "          |*scratch*".chars().collect::<Vec<_>>(),
                         "          |---------".chars().collect::<Vec<_>>(),
                         "          |abcd     ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
@@ -603,7 +603,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
         assert_eq!(display.selected_cursors, vec![(0, 15)]);
         assert_eq!(display.unselected_cursors, vec![(0, 4), (8, 15)]);
 
@@ -616,7 +616,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "          |*scratch*".chars().collect::<Vec<_>>(),
                         "          |---------".chars().collect::<Vec<_>>(),
                         "          |abcd     ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
@@ -624,7 +624,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
         assert_eq!(display.selected_cursors, vec![(0, 4)]);
         assert_eq!(display.unselected_cursors, vec![(0, 15), (8, 15)]);
 
@@ -637,7 +637,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "          |*scratch*".chars().collect::<Vec<_>>(),
                         "          |---------".chars().collect::<Vec<_>>(),
                         "          |abcd     ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
@@ -645,7 +645,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
         assert_eq!(display.selected_cursors, vec![(8, 15)]);
         assert_eq!(display.unselected_cursors, vec![(0, 4), (0, 15)]);
 
@@ -658,7 +658,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
+                        "          |*scratch*".chars().collect::<Vec<_>>(),
                         "          |---------".chars().collect::<Vec<_>>(),
                         "          |abcd     ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
@@ -666,7 +666,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
         assert_eq!(display.selected_cursors, vec![(0, 15)]);
         assert_eq!(display.unselected_cursors, vec![(0, 4), (8, 15)]);
     }

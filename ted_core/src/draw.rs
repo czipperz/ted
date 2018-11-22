@@ -46,7 +46,7 @@ fn draw_rect<D>(display: &mut D, layout: &Layout, selected_window: &Arc<Mutex<Wi
             let mut column = 0;
             let mut row = 0;
             let mut location = 0;
-            while column < columns {
+            while row < rows - 1 {
                 if window.cursor.get() == location {
                     if is_selected_window {
                         display.set_attribute(y + row, x + column,
@@ -72,6 +72,13 @@ fn draw_rect<D>(display: &mut D, layout: &Layout, selected_window: &Arc<Mutex<Wi
                     None => break,
                 }
                 location += 1;
+            }
+            let mut column = 0;
+            for ch in buffer.name.display_name().chars() {
+                if column < columns {
+                    display.putch(y + rows - 1, x + column, Character::Character(ch))?;
+                    column += 1;
+                }
             }
             Ok(())
         },

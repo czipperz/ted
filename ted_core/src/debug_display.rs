@@ -50,7 +50,7 @@ use draw::*;
 ///                 "                    ".chars().collect::<Vec<_>>(),
 ///                 "                    ".chars().collect::<Vec<_>>(),
 ///                 "                    ".chars().collect::<Vec<_>>(),
-///                 "                    ".chars().collect::<Vec<_>>()]);
+///                 "*scratch*           ".chars().collect::<Vec<_>>()]);
 ///
 /// {
 ///     let mut selected_window = state.selected_window.lock();
@@ -76,7 +76,7 @@ use draw::*;
 ///                 "                    ".chars().collect::<Vec<_>>(),
 ///                 "                    ".chars().collect::<Vec<_>>(),
 ///                 "                    ".chars().collect::<Vec<_>>(),
-///                 "                    ".chars().collect::<Vec<_>>()]);
+///                 "*scratch*           ".chars().collect::<Vec<_>>()]);
 /// ```
 ///
 /// [`Display`]: trait.Display.html
@@ -196,7 +196,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
 
         {
             let mut selected_window = state.selected_window.lock();
@@ -222,7 +222,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
     }
 
     #[test]
@@ -249,7 +249,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
+                        "*scratch*           ".chars().collect::<Vec<_>>(),
                         "--------------------".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -257,7 +257,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
 
         {
             let mut selected_window = state.selected_window.lock();
@@ -275,7 +275,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
+                        "*scratch*           ".chars().collect::<Vec<_>>(),
                         "--------------------".chars().collect::<Vec<_>>(),
                         "abcd                ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -283,7 +283,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
     }
 
     #[test]
@@ -316,7 +316,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
 
         {
             let mut selected_window = state.selected_window.lock();
@@ -342,7 +342,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
     }
 
     #[test]
@@ -385,7 +385,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
     }
 
     #[test]
@@ -413,7 +413,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
     }
 
     #[test]
@@ -441,7 +441,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
 
         {
             let selected_window = state.selected_window.lock();
@@ -465,6 +465,34 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
+    }
+
+    #[test]
+    fn debug_display_long_file() {
+        let mut display = DebugDisplay::new(Vec::new());
+        let state = State::new();
+        {
+            let selected_window = state.selected_window.lock();
+            let mut buffer = selected_window.buffer.lock();
+            buffer.insert_str(0, "a\nb\nc\nd\ne\nf\ng\nh\ni\nj\nk\nl\nm\nn\no\np\nq\nr\ns\nt\nu\nv\nw\nx\ny\nz").unwrap();
+        }
+        display.show(&state).unwrap();
+        assert_eq!(display.buffer,
+                   vec!["a                   ".chars().collect::<Vec<_>>(),
+                        "b                   ".chars().collect::<Vec<_>>(),
+                        "c                   ".chars().collect::<Vec<_>>(),
+                        "d                   ".chars().collect::<Vec<_>>(),
+                        "e                   ".chars().collect::<Vec<_>>(),
+                        "f                   ".chars().collect::<Vec<_>>(),
+                        "g                   ".chars().collect::<Vec<_>>(),
+                        "h                   ".chars().collect::<Vec<_>>(),
+                        "i                   ".chars().collect::<Vec<_>>(),
+                        "j                   ".chars().collect::<Vec<_>>(),
+                        "k                   ".chars().collect::<Vec<_>>(),
+                        "l                   ".chars().collect::<Vec<_>>(),
+                        "m                   ".chars().collect::<Vec<_>>(),
+                        "n                   ".chars().collect::<Vec<_>>(),
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
     }
 }

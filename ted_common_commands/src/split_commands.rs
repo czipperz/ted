@@ -131,7 +131,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
+                        "*scratch*           ".chars().collect::<Vec<_>>(),
                         "--------------------".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -139,7 +139,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
 
         {
             let selected_window = state.selected_window.lock();
@@ -154,7 +154,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
+                        "*scratch*           ".chars().collect::<Vec<_>>(),
                         "--------------------".chars().collect::<Vec<_>>(),
                         "abcd                ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -162,6 +162,6 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
     }
 }

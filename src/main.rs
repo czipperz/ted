@@ -54,6 +54,7 @@ fn main() {
     let mut display = CursesDisplay::new().unwrap();
     let mut state = State::new();
     setup_state(&mut state);
+    display.show(&state).unwrap();
     main_loop(&mut state, &mut display).unwrap_err();
 }
 
@@ -138,7 +139,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
     }
 
     #[test]
@@ -171,7 +172,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
 
         increment(&mut state, &mut display).unwrap();
         {
@@ -195,7 +196,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
 
         increment(&mut state, &mut display).unwrap();
         {
@@ -219,7 +220,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
 
         increment(&mut state, &mut display).unwrap();
         {
@@ -243,7 +244,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
 
         {
             let mut default_keyset = state.default_key_map.lock();
@@ -284,7 +285,7 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>()]);
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
         assert_eq!(display.selected_cursors,
                    vec![(0, 1)]);
 
@@ -304,7 +305,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
         assert_eq!(display.selected_cursors,
                    vec![(0, 1)]);
         assert_eq!(display.unselected_cursors,
@@ -326,7 +327,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>()]);
+                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
         assert_eq!(display.selected_cursors,
                    vec![(0, 2)]);
         assert_eq!(display.unselected_cursors,

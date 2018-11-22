@@ -290,6 +290,15 @@ pub enum BufferName {
     Internal(String),
 }
 
+impl BufferName {
+    pub fn display_name(&self) -> &str {
+        match self {
+            BufferName::File { name, .. } => &name,
+            BufferName::Internal(name) => &name,
+        }
+    }
+}
+
 impl<T: Into<String>> From<T> for BufferName {
     fn from(t: T) -> Self {
         BufferName::Internal(t.into())
