@@ -7,6 +7,9 @@ pub use delete_commands::*;
 mod move_commands;
 pub use move_commands::*;
 
+mod move_group_commands;
+pub use move_group_commands::*;
+
 mod split_commands;
 pub use split_commands::*;
 

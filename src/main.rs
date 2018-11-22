@@ -29,12 +29,19 @@ fn setup_state(state: &mut State) {
     default_key_map.bind(kbd!(C-'f'), KeyBind::Action(Arc::new(forward_char_command)));
     default_key_map.bind(kbd!(A-'b'), KeyBind::Action(Arc::new(backward_word_command)));
     default_key_map.bind(kbd!(A-'f'), KeyBind::Action(Arc::new(forward_word_command)));
-    default_key_map.bind(kbd!(C-'a'), KeyBind::Action(Arc::new(begin_of_line_command)));
-    default_key_map.bind(kbd!(C-'e'), KeyBind::Action(Arc::new(end_of_line_command)));
-    default_key_map.bind(kbd!(C-'z'), KeyBind::Action(Arc::new(undo_command)));
-    default_key_map.bind(kbd!(A-'z'), KeyBind::Action(Arc::new(redo_command)));
+    default_key_map.bind(kbd!(C-A-'b'), KeyBind::Action(Arc::new(backward_group_command)));
+    default_key_map.bind(kbd!(C-A-'f'), KeyBind::Action(Arc::new(forward_group_command)));
+
+    default_key_map.bind(kbd!(C-A-'u'), KeyBind::Action(Arc::new(up_group_command)));
+
     default_key_map.bind(kbd!(C-'n'), KeyBind::Action(Arc::new(forward_line_command)));
     default_key_map.bind(kbd!(C-'p'), KeyBind::Action(Arc::new(backward_line_command)));
+
+    default_key_map.bind(kbd!(C-'a'), KeyBind::Action(Arc::new(begin_of_line_command)));
+    default_key_map.bind(kbd!(C-'e'), KeyBind::Action(Arc::new(end_of_line_command)));
+
+    default_key_map.bind(kbd!(C-'z'), KeyBind::Action(Arc::new(undo_command)));
+    default_key_map.bind(kbd!(A-'z'), KeyBind::Action(Arc::new(redo_command)));
 
     default_key_map.bind(kbd!(C-'x'),
                          KeyBind::SubMap(Arc::new(Mutex::new({

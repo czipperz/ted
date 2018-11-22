@@ -132,19 +132,23 @@ pub fn backward_word_command(state: &mut State, _: &mut Display) -> Result<(), (
 
 /// Get the point `times` words after `location`.
 pub fn forward_word(buffer: &Buffer, mut location: usize, times: isize) -> usize {
+    fn word_character(c: char) -> bool {
+        c.is_alphanumeric() || c == '_'
+    }
+
     if times < 0 {
         for _ in times..0 {
             if location == 0 {
                 return location;
             }
             location -= 1;
-            while !buffer.get(location).unwrap().is_alphanumeric() {
+            while !word_character(buffer.get(location).unwrap()) {
                 if location == 0 {
                     return location;
                 }
                 location -= 1;
             }
-            while buffer.get(location).unwrap().is_alphanumeric() {
+            while word_character(buffer.get(location).unwrap()) {
                 if location == 0 {
                     return location;
                 }
@@ -158,13 +162,13 @@ pub fn forward_word(buffer: &Buffer, mut location: usize, times: isize) -> usize
             if location + 1 >= buffer_len {
                 return buffer_len;
             }
-            while !buffer.get(location).unwrap().is_alphanumeric() {
+            while !word_character(buffer.get(location).unwrap()) {
                 if location + 1 >= buffer_len {
                     return buffer_len;
                 }
                 location += 1;
             }
-            while buffer.get(location).unwrap().is_alphanumeric() {
+            while word_character(buffer.get(location).unwrap()) {
                 if location + 1 >= buffer_len {
                     return buffer_len;
                 }
@@ -376,5 +380,12 @@ mod tests {
         assert_eq!(forward_word(&buffer, 7, -1), 1);
         assert_eq!(forward_word(&buffer, 8, -1), 1);
         assert_eq!(forward_word(&buffer, 12, -1), 11);
+    }
+
+    #[test]
+    fn forward_word_underscore() {
+        let mut buffer = Buffer::new("*scratch*".into());
+        buffer.insert_str(0, "a_b").unwrap();
+        assert_eq!(forward_word(&buffer, 0, 1), 3);
     }
 }
