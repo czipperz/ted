@@ -41,14 +41,6 @@ impl Cursor {
         }
     }
 
-    pub fn unchecked_increment(&mut self, offset: isize) {
-        self.location = (self.location as isize + offset) as usize;
-    }
-
-    pub fn unchecked_set(&mut self, location: usize) {
-        self.location = location;
-    }
-
     pub fn update(&mut self, buffer: &Buffer) {
         update_cursor(buffer, &mut self.state, &mut self.location);
     }
