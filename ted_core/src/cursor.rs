@@ -19,6 +19,7 @@ impl Cursor {
     }
 
     pub fn increment(&mut self, buffer: &Buffer, offset: isize) {
+        self.update(buffer);
         if offset < 0 && self.location < -offset as usize {
             self.location = 0;
         } else {
@@ -32,6 +33,7 @@ impl Cursor {
     }
 
     pub fn set(&mut self, buffer: &Buffer, location: usize) {
+        self.update(buffer);
         if location > buffer.len() {
             self.location = buffer.len();
         } else {
@@ -81,6 +83,7 @@ mod tests {
         {
             let mut buffer = window.buffer.lock();
             buffer.insert_str(0, "abc").unwrap();
+            window.cursor.set(&buffer, 0);
         }
         assert_eq!(window.cursor.get(), 0);
         window.increment_cursor(1);
@@ -101,6 +104,7 @@ mod tests {
         {
             let mut buffer = window.buffer.lock();
             buffer.insert_str(0, "abc").unwrap();
+            window.cursor.set(&buffer, 0);
         }
         assert_eq!(window.cursor.get(), 0);
         window.set_cursor(0);
