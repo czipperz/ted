@@ -24,7 +24,9 @@ use ted_common_commands::*;
 
 fn setup_state(state: &mut State) {
     let mut default_key_map = state.default_key_map.lock();
-    default_key_map.bind(kbd!(BACKSPACE), KeyBind::Action(Arc::new(backspace_command)));
+    default_key_map.bind(kbd!(BACKSPACE), KeyBind::Action(Arc::new(delete_backward_char_command)));
+    default_key_map.bind(kbd!(C-'d'), KeyBind::Action(Arc::new(delete_forward_char_command)));
+
     default_key_map.bind(kbd!(C-'b'), KeyBind::Action(Arc::new(backward_char_command)));
     default_key_map.bind(kbd!(C-'f'), KeyBind::Action(Arc::new(forward_char_command)));
     default_key_map.bind(kbd!(A-'b'), KeyBind::Action(Arc::new(backward_word_command)));
