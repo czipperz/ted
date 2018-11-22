@@ -37,9 +37,10 @@ mod logger;
 pub use logger::*;
 mod buffer;
 pub use buffer::{Buffer, BufferName};
+mod cursor;
+pub use cursor::*;
 
 // private modules
-mod draw;
 mod buffer_contents;
-mod cursor;
 mod change;
+mod draw;
