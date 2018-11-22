@@ -15,6 +15,7 @@ pub enum Character {
 pub enum Attribute {
     SelectedCursor,
     UnselectedCursor,
+    Inverted,
 }
 
 pub trait DisplayDraw: Display {
@@ -79,6 +80,9 @@ fn draw_rect<D>(display: &mut D, layout: &Layout, selected_window: &Arc<Mutex<Wi
                     display.putch(y + rows - 1, x + column, Character::Character(ch))?;
                     column += 1;
                 }
+            }
+            for column in 0..columns {
+                display.set_attribute(y + rows - 1, x + column, Attribute::Inverted)?;
             }
             Ok(())
         },

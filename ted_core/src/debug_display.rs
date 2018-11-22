@@ -148,6 +148,7 @@ impl DisplayDraw for DebugDisplay {
         match at {
             Attribute::SelectedCursor => self.selected_cursors.push((y, x)),
             Attribute::UnselectedCursor => self.unselected_cursors.push((y, x)),
+            Attribute::Inverted => {},
         }
         Ok(())
     }

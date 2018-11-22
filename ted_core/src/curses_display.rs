@@ -111,7 +111,10 @@ impl DisplayDraw for CursesDisplay {
                 Ok(())
             },
             Attribute::UnselectedCursor => Ok(()),
-            //check(self.window.chgat(1, pancurses::Attribute::Reverse.into(), 0)) ,
+            Attribute::Inverted => {
+                check(self.window.mvchgat(y as i32, x as i32, 1,
+                                          pancurses::Attribute::Reverse.into(), 0))
+            },
         }
     }
 }
