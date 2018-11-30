@@ -19,7 +19,7 @@ use buffer::*;
 ///
 /// [`update`]: #method.update
 /// [`Buffer`]: struct.Buffer.html
-/// [`Window`]: struct.Windew.html
+/// [`Window`]: struct.Window.html
 #[derive(Clone)]
 pub struct Cursor {
     location: usize,

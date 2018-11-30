@@ -305,7 +305,8 @@ impl<T: Into<String>> From<T> for BufferName {
     }
 }
 
-pub fn update_cursor(buffer: &Buffer, ret_state: &mut Weak<Mutex<StateNode>>, ret_location: &mut usize) {
+pub fn update_cursor(buffer: &Buffer, ret_state: &mut Weak<Mutex<StateNode>>,
+                     ret_location: &mut usize) {
     let mut state =
         match ret_state.upgrade() {
             Some(state) => state,
