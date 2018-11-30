@@ -97,6 +97,22 @@ impl Cursor {
     pub fn update(&mut self, buffer: &Buffer) {
         update_cursor(buffer, &mut self.state, &mut self.location);
     }
+
+    /// Update the `Cursor` to the current state of the [`Buffer`].
+    ///
+    /// This allows for easier access of a [`Window`]'s updated cursor
+    /// while the [`Window`] is still immutable.
+    ///
+    /// [`Window`]: struct.Window.html
+    pub fn updated(mut self, buffer: &Buffer) -> Self {
+        self.update(buffer);
+        self
+    }
+
+    /// Indicates whether the `Cursor` has been updated properly.
+    pub fn is_updated(&self, buffer: &Buffer) -> bool {
+        is_updated_cursor(buffer, &self.state)
+    }
 }
 
 impl PartialEq for Cursor {

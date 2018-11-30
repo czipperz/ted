@@ -371,6 +371,18 @@ pub fn update_cursor(buffer: &Buffer, ret_state: &mut Weak<Mutex<StateNode>>, re
     }
 }
 
+pub fn is_updated_cursor(buffer: &Buffer, state: &Weak<Mutex<StateNode>>) -> bool {
+    let state = state.upgrade();
+    if buffer.current_state.is_none() && state.is_none() {
+        true
+    } else if buffer.current_state.is_none() || state.is_none() {
+        false
+    } else {
+        let current_state = buffer.current_state.as_ref().unwrap();
+        Arc::ptr_eq(current_state, &state.unwrap())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
