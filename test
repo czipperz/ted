@@ -11,7 +11,9 @@ else
 fi
 
 status=0
-RUST_BACKTRACE=1 cargo test -q -p ted_core $tests || status=1
-RUST_BACKTRACE=1 cargo test -q -p ted_common_commands $tests || status=1
-RUST_BACKTRACE=1 cargo test -q -p ted $tests || status=1
+RUST_BACKTRACE=1 cargo test -p ted_core $tests || status=1
+RUST_BACKTRACE=1 cargo test -p ted_common_commands $tests || status=1
+RUST_BACKTRACE=1 cargo test -p ted_mark $tests || status=1
+RUST_BACKTRACE=1 cargo test -p ted_kill_ring $tests || status=1
+RUST_BACKTRACE=1 cargo test -p ted $tests || status=1
 exit $status

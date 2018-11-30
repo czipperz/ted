@@ -16,12 +16,16 @@
 extern crate parking_lot;
 extern crate ted_core;
 extern crate ted_common_commands;
+extern crate ted_mark;
+extern crate ted_kill_ring;
 
 use std::collections::VecDeque;
 use std::sync::Arc;
 use parking_lot::Mutex;
 use ted_core::*;
 use ted_common_commands::*;
+use ted_mark::*;
+use ted_kill_ring::*;
 
 fn close_ted_command(_: &mut State, _: &mut Display) -> Result<(), ()> {
     Err(())
@@ -38,9 +42,14 @@ fn setup_state(state: &mut State) {
     default_key_map.bind(kbd!(C-'f'), KeyBind::Action(Arc::new(forward_char_command)));
     default_key_map.bind(kbd!(A-'f'), KeyBind::Action(Arc::new(forward_word_command)));
     default_key_map.bind(kbd!(C-A-'f'), KeyBind::Action(Arc::new(forward_group_command)));
+    default_key_map.bind(kbd!(C-'g'), KeyBind::Action(Arc::new(remove_mark_command)));
     default_key_map.bind(kbd!(C-'n'), KeyBind::Action(Arc::new(forward_line_command)));
     default_key_map.bind(kbd!(C-'p'), KeyBind::Action(Arc::new(backward_line_command)));
     default_key_map.bind(kbd!(C-A-'u'), KeyBind::Action(Arc::new(up_group_command)));
+    default_key_map.bind(kbd!(C-'w'), KeyBind::Action(Arc::new(kill_region_command)));
+    default_key_map.bind(kbd!(A-'w'), KeyBind::Action(Arc::new(copy_region_command)));
+    default_key_map.bind(kbd!(C-'y'), KeyBind::Action(Arc::new(paste_command)));
+    default_key_map.bind(kbd!(A-'y'), KeyBind::Action(Arc::new(paste_pop_command)));
     default_key_map.bind(kbd!(C-'x'),
                          KeyBind::SubMap(Arc::new(Mutex::new({
                              let mut cx = KeyMap::default();
@@ -56,6 +65,7 @@ fn setup_state(state: &mut State) {
     default_key_map.bind(kbd!(C-'z'), KeyBind::Action(Arc::new(undo_command)));
     default_key_map.bind(kbd!(A-'z'), KeyBind::Action(Arc::new(redo_command)));
     default_key_map.bind(kbd!(BACKSPACE), KeyBind::Action(Arc::new(delete_backward_char_command)));
+    default_key_map.bind(kbd!(C-'@'), KeyBind::Action(Arc::new(set_mark_command)));
 }
 
 fn main() {

@@ -1,0 +1,10 @@
+[package]
+name = "ted_kill_ring"
+version = "0.1.0"
+authors = ["Czipperz <czipperz@gmail.com>"]
+
+[dependencies]
+lazy_static = "*"
+parking_lot = "*"
+ted_core = { path = "../ted_core" }
+ted_mark = { path = "../ted_mark" }
