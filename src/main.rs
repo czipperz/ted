@@ -17,6 +17,7 @@ extern crate parking_lot;
 extern crate ted_core;
 extern crate ted_common_commands;
 
+use std::collections::VecDeque;
 use std::sync::Arc;
 use parking_lot::Mutex;
 use ted_core::*;
