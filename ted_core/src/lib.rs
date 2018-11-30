@@ -39,6 +39,8 @@ mod buffer;
 pub use buffer::{Buffer, BufferName};
 mod cursor;
 pub use cursor::*;
+mod mode;
+pub use mode::*;
 
 // private modules
 mod buffer_contents;
