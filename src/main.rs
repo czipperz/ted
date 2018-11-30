@@ -23,41 +23,39 @@ use parking_lot::Mutex;
 use ted_core::*;
 use ted_common_commands::*;
 
+fn close_ted_command(_: &mut State, _: &mut Display) -> Result<(), ()> {
+    Err(())
+}
+
 fn setup_state(state: &mut State) {
     let mut default_key_map = state.default_key_map.lock();
-    default_key_map.bind(kbd!(BACKSPACE), KeyBind::Action(Arc::new(delete_backward_char_command)));
-    default_key_map.bind(kbd!(C-'d'), KeyBind::Action(Arc::new(delete_forward_char_command)));
-
+    default_key_map.bind(kbd!(C-'a'), KeyBind::Action(Arc::new(begin_of_line_command)));
     default_key_map.bind(kbd!(C-'b'), KeyBind::Action(Arc::new(backward_char_command)));
-    default_key_map.bind(kbd!(C-'f'), KeyBind::Action(Arc::new(forward_char_command)));
     default_key_map.bind(kbd!(A-'b'), KeyBind::Action(Arc::new(backward_word_command)));
-    default_key_map.bind(kbd!(A-'f'), KeyBind::Action(Arc::new(forward_word_command)));
     default_key_map.bind(kbd!(C-A-'b'), KeyBind::Action(Arc::new(backward_group_command)));
+    default_key_map.bind(kbd!(C-'d'), KeyBind::Action(Arc::new(delete_forward_char_command)));
+    default_key_map.bind(kbd!(C-'e'), KeyBind::Action(Arc::new(end_of_line_command)));
+    default_key_map.bind(kbd!(C-'f'), KeyBind::Action(Arc::new(forward_char_command)));
+    default_key_map.bind(kbd!(A-'f'), KeyBind::Action(Arc::new(forward_word_command)));
     default_key_map.bind(kbd!(C-A-'f'), KeyBind::Action(Arc::new(forward_group_command)));
-
-    default_key_map.bind(kbd!(C-A-'u'), KeyBind::Action(Arc::new(up_group_command)));
-
     default_key_map.bind(kbd!(C-'n'), KeyBind::Action(Arc::new(forward_line_command)));
     default_key_map.bind(kbd!(C-'p'), KeyBind::Action(Arc::new(backward_line_command)));
-
-    default_key_map.bind(kbd!(C-'a'), KeyBind::Action(Arc::new(begin_of_line_command)));
-    default_key_map.bind(kbd!(C-'e'), KeyBind::Action(Arc::new(end_of_line_command)));
-
-    default_key_map.bind(kbd!(C-'z'), KeyBind::Action(Arc::new(undo_command)));
-    default_key_map.bind(kbd!(A-'z'), KeyBind::Action(Arc::new(redo_command)));
-
+    default_key_map.bind(kbd!(C-A-'u'), KeyBind::Action(Arc::new(up_group_command)));
     default_key_map.bind(kbd!(C-'x'),
                          KeyBind::SubMap(Arc::new(Mutex::new({
                              let mut cx = KeyMap::default();
-                             cx.bind(kbd!(C-'c'), KeyBind::Action(Arc::new(|_, _| Err(()))));
                              cx.bind(kbd!('1'), KeyBind::Action(Arc::new(close_other_windows_command)));
                              cx.bind(kbd!('2'), KeyBind::Action(Arc::new(horizontal_split_command)));
                              cx.bind(kbd!('3'), KeyBind::Action(Arc::new(vertical_split_command)));
                              cx.bind(kbd!('0'), KeyBind::Action(Arc::new(close_window_command)));
+                             cx.bind(kbd!(C-'c'), KeyBind::Action(Arc::new(close_ted_command)));
                              cx.bind(kbd!('o'), KeyBind::Action(Arc::new(other_window_clockwise_command)));
                              cx.bind(kbd!(C-'o'), KeyBind::Action(Arc::new(other_window_counter_clockwise_command)));
                              cx
                          }))));
+    default_key_map.bind(kbd!(C-'z'), KeyBind::Action(Arc::new(undo_command)));
+    default_key_map.bind(kbd!(A-'z'), KeyBind::Action(Arc::new(redo_command)));
+    default_key_map.bind(kbd!(BACKSPACE), KeyBind::Action(Arc::new(delete_backward_char_command)));
 }
 
 fn main() {
