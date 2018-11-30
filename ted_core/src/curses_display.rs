@@ -57,16 +57,12 @@ impl Display for CursesDisplay {
             Some(pancurses::Input::Character(c)) => {
                 let ch = convert_to_key(c, self.stalling_escape);
                 self.stalling_escape = false;
-                if cfg!(debug_assertions) {
-                    log(format!("{:?} ({:?} = {:?})", ch, c, c as u32));
-                }
+                log_debug(format!("{:?} ({:?} = {:?}) {:?}", ch, c, c as u32, pancurses::keyname(c as i32)));
                 Some(ch)
             },
             k => {
                 if k.is_some() {
-                    if cfg!(debug_assertions) {
-                        log(format!("{:?}", k));
-                    }
+                    log_debug(format!("{:?}", k));
                 }
                 None
             },
@@ -123,9 +119,7 @@ impl DisplayDraw for CursesDisplay {
 impl Drop for CursesDisplay {
     fn drop(&mut self) {
         pancurses::endwin();
-        if cfg!(debug_assertions) {
-            print_log();
-        }
+        print_log();
     }
 }
 

@@ -8,9 +8,23 @@ lazy_static! {
 ///
 /// This is similar to `println!`.  The message is placed into the log
 /// and is visible to the user at a later point.
-pub fn log<'a, S>(s: S) where S: Into<String> {
+pub fn log<S>(s: S) where S: Into<String> {
     let mut log = LOG.lock();
     log.push(s.into());
+}
+
+/// Log a message
+///
+/// This is similar to `println!`.  The message is placed into the log
+/// and is visible to the user at a later point.
+///
+/// If the program is compiled in debug mode, this message will be
+/// logged.
+pub fn log_debug<S>(s: S) where S: Into<String> {
+    if cfg!(debug_assertions) {
+        let mut log = LOG.lock();
+        log.push(s.into());
+    }
 }
 
 /// Print the log
