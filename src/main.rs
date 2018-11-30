@@ -74,82 +74,48 @@ fn main_loop(state: &mut State, display: &mut Display) -> Result<(), ()> {
 }
 
 fn increment(state: &mut State, display: &mut Display) -> Result<(), ()> {
-    let key_map = state.default_key_map.clone();
-    let ch = display.getch();
-    increment_(state, &key_map, false, display, ch)
-}
-
-fn increment_(state: &mut State, key_map: &Arc<Mutex<KeyMap>>, recursed: bool,
-              display: &mut Display, ch: Option<Input>) -> Result<(), ()> {
-    match ch {
-        Some(input) => {
-            let x = {
-                let key_map = key_map.lock();
-                let l = key_map.lookup(&input);
-                l.cloned()
-            };
-            match x {
-                Some(KeyBind::Action(f)) => {
-                    let r = f(state, display);
-                    display.show(&state).unwrap();
-                    r
-                },
-                Some(KeyBind::SubMap(sub_map)) => {
-                    let ch = display.getch();
-                    increment_(state, &sub_map, true, display, ch)
-                },
-                None => {
-                    if !recursed {
+    fn increment_(state: &mut State, display: &mut Display,
+                  inputs: &mut VecDeque<Input>) -> Result<(), ()> {
+        match display.getch() {
+            Some(input) => {
+                inputs.push_back(input);
+                match KeyMap::lookup(&state.default_key_map, inputs, true) {
+                    Ok(action) => {
+                        let r = action(state, display);
+                        display.show(&state).unwrap();
+                        r
+                    },
+                    Err(true) => {
+                        increment_(state, display, inputs)
+                    },
+                    Err(false) => {
                         match input {
-                            Input::Key { key, control: false, alt: false } => {
+                            Input::Key { key, control: false, alt: false } if !key.is_control() => {
                                 {
-                                    let mut selected_window = state.selected_window.lock();
-                                    selected_window.insert(key).unwrap();
+                                    let mut window = state.selected_window.lock();
+                                    window.insert(key)?;
                                 }
-                                display.show(&state).unwrap();
+                                display.show(state)?;
                             },
-                            _ => {},
+                            _ => {
+                                log(format!("Invalid input {:?}", input));
+                            },
                         }
-                    }
-                    Ok(())
-                },
-            }
-        },
-        None => Ok(()),
+                        Ok(())
+                    },
+                }
+            },
+            None => Ok(()),
+        }
     }
+
+    increment_(state, display, &mut VecDeque::new())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::sync::Arc;
-
-    #[test]
-    fn main_loop_immediate_quit() {
-        let mut display = DebugDisplay::new(vec![kbd!('q')]);
-        let mut state = State::new();
-        {
-            let mut default_keyset = state.default_key_map.lock();
-            default_keyset.bind(kbd!('q'), KeyBind::Action(Arc::new(|_, _| Err(()))));
-        }
-        main_loop(&mut state, &mut display).unwrap_err();
-        assert_eq!(display.buffer,
-                   vec!["                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "*scratch*           ".chars().collect::<Vec<_>>()]);
-    }
 
     #[test]
     fn increment_1() {
@@ -261,6 +227,24 @@ mod tests {
         }
         display.inputs.push_back(kbd!('q'));
         increment(&mut state, &mut display).unwrap_err();
+
+        display.show(&state).unwrap();
+        assert_eq!(display.buffer,
+                   vec!["abcq                ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "                    ".chars().collect::<Vec<_>>(),
+                        "*scratch*           ".chars().collect::<Vec<_>>()]);
     }
 
     #[test]
