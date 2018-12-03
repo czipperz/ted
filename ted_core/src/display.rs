@@ -7,7 +7,7 @@ use input::Input;
 ///
 /// [`DebugDisplay`]: struct.DebugDisplay.html
 /// [`CursesDisplay`]: struct.CursesDisplay.html
-pub trait Display {
+pub trait Display : Send {
     /// Show the [`State`] on the `Display`.
     ///
     /// [`State`]: struct.State.html
