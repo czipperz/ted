@@ -5,6 +5,7 @@ extern crate ted_core;
 
 use std::collections::HashMap;
 use std::ops::Range;
+use std::sync::Arc;
 use parking_lot::Mutex;
 use ted_core::*;
 
@@ -62,14 +63,18 @@ pub fn remove_mark(window: &Window) {
     marks.remove(&W(window));
 }
 
-pub fn set_mark_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
-    let selected_window = state.selected_window.lock();
+pub fn set_mark_command(state: Arc<Mutex<State>>,
+                        _: Arc<Mutex<Display>>) -> Result<(), ()> {
+    let selected_window = state.lock().selected_window.clone();
+    let selected_window = selected_window.lock();
     set_mark(&selected_window, selected_window.cursor.clone());
     Ok(())
 }
 
-pub fn remove_mark_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
-    let selected_window = state.selected_window.lock();
+pub fn remove_mark_command(state: Arc<Mutex<State>>,
+                           _: Arc<Mutex<Display>>) -> Result<(), ()> {
+    let selected_window = state.lock().selected_window.clone();
+    let selected_window = selected_window.lock();
     remove_mark(&selected_window);
     Ok(())
 }

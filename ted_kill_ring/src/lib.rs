@@ -4,6 +4,7 @@ extern crate parking_lot;
 extern crate ted_core;
 extern crate ted_mark;
 
+use std::sync::Arc;
 use std::collections::HashMap;
 use parking_lot::Mutex;
 use ted_core::*;
@@ -79,28 +80,32 @@ pub fn paste_pop(window: &Window, times: isize) {
     }
 }
 
-pub fn copy_region_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
-    let selected_window = state.selected_window.lock();
+pub fn copy_region_command(state: Arc<Mutex<State>>, _: Arc<Mutex<Display>>) -> Result<(), ()> {
+    let selected_window = state.lock().selected_window.clone();
+    let selected_window = selected_window.lock();
     copy_region(&selected_window);
     Ok(())
 }
 
-pub fn kill_region_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
-    let mut selected_window = state.selected_window.lock();
+pub fn kill_region_command(state: Arc<Mutex<State>>, _: Arc<Mutex<Display>>) -> Result<(), ()> {
+    let selected_window = state.lock().selected_window.clone();
+    let mut selected_window = selected_window.lock();
     kill_region(&selected_window);
     selected_window.update_cursor();
     Ok(())
 }
 
-pub fn paste_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
-    let mut selected_window = state.selected_window.lock();
+pub fn paste_command(state: Arc<Mutex<State>>, _: Arc<Mutex<Display>>) -> Result<(), ()> {
+    let selected_window = state.lock().selected_window.clone();
+    let mut selected_window = selected_window.lock();
     paste(&selected_window);
     selected_window.update_cursor();
     Ok(())
 }
 
-pub fn paste_pop_command(state: &mut State, _: &mut Display) -> Result<(), ()> {
-    let selected_window = state.selected_window.lock();
+pub fn paste_pop_command(state: Arc<Mutex<State>>, _: Arc<Mutex<Display>>) -> Result<(), ()> {
+    let selected_window = state.lock().selected_window.clone();
+    let selected_window = selected_window.lock();
     paste_pop(&selected_window, 1);
     Ok(())
 }

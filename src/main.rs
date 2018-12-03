@@ -27,7 +27,7 @@ use ted_common_commands::*;
 use ted_mark::*;
 use ted_kill_ring::*;
 
-fn close_ted_command(_: &mut State, _: &mut Display) -> Result<(), ()> {
+fn close_ted_command(_: Arc<Mutex<State>>, _: Arc<Mutex<Display>>) -> Result<(), ()> {
     Err(())
 }
 
@@ -68,25 +68,26 @@ fn main() {
     let mut state = State::new();
     setup_state(&mut state);
     display.show(&state).unwrap();
-    main_loop(&mut state, &mut display).unwrap_err();
+    main_loop(Arc::new(Mutex::new(state)), Arc::new(Mutex::new(display))).unwrap_err();
 }
 
-fn main_loop(state: &mut State, display: &mut Display) -> Result<(), ()> {
+fn main_loop(state: Arc<Mutex<State>>, display: Arc<Mutex<Display>>) -> Result<(), ()> {
     loop {
-        increment(state, display)?;
+        increment(state.clone(), display.clone())?;
     }
 }
 
-fn increment(state: &mut State, display: &mut Display) -> Result<(), ()> {
-    fn increment_(state: &mut State, display: &mut Display,
+fn increment(state: Arc<Mutex<State>>, display: Arc<Mutex<Display>>) -> Result<(), ()> {
+    fn increment_(state: Arc<Mutex<State>>, display: Arc<Mutex<Display>>,
                   inputs: &mut VecDeque<Input>) -> Result<(), ()> {
-        match display.getch() {
+        match { let mut display = display.lock(); display.getch() } {
             Some(input) => {
                 inputs.push_back(input);
-                match KeyMap::lookup(&state.default_key_map, inputs, true) {
+                match { let state = state.lock(); KeyMap::lookup(&state.default_key_map, inputs, true) } {
                     Ok(action) => {
-                        let r = action(state, display);
-                        display.show(&state).unwrap();
+                        let r = action(state.clone(), display.clone());
+                        let state = state.lock();
+                        display.lock().show(&state).unwrap();
                         r
                     },
                     Err(true) => {
@@ -97,10 +98,12 @@ fn increment(state: &mut State, display: &mut Display) -> Result<(), ()> {
                             Input::Key { key, control: false, alt: false, function: false }
                             if !key.is_control() => {
                                 {
-                                    let mut window = state.selected_window.lock();
+                                    let window = state.lock().selected_window.clone();
+                                    let mut window = window.lock();
                                     window.insert(key)?;
                                 }
-                                display.show(state)?;
+                                let state = state.lock();
+                                display.lock().show(&state)?;
                             },
                             _ => {
                                 log(format!("Invalid input {:?}", input));
@@ -124,20 +127,23 @@ mod tests {
 
     #[test]
     fn increment_1() {
-        let mut display = DebugDisplay::new(vec![kbd!('a'), kbd!('b'), kbd!('c'), kbd!('q')]);
-        let mut state = State::new();
+        let display = Arc::new(Mutex::new(DebugDisplay::new(
+            vec![kbd!('a'), kbd!('b'), kbd!('c'), kbd!('q')])));
+        let state = Arc::new(Mutex::new(State::new()));
         {
+            let state = state.lock();
             let selected_window = state.selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 0);
         }
-        increment(&mut state, &mut display).unwrap();
+        increment(state.clone(), display.clone()).unwrap();
         {
+            let state = state.lock();
             let selected_window = state.selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 1);
             let buffer = selected_window.buffer.lock();
             assert_eq!(format!("{}", *buffer), "a");
         }
-        assert_eq!(display.buffer,
+        assert_eq!(display.lock().buffer,
                    vec!["a                   ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -154,14 +160,15 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "*scratch*           ".chars().collect::<Vec<_>>()]);
 
-        increment(&mut state, &mut display).unwrap();
+        increment(state.clone(), display.clone()).unwrap();
         {
+            let state = state.lock();
             let selected_window = state.selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 2);
             let buffer = selected_window.buffer.lock();
             assert_eq!(format!("{}", *buffer), "ab");
         }
-        assert_eq!(display.buffer,
+        assert_eq!(display.lock().buffer,
                    vec!["ab                  ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -178,14 +185,15 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "*scratch*           ".chars().collect::<Vec<_>>()]);
 
-        increment(&mut state, &mut display).unwrap();
+        increment(state.clone(), display.clone()).unwrap();
         {
+            let state = state.lock();
             let selected_window = state.selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 3);
             let buffer = selected_window.buffer.lock();
             assert_eq!(format!("{}", *buffer), "abc");
         }
-        assert_eq!(display.buffer,
+        assert_eq!(display.lock().buffer,
                    vec!["abc                 ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -202,14 +210,15 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "*scratch*           ".chars().collect::<Vec<_>>()]);
 
-        increment(&mut state, &mut display).unwrap();
+        increment(state.clone(), display.clone()).unwrap();
         {
+            let state = state.lock();
             let selected_window = state.selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 4);
             let buffer = selected_window.buffer.lock();
             assert_eq!(format!("{}", *buffer), "abcq");
         }
-        assert_eq!(display.buffer,
+        assert_eq!(display.lock().buffer,
                    vec!["abcq                ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -227,14 +236,15 @@ mod tests {
                         "*scratch*           ".chars().collect::<Vec<_>>()]);
 
         {
+            let state = state.lock();
             let mut default_keyset = state.default_key_map.lock();
             default_keyset.bind(vec![kbd!('q')], Arc::new(|_, _| Err(())));
         }
-        display.inputs.push_back(kbd!('q'));
-        increment(&mut state, &mut display).unwrap_err();
+        display.lock().inputs.push_back(kbd!('q'));
+        increment(state.clone(), display.clone()).unwrap_err();
 
-        display.show(&state).unwrap();
-        assert_eq!(display.buffer,
+        { let state = state.lock(); display.lock().show(&state).unwrap(); }
+        assert_eq!(display.lock().buffer,
                    vec!["abcq                ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -254,16 +264,18 @@ mod tests {
 
     #[test]
     fn increment_vertical_split() {
-        let mut state = State::new();
-        let mut display = DebugDisplay::new(vec![kbd!('a'), kbd!(C-'x'), kbd!('3'), kbd!('b')]);
+        let state = Arc::new(Mutex::new(State::new()));
+        let display = Arc::new(Mutex::new(DebugDisplay::new(
+            vec![kbd!('a'), kbd!(C-'x'), kbd!('3'), kbd!('b')])));
 
         {
+            let state = state.lock();
             let mut default_key_map = state.default_key_map.lock();
             default_key_map.bind(vec![kbd!(C-'x'), kbd!('3')], Arc::new(vertical_split_command));
         }
 
-        increment(&mut state, &mut display).unwrap();
-        assert_eq!(display.buffer,
+        increment(state.clone(), display.clone()).unwrap();
+        assert_eq!(display.lock().buffer,
                    vec!["a                   ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
@@ -279,11 +291,10 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "*scratch*           ".chars().collect::<Vec<_>>()]);
-        assert_eq!(display.selected_cursors,
-                   vec![(0, 1)]);
+        assert_eq!(display.lock().selected_cursors, vec![(0, 1)]);
 
-        increment(&mut state, &mut display).unwrap();
-        assert_eq!(display.buffer,
+        increment(state.clone(), display.clone()).unwrap();
+        assert_eq!(display.lock().buffer,
                    vec!["a         |a        ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
@@ -299,13 +310,11 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
-        assert_eq!(display.selected_cursors,
-                   vec![(0, 1)]);
-        assert_eq!(display.unselected_cursors,
-                   vec![(0, 12)]);
+        assert_eq!(display.lock().selected_cursors, vec![(0, 1)]);
+        assert_eq!(display.lock().unselected_cursors, vec![(0, 12)]);
 
-        increment(&mut state, &mut display).unwrap();
-        assert_eq!(display.buffer,
+        increment(state.clone(), display.clone()).unwrap();
+        assert_eq!(display.lock().buffer,
                    vec!["ab        |ab       ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
@@ -321,9 +330,7 @@ mod tests {
                         "          |         ".chars().collect::<Vec<_>>(),
                         "          |         ".chars().collect::<Vec<_>>(),
                         "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
-        assert_eq!(display.selected_cursors,
-                   vec![(0, 2)]);
-        assert_eq!(display.unselected_cursors,
-                   vec![(0, 13)]);
+        assert_eq!(display.lock().selected_cursors, vec![(0, 2)]);
+        assert_eq!(display.lock().unselected_cursors, vec![(0, 13)]);
     }
 }

@@ -38,7 +38,7 @@ pub enum KeyBind {
 ///
 /// [`Buffer`]: struct.Buffer.html
 /// [`State`]: struct.State.html
-pub type Action = Arc<fn (&mut State, &mut Display) -> Result<(), ()>>;
+pub type Action = Arc<fn (Arc<Mutex<State>>, Arc<Mutex<Display>>) -> Result<(), ()>>;
 
 impl KeyMap {
     /// This function performs the lookup.

@@ -16,6 +16,8 @@ pub struct CursesDisplay {
     stalling_escape: bool,
 }
 
+unsafe impl Send for CursesDisplay {}
+
 fn check(code: i32) -> Result<(), ()> {
     if code == pancurses::ERR {
         Err(())
