@@ -33,39 +33,34 @@ fn close_ted_command(_: &mut State, _: &mut Display) -> Result<(), ()> {
 
 fn setup_state(state: &mut State) {
     let mut default_key_map = state.default_key_map.lock();
-    default_key_map.bind(kbd!(C-'a'), KeyBind::Action(Arc::new(begin_of_line_command)));
-    default_key_map.bind(kbd!(C-'b'), KeyBind::Action(Arc::new(backward_char_command)));
-    default_key_map.bind(kbd!(A-'b'), KeyBind::Action(Arc::new(backward_word_command)));
-    default_key_map.bind(kbd!(C-A-'b'), KeyBind::Action(Arc::new(backward_group_command)));
-    default_key_map.bind(kbd!(C-'d'), KeyBind::Action(Arc::new(delete_forward_char_command)));
-    default_key_map.bind(kbd!(C-'e'), KeyBind::Action(Arc::new(end_of_line_command)));
-    default_key_map.bind(kbd!(C-'f'), KeyBind::Action(Arc::new(forward_char_command)));
-    default_key_map.bind(kbd!(A-'f'), KeyBind::Action(Arc::new(forward_word_command)));
-    default_key_map.bind(kbd!(C-A-'f'), KeyBind::Action(Arc::new(forward_group_command)));
-    default_key_map.bind(kbd!(C-'g'), KeyBind::Action(Arc::new(remove_mark_command)));
-    default_key_map.bind(kbd!(C-'n'), KeyBind::Action(Arc::new(forward_line_command)));
-    default_key_map.bind(kbd!(C-'p'), KeyBind::Action(Arc::new(backward_line_command)));
-    default_key_map.bind(kbd!(C-A-'u'), KeyBind::Action(Arc::new(up_group_command)));
-    default_key_map.bind(kbd!(C-'w'), KeyBind::Action(Arc::new(kill_region_command)));
-    default_key_map.bind(kbd!(A-'w'), KeyBind::Action(Arc::new(copy_region_command)));
-    default_key_map.bind(kbd!(C-'y'), KeyBind::Action(Arc::new(paste_command)));
-    default_key_map.bind(kbd!(A-'y'), KeyBind::Action(Arc::new(paste_pop_command)));
-    default_key_map.bind(kbd!(C-'x'),
-                         KeyBind::SubMap(Arc::new(Mutex::new({
-                             let mut cx = KeyMap::default();
-                             cx.bind(kbd!('1'), KeyBind::Action(Arc::new(close_other_windows_command)));
-                             cx.bind(kbd!('2'), KeyBind::Action(Arc::new(horizontal_split_command)));
-                             cx.bind(kbd!('3'), KeyBind::Action(Arc::new(vertical_split_command)));
-                             cx.bind(kbd!('0'), KeyBind::Action(Arc::new(close_window_command)));
-                             cx.bind(kbd!(C-'c'), KeyBind::Action(Arc::new(close_ted_command)));
-                             cx.bind(kbd!('o'), KeyBind::Action(Arc::new(other_window_clockwise_command)));
-                             cx.bind(kbd!(C-'o'), KeyBind::Action(Arc::new(other_window_counter_clockwise_command)));
-                             cx
-                         }))));
-    default_key_map.bind(kbd!(C-'z'), KeyBind::Action(Arc::new(undo_command)));
-    default_key_map.bind(kbd!(A-'z'), KeyBind::Action(Arc::new(redo_command)));
-    default_key_map.bind(kbd!(BACKSPACE), KeyBind::Action(Arc::new(delete_backward_char_command)));
-    default_key_map.bind(kbd!(C-'@'), KeyBind::Action(Arc::new(set_mark_command)));
+    default_key_map.bind(vec![kbd!(C-'a')], Arc::new(begin_of_line_command));
+    default_key_map.bind(vec![kbd!(C-'b')], Arc::new(backward_char_command));
+    default_key_map.bind(vec![kbd!(A-'b')], Arc::new(backward_word_command));
+    default_key_map.bind(vec![kbd!(C-A-'b')], Arc::new(backward_group_command));
+    default_key_map.bind(vec![kbd!(C-'d')], Arc::new(delete_forward_char_command));
+    default_key_map.bind(vec![kbd!(C-'e')], Arc::new(end_of_line_command));
+    default_key_map.bind(vec![kbd!(C-'f')], Arc::new(forward_char_command));
+    default_key_map.bind(vec![kbd!(A-'f')], Arc::new(forward_word_command));
+    default_key_map.bind(vec![kbd!(C-A-'f')], Arc::new(forward_group_command));
+    default_key_map.bind(vec![kbd!(C-'g')], Arc::new(remove_mark_command));
+    default_key_map.bind(vec![kbd!(C-'n')], Arc::new(forward_line_command));
+    default_key_map.bind(vec![kbd!(C-'p')], Arc::new(backward_line_command));
+    default_key_map.bind(vec![kbd!(C-A-'u')], Arc::new(up_group_command));
+    default_key_map.bind(vec![kbd!(C-'w')], Arc::new(kill_region_command));
+    default_key_map.bind(vec![kbd!(A-'w')], Arc::new(copy_region_command));
+    default_key_map.bind(vec![kbd!(C-'y')], Arc::new(paste_command));
+    default_key_map.bind(vec![kbd!(A-'y')], Arc::new(paste_pop_command));
+    default_key_map.bind(vec![kbd!(C-'x'), kbd!('1')], Arc::new(close_other_windows_command));
+    default_key_map.bind(vec![kbd!(C-'x'), kbd!('2')], Arc::new(horizontal_split_command));
+    default_key_map.bind(vec![kbd!(C-'x'), kbd!('3')], Arc::new(vertical_split_command));
+    default_key_map.bind(vec![kbd!(C-'x'), kbd!('0')], Arc::new(close_window_command));
+    default_key_map.bind(vec![kbd!(C-'x'), kbd!(C-'c')], Arc::new(close_ted_command));
+    default_key_map.bind(vec![kbd!(C-'x'), kbd!('o')], Arc::new(other_window_clockwise_command));
+    default_key_map.bind(vec![kbd!(C-'x'), kbd!(C-'o')], Arc::new(other_window_counter_clockwise_command));
+    default_key_map.bind(vec![kbd!(C-'z')], Arc::new(undo_command));
+    default_key_map.bind(vec![kbd!(A-'z')], Arc::new(redo_command));
+    default_key_map.bind(vec![kbd!(BACKSPACE)], Arc::new(delete_backward_char_command));
+    default_key_map.bind(vec![kbd!(C-'@')], Arc::new(set_mark_command));
 }
 
 fn main() {
@@ -232,7 +227,7 @@ mod tests {
 
         {
             let mut default_keyset = state.default_key_map.lock();
-            default_keyset.bind(kbd!('q'), KeyBind::Action(Arc::new(|_, _| Err(()))));
+            default_keyset.bind(vec![kbd!('q')], Arc::new(|_, _| Err(())));
         }
         display.inputs.push_back(kbd!('q'));
         increment(&mut state, &mut display).unwrap_err();
@@ -263,12 +258,7 @@ mod tests {
 
         {
             let mut default_key_map = state.default_key_map.lock();
-            default_key_map.bind(kbd!(C-'x'),
-                                 KeyBind::SubMap(Arc::new(Mutex::new({
-                                     let mut cx = KeyMap::default();
-                                     cx.bind(kbd!('3'), KeyBind::Action(Arc::new(vertical_split_command)));
-                                     cx
-                                 }))));
+            default_key_map.bind(vec![kbd!(C-'x'), kbd!('3')], Arc::new(vertical_split_command));
         }
 
         increment(&mut state, &mut display).unwrap();
