@@ -94,7 +94,8 @@ fn increment(state: &mut State, display: &mut Display) -> Result<(), ()> {
                     },
                     Err(false) => {
                         match input {
-                            Input::Key { key, control: false, alt: false } if !key.is_control() => {
+                            Input::Key { key, control: false, alt: false, function: false }
+                            if !key.is_control() => {
                                 {
                                     let mut window = state.selected_window.lock();
                                     window.insert(key)?;

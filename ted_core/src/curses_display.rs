@@ -72,17 +72,14 @@ impl Display for CursesDisplay {
 
 fn convert_to_key(c: char, alt: bool) -> Input {
     if c == '\n' /* 10 */ {
-        Input::Key { key: c, control: false, alt }
+        Input::Key { key: c, control: false, alt, function: false, }
     } else if c == 0 as char /* 0 */ {
-        Input::Key { key: '@', control: true, alt }
+        Input::Key { key: '@', control: true, alt, function: false, }
     } else if c >= 1 as char && c <= 26 as char {
-        Input::Key { key: (c as u8 - 1 + 'a' as u8) as char,
-                     control: true, alt }
-    /*} else if c >= 27 as char && c <= 31 as char {
-        Input::Key { c: (c as u8 - 27 + '1' as u8) as char,
-                     control: true, alt: false }*/
+        let key = (c as u8 - 1 + 'a' as u8) as char;
+        Input::Key { key, control: true, alt, function: false }
     } else {
-        Input::Key { key: c, control: false, alt }
+        Input::Key { key: c, control: false, alt, function: false }
     }
 }
 
