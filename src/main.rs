@@ -3,70 +3,33 @@
 //! This crate runs the main loop.  That is it handles which Display
 //! is used (terminal vs gui) and processing events.
 //!
-//! This isn't incredibly interesting.  Right now key binds are set up
-//! in this crate but that will change soon to allow more user
-//! customizability.
+//! Key binds are set up in the [`ted_user_cfg`] crate.
 //!
 //! To look at the overview of the software model, see the crate [`ted_core`].
+//!
 //! To look at some common commands that you can run, see the crate [`ted_common_commands`].
+//!
+//! To see how to create your own commands, see the documentation for [`Action`]s.
 //!
 //! [`ted_core`]: ../ted_core/index.html
 //! [`ted_common_commands`]: ../ted_common_commands/index.html
+//! [`ted_user_cfg`]: ../ted_user_cfg/index.html
+//! [`Action`]: ../ted_core/type.Action.html
 
 extern crate parking_lot;
 extern crate ted_core;
-extern crate ted_common_commands;
-extern crate ted_mark;
-extern crate ted_kill_ring;
+extern crate ted_user_cfg;
 
 use std::collections::VecDeque;
 use std::sync::Arc;
 use parking_lot::Mutex;
 use ted_core::*;
-use ted_common_commands::*;
-use ted_mark::*;
-use ted_kill_ring::*;
-
-fn close_ted_command(_: Arc<Mutex<State>>, _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    Err(())
-}
-
-fn setup_state(state: &mut State) {
-    let mut default_key_map = state.default_key_map.lock();
-    default_key_map.bind(vec![kbd!(C-'a')], Arc::new(begin_of_line_command));
-    default_key_map.bind(vec![kbd!(C-'b')], Arc::new(backward_char_command));
-    default_key_map.bind(vec![kbd!(A-'b')], Arc::new(backward_word_command));
-    default_key_map.bind(vec![kbd!(C-A-'b')], Arc::new(backward_group_command));
-    default_key_map.bind(vec![kbd!(C-'d')], Arc::new(delete_forward_char_command));
-    default_key_map.bind(vec![kbd!(C-'e')], Arc::new(end_of_line_command));
-    default_key_map.bind(vec![kbd!(C-'f')], Arc::new(forward_char_command));
-    default_key_map.bind(vec![kbd!(A-'f')], Arc::new(forward_word_command));
-    default_key_map.bind(vec![kbd!(C-A-'f')], Arc::new(forward_group_command));
-    default_key_map.bind(vec![kbd!(C-'g')], Arc::new(remove_mark_command));
-    default_key_map.bind(vec![kbd!(C-'n')], Arc::new(forward_line_command));
-    default_key_map.bind(vec![kbd!(C-'p')], Arc::new(backward_line_command));
-    default_key_map.bind(vec![kbd!(C-A-'u')], Arc::new(up_group_command));
-    default_key_map.bind(vec![kbd!(C-'w')], Arc::new(kill_region_command));
-    default_key_map.bind(vec![kbd!(A-'w')], Arc::new(copy_region_command));
-    default_key_map.bind(vec![kbd!(C-'y')], Arc::new(paste_command));
-    default_key_map.bind(vec![kbd!(A-'y')], Arc::new(paste_pop_command));
-    default_key_map.bind(vec![kbd!(C-'x'), kbd!('1')], Arc::new(close_other_windows_command));
-    default_key_map.bind(vec![kbd!(C-'x'), kbd!('2')], Arc::new(horizontal_split_command));
-    default_key_map.bind(vec![kbd!(C-'x'), kbd!('3')], Arc::new(vertical_split_command));
-    default_key_map.bind(vec![kbd!(C-'x'), kbd!('0')], Arc::new(close_window_command));
-    default_key_map.bind(vec![kbd!(C-'x'), kbd!(C-'c')], Arc::new(close_ted_command));
-    default_key_map.bind(vec![kbd!(C-'x'), kbd!('o')], Arc::new(other_window_clockwise_command));
-    default_key_map.bind(vec![kbd!(C-'x'), kbd!(C-'o')], Arc::new(other_window_counter_clockwise_command));
-    default_key_map.bind(vec![kbd!(C-'z')], Arc::new(undo_command));
-    default_key_map.bind(vec![kbd!(A-'z')], Arc::new(redo_command));
-    default_key_map.bind(vec![kbd!(BACKSPACE)], Arc::new(delete_backward_char_command));
-    default_key_map.bind(vec![kbd!(C-'@')], Arc::new(set_mark_command));
-}
+use ted_user_cfg::*;
 
 fn main() {
-    let mut display = CursesDisplay::new().unwrap();
     let mut state = State::new();
     setup_state(&mut state);
+    let mut display = CursesDisplay::new().unwrap();
     display.show(&state).unwrap();
     main_loop(Arc::new(Mutex::new(state)), Arc::new(Mutex::new(display))).unwrap_err();
 }
@@ -260,77 +223,5 @@ mod tests {
                         "                    ".chars().collect::<Vec<_>>(),
                         "                    ".chars().collect::<Vec<_>>(),
                         "*scratch*           ".chars().collect::<Vec<_>>()]);
-    }
-
-    #[test]
-    fn increment_vertical_split() {
-        let state = Arc::new(Mutex::new(State::new()));
-        let display = Arc::new(Mutex::new(DebugDisplay::new(
-            vec![kbd!('a'), kbd!(C-'x'), kbd!('3'), kbd!('b')])));
-
-        {
-            let state = state.lock();
-            let mut default_key_map = state.default_key_map.lock();
-            default_key_map.bind(vec![kbd!(C-'x'), kbd!('3')], Arc::new(vertical_split_command));
-        }
-
-        increment(state.clone(), display.clone()).unwrap();
-        assert_eq!(display.lock().buffer,
-                   vec!["a                   ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "                    ".chars().collect::<Vec<_>>(),
-                        "*scratch*           ".chars().collect::<Vec<_>>()]);
-        assert_eq!(display.lock().selected_cursors, vec![(0, 1)]);
-
-        increment(state.clone(), display.clone()).unwrap();
-        assert_eq!(display.lock().buffer,
-                   vec!["a         |a        ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
-        assert_eq!(display.lock().selected_cursors, vec![(0, 1)]);
-        assert_eq!(display.lock().unselected_cursors, vec![(0, 12)]);
-
-        increment(state.clone(), display.clone()).unwrap();
-        assert_eq!(display.lock().buffer,
-                   vec!["ab        |ab       ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "          |         ".chars().collect::<Vec<_>>(),
-                        "*scratch* |*scratch*".chars().collect::<Vec<_>>()]);
-        assert_eq!(display.lock().selected_cursors, vec![(0, 2)]);
-        assert_eq!(display.lock().unselected_cursors, vec![(0, 13)]);
     }
 }

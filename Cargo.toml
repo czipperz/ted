@@ -6,6 +6,4 @@ authors = ["Czipperz <czipperz@gmail.com>"]
 [dependencies]
 parking_lot = "*"
 ted_core = { path = "ted_core" }
-ted_common_commands = { path = "ted_common_commands" }
-ted_mark = { path = "ted_mark" }
-ted_kill_ring = { path = "ted_kill_ring" }
+ted_user_cfg = { path = "ted_user_cfg" }
