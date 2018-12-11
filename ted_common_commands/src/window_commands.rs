@@ -233,7 +233,10 @@ mod tests {
                 unsafe { state.display.debug_renderer() }.selected_cursors,
                 vec![(0, 4)]
             );
-            assert_eq!(unsafe { state.display.debug_renderer() }.unselected_cursors, vec![]);
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.unselected_cursors,
+                vec![]
+            );
         }
     }
 
@@ -359,7 +362,10 @@ mod tests {
                 unsafe { state.display.debug_renderer() }.selected_cursors,
                 vec![(0, 4)]
             );
-            assert_eq!(unsafe { state.display.debug_renderer() }.unselected_cursors, vec![]);
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.unselected_cursors,
+                vec![]
+            );
         }
 
         {
@@ -435,7 +441,10 @@ mod tests {
                 unsafe { state.display.debug_renderer() }.selected_cursors,
                 vec![(0, 2)]
             );
-            assert_eq!(unsafe { state.display.debug_renderer() }.unselected_cursors, vec![]);
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.unselected_cursors,
+                vec![]
+            );
         }
     }
 
@@ -724,68 +733,68 @@ mod tests {
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.buffer,
-            vec![
-                "abcd      |abcd     ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |*scratch*".chars().collect::<Vec<_>>(),
-                "          |---------".chars().collect::<Vec<_>>(),
-                "          |abcd     ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "*scratch* |*scratch*".chars().collect::<Vec<_>>()
-            ]
-        );
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.selected_cursors,
-            vec![(0, 4)]
-        );
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.unselected_cursors,
-            vec![(0, 13), (8, 15)]
-        );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.buffer,
+                vec![
+                    "abcd      |abcd     ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |*scratch*".chars().collect::<Vec<_>>(),
+                    "          |---------".chars().collect::<Vec<_>>(),
+                    "          |abcd     ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "*scratch* |*scratch*".chars().collect::<Vec<_>>()
+                ]
+            );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.selected_cursors,
+                vec![(0, 4)]
+            );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.unselected_cursors,
+                vec![(0, 13), (8, 15)]
+            );
         }
 
         other_window_clockwise_command(state.clone()).unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.buffer,
-            vec![
-                "abcd      |abcd     ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |*scratch*".chars().collect::<Vec<_>>(),
-                "          |---------".chars().collect::<Vec<_>>(),
-                "          |abcd     ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "*scratch* |*scratch*".chars().collect::<Vec<_>>()
-            ]
-        );
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.selected_cursors,
-            vec![(0, 13)]
-        );
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.unselected_cursors,
-            vec![(0, 4), (8, 15)]
-        );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.buffer,
+                vec![
+                    "abcd      |abcd     ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |*scratch*".chars().collect::<Vec<_>>(),
+                    "          |---------".chars().collect::<Vec<_>>(),
+                    "          |abcd     ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "*scratch* |*scratch*".chars().collect::<Vec<_>>()
+                ]
+            );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.selected_cursors,
+                vec![(0, 13)]
+            );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.unselected_cursors,
+                vec![(0, 4), (8, 15)]
+            );
         }
     }
 
@@ -806,136 +815,136 @@ mod tests {
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.buffer,
-            vec![
-                "abcd      |abcd     ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |*scratch*".chars().collect::<Vec<_>>(),
-                "          |---------".chars().collect::<Vec<_>>(),
-                "          |abcd     ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "*scratch* |*scratch*".chars().collect::<Vec<_>>()
-            ]
-        );
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.selected_cursors,
-            vec![(0, 15)]
-        );
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.unselected_cursors,
-            vec![(0, 4), (8, 15)]
-        );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.buffer,
+                vec![
+                    "abcd      |abcd     ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |*scratch*".chars().collect::<Vec<_>>(),
+                    "          |---------".chars().collect::<Vec<_>>(),
+                    "          |abcd     ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "*scratch* |*scratch*".chars().collect::<Vec<_>>()
+                ]
+            );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.selected_cursors,
+                vec![(0, 15)]
+            );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.unselected_cursors,
+                vec![(0, 4), (8, 15)]
+            );
         }
 
         other_window_counter_clockwise_command(state.clone()).unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.buffer,
-            vec![
-                "abcd      |abcd     ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |*scratch*".chars().collect::<Vec<_>>(),
-                "          |---------".chars().collect::<Vec<_>>(),
-                "          |abcd     ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "*scratch* |*scratch*".chars().collect::<Vec<_>>()
-            ]
-        );
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.selected_cursors,
-            vec![(0, 4)]
-        );
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.unselected_cursors,
-            vec![(0, 15), (8, 15)]
-        );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.buffer,
+                vec![
+                    "abcd      |abcd     ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |*scratch*".chars().collect::<Vec<_>>(),
+                    "          |---------".chars().collect::<Vec<_>>(),
+                    "          |abcd     ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "*scratch* |*scratch*".chars().collect::<Vec<_>>()
+                ]
+            );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.selected_cursors,
+                vec![(0, 4)]
+            );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.unselected_cursors,
+                vec![(0, 15), (8, 15)]
+            );
         }
 
         other_window_counter_clockwise_command(state.clone()).unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.buffer,
-            vec![
-                "abcd      |abcd     ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |*scratch*".chars().collect::<Vec<_>>(),
-                "          |---------".chars().collect::<Vec<_>>(),
-                "          |abcd     ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "*scratch* |*scratch*".chars().collect::<Vec<_>>()
-            ]
-        );
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.selected_cursors,
-            vec![(8, 15)]
-        );
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.unselected_cursors,
-            vec![(0, 4), (0, 15)]
-        );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.buffer,
+                vec![
+                    "abcd      |abcd     ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |*scratch*".chars().collect::<Vec<_>>(),
+                    "          |---------".chars().collect::<Vec<_>>(),
+                    "          |abcd     ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "*scratch* |*scratch*".chars().collect::<Vec<_>>()
+                ]
+            );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.selected_cursors,
+                vec![(8, 15)]
+            );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.unselected_cursors,
+                vec![(0, 4), (0, 15)]
+            );
         }
 
         other_window_counter_clockwise_command(state.clone()).unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.buffer,
-            vec![
-                "abcd      |abcd     ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |*scratch*".chars().collect::<Vec<_>>(),
-                "          |---------".chars().collect::<Vec<_>>(),
-                "          |abcd     ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "          |         ".chars().collect::<Vec<_>>(),
-                "*scratch* |*scratch*".chars().collect::<Vec<_>>()
-            ]
-        );
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.selected_cursors,
-            vec![(0, 15)]
-        );
-        assert_eq!(
-            unsafe { state.display.debug_renderer() }.unselected_cursors,
-            vec![(0, 4), (8, 15)]
-        );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.buffer,
+                vec![
+                    "abcd      |abcd     ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |*scratch*".chars().collect::<Vec<_>>(),
+                    "          |---------".chars().collect::<Vec<_>>(),
+                    "          |abcd     ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "          |         ".chars().collect::<Vec<_>>(),
+                    "*scratch* |*scratch*".chars().collect::<Vec<_>>()
+                ]
+            );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.selected_cursors,
+                vec![(0, 15)]
+            );
+            assert_eq!(
+                unsafe { state.display.debug_renderer() }.unselected_cursors,
+                vec![(0, 4), (8, 15)]
+            );
         }
     }
 }

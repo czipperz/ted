@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd ~/ted || exit 1
+
+for package in . $(find . -type d -maxdepth 1 -name 'ted_*' | perl -pe 's|\./||'); do
+    (cd "$package"; cargo fmt)
+done

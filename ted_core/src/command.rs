@@ -1,6 +1,6 @@
 use parking_lot::Mutex;
-use std::sync::Arc;
 use state::State;
+use std::sync::Arc;
 
 /// A command to be ran when a certain sequence of keys are pressed.
 ///

@@ -3,10 +3,10 @@ extern crate lazy_static;
 extern crate parking_lot;
 extern crate ted_core;
 
+use parking_lot::Mutex;
 use std::collections::HashMap;
 use std::ops::Range;
 use std::sync::Arc;
-use parking_lot::Mutex;
 use ted_core::*;
 
 #[derive(PartialEq, Eq, Hash)]
@@ -38,10 +38,8 @@ pub fn get_region(window: &Window) -> Range<Cursor> {
             } else {
                 cursor..mark
             }
-        },
-        None => {
-            window.cursor.clone()..window.cursor.clone()
-        },
+        }
+        None => window.cursor.clone()..window.cursor.clone(),
     }
 }
 
@@ -49,7 +47,9 @@ pub fn substring_region(window: &Window, buffer: &Buffer) -> (Range<Cursor>, Str
     let mut region = get_region(window);
     region.start.update(&buffer);
     region.end.update(&buffer);
-    let substring = buffer.substring(region.start.get(), region.end.get()).unwrap();
+    let substring = buffer
+        .substring(region.start.get(), region.end.get())
+        .unwrap();
     (region, substring)
 }
 

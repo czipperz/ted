@@ -4,9 +4,9 @@ extern crate parking_lot;
 extern crate ted_core;
 extern crate ted_mark;
 
-use std::sync::Arc;
-use std::collections::HashMap;
 use parking_lot::Mutex;
+use std::collections::HashMap;
+use std::sync::Arc;
 use ted_core::*;
 use ted_mark::*;
 
@@ -32,10 +32,16 @@ fn insert_kill(window: &Window, substring: String) {
             kill_ring.ring.push(substring);
             kill_ring.pos = kill_ring.ring.len() - 1;
             return;
-        },
-        None => {},
+        }
+        None => {}
     }
-    kills.insert(W(window), KillRing { ring: vec![substring], pos: 0 } );
+    kills.insert(
+        W(window),
+        KillRing {
+            ring: vec![substring],
+            pos: 0,
+        },
+    );
 }
 
 pub fn copy_region(window: &Window) {
@@ -50,7 +56,9 @@ pub fn kill_region(window: &Window) {
     let substring = {
         let mut buffer = window.buffer.lock();
         let (region, substring) = substring_region(window, &buffer);
-        buffer.delete_region(region.start.get(), region.end.get()).unwrap();
+        buffer
+            .delete_region(region.start.get(), region.end.get())
+            .unwrap();
         substring
     };
     insert_kill(window, substring);
@@ -75,8 +83,10 @@ pub fn paste_pop(window: &Window, times: isize) {
     let mut kills = KILLS.lock();
     if let Some(kill_ring) = kills.get_mut(&W(window)) {
         debug_assert!(kill_ring.ring.len() > 0);
-        kill_ring.pos = modulus(kill_ring.pos as isize - times,
-                                kill_ring.ring.len() as isize) as usize;
+        kill_ring.pos = modulus(
+            kill_ring.pos as isize - times,
+            kill_ring.ring.len() as isize,
+        ) as usize;
     }
 }
 

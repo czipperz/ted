@@ -236,7 +236,10 @@ mod tests {
             unsafe { state.display.debug_renderer() }.selected_cursors,
             vec![(0, 4)]
         );
-        assert_eq!(unsafe { state.display.debug_renderer() }.unselected_cursors, vec![]);
+        assert_eq!(
+            unsafe { state.display.debug_renderer() }.unselected_cursors,
+            vec![]
+        );
         assert_eq!(
             unsafe { state.display.debug_renderer() }.buffer,
             vec![

@@ -1,10 +1,10 @@
+use buffer::Buffer;
 use input::Input;
 use layout::Layout;
 use parking_lot::Mutex;
 use renderer::Renderer;
 use std::sync::Arc;
 use window::Window;
-use buffer::Buffer;
 
 pub struct Frame {
     pub layout: Layout,
