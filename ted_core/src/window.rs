@@ -1,8 +1,8 @@
-use std::sync::Arc;
-use parking_lot::Mutex;
 use buffer::*;
-use key_map::KeyMap;
 use cursor::Cursor;
+use key_map::KeyMap;
+use parking_lot::Mutex;
+use std::sync::Arc;
 
 /// A view into a specific [`Buffer`]
 ///

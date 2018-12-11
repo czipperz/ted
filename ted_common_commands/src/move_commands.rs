@@ -1,29 +1,26 @@
-use std::sync::Arc;
 use parking_lot::Mutex;
+use std::sync::Arc;
 use ted_core::*;
 
 /// Move backwards one char on the selected [`Window`](../ted_core/struct.Window.html).
-pub fn backward_char_command(state: Arc<Mutex<State>>,
-                             _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn backward_char_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let mut selected_window = selected_window.lock();
     selected_window.increment_cursor(-1);
     Ok(())
 }
 
 /// Move forwards one char on the selected [`Window`](../ted_core/struct.Window.html).
-pub fn forward_char_command(state: Arc<Mutex<State>>,
-                            _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn forward_char_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let mut selected_window = selected_window.lock();
     selected_window.increment_cursor(1);
     Ok(())
 }
 
 /// Move to the beginning of the line the selected [`Window`](../ted_core/struct.Window.html)'s cursor is on.
-pub fn begin_of_line_command(state: Arc<Mutex<State>>,
-                             _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn begin_of_line_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let mut selected_window = selected_window.lock();
     let selected_window = &mut *selected_window;
     let buffer = selected_window.buffer.lock();
@@ -48,9 +45,8 @@ pub fn begin_of_line(buffer: &Buffer, mut location: usize) -> usize {
 }
 
 /// Move to the end of the line the selected [`Window`](../ted_core/struct.Window.html)'s cursor is on.
-pub fn end_of_line_command(state: Arc<Mutex<State>>,
-                           _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn end_of_line_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let mut selected_window = selected_window.lock();
     let selected_window = &mut *selected_window;
     let buffer = selected_window.buffer.lock();
@@ -75,9 +71,8 @@ pub fn end_of_line(buffer: &Buffer, mut location: usize) -> usize {
 }
 
 /// Move forward one line in the selected [`Window`](../ted_core/struct.Window.html).
-pub fn forward_line_command(state: Arc<Mutex<State>>,
-                            _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn forward_line_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let mut selected_window = selected_window.lock();
     let selected_window = &mut *selected_window;
     let buffer = selected_window.buffer.lock();
@@ -87,9 +82,8 @@ pub fn forward_line_command(state: Arc<Mutex<State>>,
 }
 
 /// Move backward one line in the selected [`Window`](../ted_core/struct.Window.html).
-pub fn backward_line_command(state: Arc<Mutex<State>>,
-                             _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn backward_line_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let mut selected_window = selected_window.lock();
     let selected_window = &mut *selected_window;
     let buffer = selected_window.buffer.lock();
@@ -125,9 +119,8 @@ pub fn forward_line(buffer: &Buffer, location: usize, times: isize) -> usize {
 }
 
 /// Move forward to the ending of the word in the selected [`Window`](../ted_core/struct.Window.html).
-pub fn forward_word_command(state: Arc<Mutex<State>>,
-                            _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn forward_word_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let mut selected_window = selected_window.lock();
     let selected_window = &mut *selected_window;
     let buffer = selected_window.buffer.lock();
@@ -137,9 +130,8 @@ pub fn forward_word_command(state: Arc<Mutex<State>>,
 }
 
 /// Move backward to the beginning of the word in the selected [`Window`](../ted_core/struct.Window.html).
-pub fn backward_word_command(state: Arc<Mutex<State>>,
-                             _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn backward_word_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let mut selected_window = selected_window.lock();
     let selected_window = &mut *selected_window;
     let buffer = selected_window.buffer.lock();
@@ -203,13 +195,12 @@ mod tests {
 
     #[test]
     fn begin_of_line_command_1() {
-        let state = Arc::new(Mutex::new(State::new()));
-        let display = Arc::new(Mutex::new(DebugDisplay::new(Vec::new())));
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
 
-        begin_of_line_command(state.clone(), display.clone()).unwrap();
+        begin_of_line_command(state.clone()).unwrap();
         {
-            let state = state.lock();
-            let mut selected_window = state.selected_window.lock();
+            let selected_window = state.lock().display.selected_window();
+            let mut selected_window = selected_window.lock();
             let selected_window = &mut *selected_window;
             assert_eq!(selected_window.cursor.get(), 0);
             let mut buffer = selected_window.buffer.lock();
@@ -217,39 +208,38 @@ mod tests {
             selected_window.cursor.set(&buffer, 4);
         }
 
-        begin_of_line_command(state.clone(), display.clone()).unwrap();
+        begin_of_line_command(state.clone()).unwrap();
         {
-            let state = state.lock();
-            let mut selected_window = state.selected_window.lock();
+            let selected_window = state.lock().display.selected_window();
+            let mut selected_window = selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 0);
             selected_window.set_cursor(7);
         }
 
-        begin_of_line_command(state.clone(), display.clone()).unwrap();
+        begin_of_line_command(state.clone()).unwrap();
         {
-            let state = state.lock();
-            let mut selected_window = state.selected_window.lock();
+            let selected_window = state.lock().display.selected_window();
+            let mut selected_window = selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 5);
             selected_window.set_cursor(1000);
         }
 
-        begin_of_line_command(state.clone(), display.clone()).unwrap();
+        begin_of_line_command(state.clone()).unwrap();
         {
-            let state = state.lock();
-            let selected_window = state.selected_window.lock();
+            let selected_window = state.lock().display.selected_window();
+            let selected_window = selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 15);
         }
     }
 
     #[test]
     fn end_of_line_command_1() {
-        let state = Arc::new(Mutex::new(State::new()));
-        let display = Arc::new(Mutex::new(DebugDisplay::new(Vec::new())));
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
 
-        end_of_line_command(state.clone(), display.clone()).unwrap();
+        end_of_line_command(state.clone()).unwrap();
         {
-            let state = state.lock();
-            let mut selected_window = state.selected_window.lock();
+            let selected_window = state.lock().display.selected_window();
+            let mut selected_window = selected_window.lock();
             let selected_window = &mut *selected_window;
             assert_eq!(selected_window.cursor.get(), 0);
             let mut buffer = selected_window.buffer.lock();
@@ -257,41 +247,41 @@ mod tests {
             selected_window.cursor.set(&buffer, 4);
         }
 
-        end_of_line_command(state.clone(), display.clone()).unwrap();
+        end_of_line_command(state.clone()).unwrap();
         {
-            let state = state.lock();
-            let mut selected_window = state.selected_window.lock();
+            let selected_window = state.lock().display.selected_window();
+            let mut selected_window = selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 4);
             selected_window.set_cursor(7);
         }
 
-        end_of_line_command(state.clone(), display.clone()).unwrap();
+        end_of_line_command(state.clone()).unwrap();
         {
-            let state = state.lock();
-            let selected_window = state.selected_window.lock();
+            let selected_window = state.lock().display.selected_window();
+            let selected_window = selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 9);
         }
 
-        end_of_line_command(state.clone(), display.clone()).unwrap();
+        end_of_line_command(state.clone()).unwrap();
         {
-            let state = state.lock();
-            let mut selected_window = state.selected_window.lock();
+            let selected_window = state.lock().display.selected_window();
+            let mut selected_window = selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 9);
             selected_window.set_cursor(0);
         }
 
-        end_of_line_command(state.clone(), display.clone()).unwrap();
+        end_of_line_command(state.clone()).unwrap();
         {
-            let state = state.lock();
-            let mut selected_window = state.selected_window.lock();
+            let selected_window = state.lock().display.selected_window();
+            let mut selected_window = selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 4);
             selected_window.set_cursor(1000);
         }
 
-        end_of_line_command(state.clone(), display.clone()).unwrap();
+        end_of_line_command(state.clone()).unwrap();
         {
-            let state = state.lock();
-            let selected_window = state.selected_window.lock();
+            let selected_window = state.lock().display.selected_window();
+            let selected_window = selected_window.lock();
             assert_eq!(selected_window.cursor.get(), 15);
         }
     }

@@ -1,10 +1,10 @@
+use buffer_contents::*;
+use by_address::ByAddress;
+use change::*;
+use parking_lot::Mutex;
+use std::collections::{HashSet, VecDeque};
 use std::fmt;
 use std::sync::{Arc, Weak};
-use parking_lot::Mutex;
-use by_address::ByAddress;
-use buffer_contents::*;
-use change::*;
-use std::collections::{HashSet, VecDeque};
 
 /// The actual text storage structure
 ///
@@ -69,7 +69,9 @@ impl Buffer {
     /// buffer.insert_str(0, "αβθγ");
     /// assert_eq!(buffer.len(), 4);
     /// ```
-    pub fn len(&self) -> usize { self.buffer_contents.len() }
+    pub fn len(&self) -> usize {
+        self.buffer_contents.len()
+    }
 
     /// Iterate over the contents of the `Buffer`.
     ///
@@ -86,7 +88,9 @@ impl Buffer {
     /// assert_eq!(iter.next(), Some('γ'));
     /// assert_eq!(iter.next(), None);
     /// ```
-    pub fn iter(&self) -> BufferContentsIterator { self.buffer_contents.iter() }
+    pub fn iter(&self) -> BufferContentsIterator {
+        self.buffer_contents.iter()
+    }
 
     /// Get the character at position `loc`.
     ///
@@ -114,15 +118,24 @@ impl Buffer {
     /// Insert char `c` at point `loc`.
     pub fn insert(&mut self, loc: usize, c: char) -> Result<(), ()> {
         self.buffer_contents.insert(loc, c)?;
-        self.add_change(Change { loc, s: c.to_string(), len_chars: 1, is_insert: true });
+        self.add_change(Change {
+            loc,
+            s: c.to_string(),
+            len_chars: 1,
+            is_insert: true,
+        });
         Ok(())
     }
 
     /// Insert string `s` at point `loc`.
     pub fn insert_str(&mut self, loc: usize, s: &str) -> Result<(), ()> {
         self.buffer_contents.insert_str(loc, s)?;
-        self.add_change(Change { loc, s: s.to_string(),
-                                 len_chars: s.chars().count(), is_insert: true });
+        self.add_change(Change {
+            loc,
+            s: s.to_string(),
+            len_chars: s.chars().count(),
+            is_insert: true,
+        });
         Ok(())
     }
 
@@ -130,7 +143,12 @@ impl Buffer {
     pub fn delete(&mut self, loc: usize) -> Result<(), ()> {
         let c = self.get(loc)?;
         self.buffer_contents.delete(loc)?;
-        self.add_change(Change { loc, s: c.to_string(), len_chars: 1, is_insert: false });
+        self.add_change(Change {
+            loc,
+            s: c.to_string(),
+            len_chars: 1,
+            is_insert: false,
+        });
         Ok(())
     }
 
@@ -139,8 +157,12 @@ impl Buffer {
         let s = self.substring(begin, end)?;
         self.buffer_contents.delete_region(begin, end)?;
         let len_chars = s.chars().count();
-        self.add_change(Change { loc: begin, s: s,
-                                 len_chars, is_insert: false });
+        self.add_change(Change {
+            loc: begin,
+            s: s,
+            len_chars,
+            is_insert: false,
+        });
         Ok(())
     }
 
@@ -158,7 +180,7 @@ impl Buffer {
                     current_state.succ.push(node.clone());
                 }
                 self.current_state = Some(node);
-            },
+            }
             None => {
                 let node = Arc::new(Mutex::new(StateNode {
                     pred: Weak::new(),
@@ -167,7 +189,7 @@ impl Buffer {
                 }));
                 self._initial_state = Some(node.clone());
                 self.current_state = Some(node);
-            },
+            }
         }
     }
 
@@ -177,9 +199,9 @@ impl Buffer {
     /// to `insert`, `insert_str`, `delete`, or `delete_range` is
     /// considered a change.
     ///
-    /// If there are no edits to undo, 
+    /// If there are no edits to undo,
     ///
-    /// ## Examples
+    /// # Examples
     ///
     /// ```
     /// # use ted_core::{Buffer, BufferName};
@@ -202,21 +224,20 @@ impl Buffer {
             Some(current_state) => {
                 let current_state = current_state.lock();
                 if current_state.change.is_insert {
-                    self.buffer_contents.delete_region
-                        (current_state.change.loc,
-                         current_state.change.loc + current_state.change.len_chars)
-                        .unwrap();
+                    self.buffer_contents
+                        .delete_region(
+                            current_state.change.loc,
+                            current_state.change.loc + current_state.change.len_chars,
+                        ).unwrap();
                 } else {
-                    self.buffer_contents.insert_str(current_state.change.loc,
-                                                    &current_state.change.s)
+                    self.buffer_contents
+                        .insert_str(current_state.change.loc, &current_state.change.s)
                         .unwrap();
                 }
                 self.current_state = current_state.pred.upgrade();
                 true
-            },
-            None => {
-                false
-            },
+            }
+            None => false,
         }
     }
 
@@ -252,28 +273,27 @@ impl Buffer {
                             {
                                 let next_state = next_state.lock();
                                 if !next_state.change.is_insert {
-                                    self.buffer_contents.delete_region
-                                        (next_state.change.loc,
-                                         next_state.change.loc + next_state.change.len_chars)
-                                        .unwrap();
+                                    self.buffer_contents
+                                        .delete_region(
+                                            next_state.change.loc,
+                                            next_state.change.loc + next_state.change.len_chars,
+                                        ).unwrap();
                                 } else {
-                                    self.buffer_contents.insert_str(next_state.change.loc,
-                                                                    &next_state.change.s)
+                                    self.buffer_contents
+                                        .insert_str(next_state.change.loc, &next_state.change.s)
                                         .unwrap();
                                 }
                             }
                             self.current_state = Some(next_state.clone());
                             return true;
-                        },
-                        None => {},
+                        }
+                        None => {}
                     }
                 }
                 self.current_state = Some(current_state_lock);
                 false
-            },
-            None => {
-                false
-            },
+            }
+            None => false,
         }
     }
 }
@@ -305,21 +325,23 @@ impl<T: Into<String>> From<T> for BufferName {
     }
 }
 
-pub fn update_cursor(buffer: &Buffer, ret_state: &mut Weak<Mutex<StateNode>>,
-                     ret_location: &mut usize) {
-    let mut state =
-        match ret_state.upgrade() {
-            Some(state) => state,
-            None => {
-                debug_assert_eq!(*ret_location, 0);
-                *ret_state = match &buffer.current_state {
-                    Some(s) => Arc::downgrade(&s),
-                    None => Weak::new(),
-                };
-                *ret_location = buffer.len();
-                return;
-            }
-        };
+pub fn update_cursor(
+    buffer: &Buffer,
+    ret_state: &mut Weak<Mutex<StateNode>>,
+    ret_location: &mut usize,
+) {
+    let mut state = match ret_state.upgrade() {
+        Some(state) => state,
+        None => {
+            debug_assert_eq!(*ret_location, 0);
+            *ret_state = match &buffer.current_state {
+                Some(s) => Arc::downgrade(&s),
+                None => Weak::new(),
+            };
+            *ret_location = buffer.len();
+            return;
+        }
+    };
     let mut location = *ret_location;
     if buffer.current_state.is_none() {
         let mut state_lock = state;
@@ -362,8 +384,8 @@ pub fn update_cursor(buffer: &Buffer, ret_state: &mut Weak<Mutex<StateNode>>,
                 Some(new_state) => {
                     let new_location = state.change.offset_cursor_undo(location);
                     states.push_back((new_state.clone(), new_location));
-                },
-                None => {},
+                }
+                None => {}
             }
         }
         let new_state = states.pop_front().unwrap();

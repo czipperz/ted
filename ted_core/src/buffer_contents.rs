@@ -12,7 +12,7 @@ const PREFERRED_LENGTH_CHARS: usize = 2;
 
 #[derive(Debug, Clone)]
 pub struct BufferContents {
-    array: Vec<S>
+    array: Vec<S>,
 }
 
 impl BufferContents {
@@ -97,8 +97,13 @@ impl BufferContents {
         for i in 0..self.array.len() {
             if loc <= self.array[i].len_chars {
                 if str_len + self.array[i].str.chars().count() <= MAX_LENGTH_CHARS {
-                    let j = self.array[i].str.char_indices().skip(loc).next()
-                        .map(|(j, _)| j).unwrap_or(self.array[i].str.len());
+                    let j = self.array[i]
+                        .str
+                        .char_indices()
+                        .skip(loc)
+                        .next()
+                        .map(|(j, _)| j)
+                        .unwrap_or(self.array[i].str.len());
                     self.array[i].str.insert_str(j, str);
                     self.array[i].len_chars += str_len;
                 } else {
@@ -128,12 +133,16 @@ impl BufferContents {
                 if str_len == i {
                     break;
                 } else if str_len < i + PREFERRED_LENGTH_CHARS {
-                    self.array.push(S { str: str.chars().skip(i).collect(),
-                                        len_chars: str_len - i });
+                    self.array.push(S {
+                        str: str.chars().skip(i).collect(),
+                        len_chars: str_len - i,
+                    });
                     break;
                 } else {
-                    self.array.push(S { str: str.chars().skip(i).take(PREFERRED_LENGTH_CHARS).collect(),
-                                        len_chars: PREFERRED_LENGTH_CHARS });
+                    self.array.push(S {
+                        str: str.chars().skip(i).take(PREFERRED_LENGTH_CHARS).collect(),
+                        len_chars: PREFERRED_LENGTH_CHARS,
+                    });
                     i += PREFERRED_LENGTH_CHARS;
                 }
             }
@@ -166,14 +175,14 @@ impl BufferContents {
             Some(i) => {
                 self.array.remove(i);
                 return Ok(());
-            },
+            }
             None => {
                 if loc == 0 {
                     Ok(())
                 } else {
                     Err(())
                 }
-            },
+            }
         }
     }
     pub fn delete_region(&mut self, begin: usize, mut end: usize) -> BufferContentsResult<()> {
@@ -205,19 +214,32 @@ enum MiddleChainState {
     Back,
 }
 
-impl<I1, I2> MiddleChain<I1, I2> where
-    I1: Iterator, I2: Iterator<Item = I1::Item> {
+impl<I1, I2> MiddleChain<I1, I2>
+where
+    I1: Iterator,
+    I2: Iterator<Item = I1::Item>,
+{
     fn new(iter1: I1, iter2: I2, offset: usize) -> Self {
         if offset == 0 {
-            Self { iter1, iter2, state: MiddleChainState::Middle }
+            Self {
+                iter1,
+                iter2,
+                state: MiddleChainState::Middle,
+            }
         } else {
-            Self { iter1, iter2, state: MiddleChainState::Front(offset) }
+            Self {
+                iter1,
+                iter2,
+                state: MiddleChainState::Front(offset),
+            }
         }
     }
 }
 
-impl<I1, I2> MiddleChain<I1, I2> where
-    I1: Iterator<Item = char>, I2: Iterator<Item = char>
+impl<I1, I2> MiddleChain<I1, I2>
+where
+    I1: Iterator<Item = char>,
+    I2: Iterator<Item = char>,
 {
     fn take_(&mut self, len: usize) -> S {
         let mut s = String::with_capacity(len);
@@ -225,19 +247,29 @@ impl<I1, I2> MiddleChain<I1, I2> where
             match self.next() {
                 Some(c) => {
                     s.push(c);
-                },
-                None => return S { str: s, len_chars: l },
+                }
+                None => {
+                    return S {
+                        str: s,
+                        len_chars: l,
+                    }
+                }
             }
         }
-        S { str: s, len_chars: len }
+        S {
+            str: s,
+            len_chars: len,
+        }
     }
 }
 
-impl<I1, I2> Iterator for MiddleChain<I1, I2> where
-    I1: Iterator, I2: Iterator<Item = I1::Item>
+impl<I1, I2> Iterator for MiddleChain<I1, I2>
+where
+    I1: Iterator,
+    I2: Iterator<Item = I1::Item>,
 {
     type Item = I1::Item;
-    
+
     fn next(&mut self) -> Option<Self::Item> {
         match self.state {
             MiddleChainState::Front(i) => {
@@ -256,7 +288,7 @@ impl<I1, I2> Iterator for MiddleChain<I1, I2> where
                 } else {
                     n
                 }
-            },
+            }
             MiddleChainState::Back => self.iter1.next(),
         }
     }
@@ -272,23 +304,22 @@ impl<'a> Iterator for BufferContentsIterator<'a> {
     type Item = char;
     fn next(&mut self) -> Option<char> {
         match self.inner.take() {
-            Some(mut inner) =>
-                match inner.next() {
-                    None => {
-                        self.outer += 1;
-                        if self.outer >= self.buffer_contents.array.len() {
-                            self.inner = None;
-                            None
-                        } else {
-                            self.inner = Some(self.buffer_contents.array[self.outer].str.chars());
-                            self.next()
-                        }
-                    },
-                    c => {
-                        self.inner = Some(inner);
-                        c
-                    },
-                },
+            Some(mut inner) => match inner.next() {
+                None => {
+                    self.outer += 1;
+                    if self.outer >= self.buffer_contents.array.len() {
+                        self.inner = None;
+                        None
+                    } else {
+                        self.inner = Some(self.buffer_contents.array[self.outer].str.chars());
+                        self.next()
+                    }
+                }
+                c => {
+                    self.inner = Some(inner);
+                    c
+                }
+            },
             None => None,
         }
     }
@@ -304,7 +335,7 @@ impl fmt::Display for BufferContents {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn insert_into_null() {
         let mut buf = BufferContents::new();
@@ -385,7 +416,7 @@ mod tests {
         assert_eq!(buf.get(6).unwrap(), 'g');
         assert_eq!(buf.get(7).unwrap(), 'h');
     }
-    
+
     #[test]
     fn insert_end_string() {
         let mut buf = BufferContents::new();
@@ -409,7 +440,7 @@ mod tests {
         assert_eq!(buf.get(7).unwrap(), 'h');
         assert!(buf.get(8).is_err());
     }
-    
+
     #[test]
     fn insert_middle_string() {
         let mut buf = BufferContents::new();

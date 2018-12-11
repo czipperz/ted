@@ -1,8 +1,8 @@
-use std::sync::Weak;
-use std::fmt;
-use parking_lot::Mutex;
-use change::StateNode;
 use buffer::*;
+use change::StateNode;
+use parking_lot::Mutex;
+use std::fmt;
+use std::sync::Weak;
 
 /// Safely index into a [`Buffer`] and get automatic updates.
 ///
@@ -28,7 +28,10 @@ pub struct Cursor {
 impl Cursor {
     /// Create a `Cursor` at location 0 and a null state.
     pub fn new() -> Self {
-        Cursor { location: 0, state: Weak::new() }
+        Cursor {
+            location: 0,
+            state: Weak::new(),
+        }
     }
 
     /// Get the `Cursor`'s location
@@ -117,12 +120,11 @@ impl Cursor {
 
 impl PartialEq for Cursor {
     fn eq(&self, other: &Self) -> bool {
-        self.location == other.location &&
-            match (self.state.upgrade(), other.state.upgrade()) {
-                (Some(s), Some(o)) => std::sync::Arc::ptr_eq(&s, &o),
-                (None, None) => true,
-                _ => false,
-            }
+        self.location == other.location && match (self.state.upgrade(), other.state.upgrade()) {
+            (Some(s), Some(o)) => std::sync::Arc::ptr_eq(&s, &o),
+            (None, None) => true,
+            _ => false,
+        }
     }
 }
 

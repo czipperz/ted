@@ -1,11 +1,10 @@
-use std::sync::Arc;
-use parking_lot::Mutex;
-use ted_core::*;
 use move_commands::forward_word;
+use parking_lot::Mutex;
+use std::sync::Arc;
+use ted_core::*;
 
-pub fn forward_group_command(state: Arc<Mutex<State>>,
-                             _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn forward_group_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let mut selected_window = selected_window.lock();
     let selected_window = &mut *selected_window;
     let buffer = selected_window.buffer.lock();
@@ -14,8 +13,8 @@ pub fn forward_group_command(state: Arc<Mutex<State>>,
     Ok(())
 }
 
-pub fn backward_group_command(state: Arc<Mutex<State>>, _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn backward_group_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let mut selected_window = selected_window.lock();
     let selected_window = &mut *selected_window;
     let buffer = selected_window.buffer.lock();
@@ -103,8 +102,8 @@ pub fn forward_group(buffer: &Buffer, mut ret_location: usize, times: isize) -> 
     location
 }
 
-pub fn up_group_command(state: Arc<Mutex<State>>, _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn up_group_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let mut selected_window = selected_window.lock();
     let selected_window = &mut *selected_window;
     let buffer = selected_window.buffer.lock();

@@ -1,8 +1,7 @@
-use display::Display;
 use layout::Layout;
-use state::State;
-use std::sync::Arc;
 use parking_lot::Mutex;
+use renderer::Renderer;
+use std::sync::Arc;
 use window::Window;
 
 pub enum Character {
@@ -18,26 +17,40 @@ pub enum Attribute {
     Inverted,
 }
 
-pub trait DisplayDraw: Display {
+pub trait DrawableRenderer: Renderer {
     fn erase(&mut self) -> Result<(), ()>;
     fn putch(&mut self, y: usize, x: usize, ch: Character) -> Result<(), ()>;
     fn set_attribute(&mut self, y: usize, x: usize, at: Attribute) -> Result<(), ()>;
 }
 
-pub fn draw<D>(display: &mut D, state: &State, rows: usize, columns: usize)
-               -> Result<(), ()>
-               where D: DisplayDraw {
-    state.layout.update_window_cursors();
+pub fn draw<D>(
+    display: &mut D,
+    layout: &Layout,
+    selected_window: &Arc<Mutex<Window>>,
+    rows: usize,
+    columns: usize,
+) -> Result<(), ()>
+where
+    D: DrawableRenderer,
+{
+    layout.update_window_cursors();
     display.erase()?;
-    draw_rect(display, &state.layout, &state.selected_window,
-              0, 0, rows, columns)?;
+    draw_rect(display, layout, selected_window, 0, 0, rows, columns)?;
     Ok(())
 }
 
-fn draw_rect<D>(display: &mut D, layout: &Layout, selected_window: &Arc<Mutex<Window>>,
-                y: usize, x: usize, rows: usize, columns: usize)
-                -> Result<(), ()>
-    where D: DisplayDraw {
+fn draw_rect<D>(
+    display: &mut D,
+    layout: &Layout,
+    selected_window: &Arc<Mutex<Window>>,
+    y: usize,
+    x: usize,
+    rows: usize,
+    columns: usize,
+) -> Result<(), ()>
+where
+    D: DrawableRenderer,
+{
     match layout {
         Layout::Window(window) => {
             let is_selected_window = Arc::ptr_eq(window, selected_window);
@@ -50,18 +63,16 @@ fn draw_rect<D>(display: &mut D, layout: &Layout, selected_window: &Arc<Mutex<Wi
             while row < rows - 1 {
                 if window.cursor.get() == location {
                     if is_selected_window {
-                        display.set_attribute(y + row, x + column,
-                                              Attribute::SelectedCursor)?;
+                        display.set_attribute(y + row, x + column, Attribute::SelectedCursor)?;
                     } else {
-                        display.set_attribute(y + row, x + column,
-                                              Attribute::UnselectedCursor)?;
+                        display.set_attribute(y + row, x + column, Attribute::UnselectedCursor)?;
                     }
                 }
                 match iter.next() {
                     Some('\n') => {
                         column = 0;
                         row += 1;
-                    },
+                    }
                     Some(ch) => {
                         display.putch(y + row, x + column, Character::Character(ch))?;
                         column += 1;
@@ -69,7 +80,7 @@ fn draw_rect<D>(display: &mut D, layout: &Layout, selected_window: &Arc<Mutex<Wi
                             row += 1;
                             column = 0;
                         }
-                    },
+                    }
                     None => break,
                 }
                 location += 1;
@@ -85,7 +96,7 @@ fn draw_rect<D>(display: &mut D, layout: &Layout, selected_window: &Arc<Mutex<Wi
                 display.set_attribute(y + rows - 1, x + column, Attribute::Inverted)?;
             }
             Ok(())
-        },
+        }
         Layout::VSplit { left, right } => {
             // 4 columns
             // __|_
@@ -95,10 +106,17 @@ fn draw_rect<D>(display: &mut D, layout: &Layout, selected_window: &Arc<Mutex<Wi
             for r in 0..rows {
                 display.putch(y + r, x + columns / 2, Character::VLine)?;
             }
-            draw_rect(display, right, selected_window,
-                      y, x + columns / 2 + 1, rows, (columns - 1) / 2)?;
+            draw_rect(
+                display,
+                right,
+                selected_window,
+                y,
+                x + columns / 2 + 1,
+                rows,
+                (columns - 1) / 2,
+            )?;
             Ok(())
-        },
+        }
         Layout::HSplit { top, bottom } => {
             // 4 rows
             // __|_
@@ -108,9 +126,16 @@ fn draw_rect<D>(display: &mut D, layout: &Layout, selected_window: &Arc<Mutex<Wi
             for c in 0..columns {
                 display.putch(y + rows / 2, x + c, Character::HLine)?;
             }
-            draw_rect(display, bottom, selected_window,
-                      y + rows / 2 + 1, x, (rows - 1) / 2, columns)?;
+            draw_rect(
+                display,
+                bottom,
+                selected_window,
+                y + rows / 2 + 1,
+                x,
+                (rows - 1) / 2,
+                columns,
+            )?;
             Ok(())
-        },
+        }
     }
 }

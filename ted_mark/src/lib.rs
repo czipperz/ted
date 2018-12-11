@@ -63,17 +63,15 @@ pub fn remove_mark(window: &Window) {
     marks.remove(&W(window));
 }
 
-pub fn set_mark_command(state: Arc<Mutex<State>>,
-                        _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn set_mark_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let selected_window = selected_window.lock();
     set_mark(&selected_window, selected_window.cursor.clone());
     Ok(())
 }
 
-pub fn remove_mark_command(state: Arc<Mutex<State>>,
-                           _: Arc<Mutex<Display>>) -> Result<(), ()> {
-    let selected_window = state.lock().selected_window.clone();
+pub fn remove_mark_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
     let selected_window = selected_window.lock();
     remove_mark(&selected_window);
     Ok(())

@@ -1,5 +1,5 @@
-use std::sync::{Arc, Weak};
 use parking_lot::Mutex;
+use std::sync::{Arc, Weak};
 
 pub struct StateNode {
     pub pred: Weak<Mutex<StateNode>>,

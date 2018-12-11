@@ -1,20 +1,62 @@
-use state::State;
+use buffer::Buffer;
+use debug_renderer::*;
+use frame::Frame;
 use input::Input;
+use parking_lot::Mutex;
+use parking_lot::{MappedMutexGuard, MutexGuard};
+use renderer::Renderer;
+use std::sync::Arc;
+use window::Window;
 
-/// A generic interface to handle a graphical Display.
-///
-/// Specific implementations include [`DebugDisplay`] and [`CursesDisplay`].
-///
-/// [`DebugDisplay`]: struct.DebugDisplay.html
-/// [`CursesDisplay`]: struct.CursesDisplay.html
-pub trait Display : Send {
-    /// Show the [`State`] on the `Display`.
-    ///
-    /// [`State`]: struct.State.html
-    fn show(&mut self, state: &State) -> Result<(), ()>;
+pub struct Display {
+    pub selected_frame: Arc<Mutex<Frame>>,
+    pub frames: Vec<Arc<Mutex<Frame>>>,
+}
 
-    /// Get the next user [`Input`] event if any.
-    ///
-    /// [`Input`]: enum.Input.html
-    fn getch(&mut self) -> Option<Input>;
+impl Display {
+    pub fn new(selected_window: Arc<Mutex<Window>>, renderer: Box<Renderer>) -> Self {
+        let frame = Arc::new(Mutex::new(Frame::new(selected_window, renderer)));
+        Display {
+            selected_frame: frame.clone(),
+            frames: vec![frame],
+        }
+    }
+
+    pub fn selected_window(&self) -> Arc<Mutex<Window>> {
+        self.selected_frame.lock().selected_window.clone()
+    }
+
+    pub fn selected_window_buffer(&self) -> Arc<Mutex<Buffer>> {
+        self.selected_frame.lock().selected_window_buffer()
+    }
+
+    pub unsafe fn debug_renderer(&self) -> MappedMutexGuard<DebugRenderer> {
+        MutexGuard::map(self.selected_frame.lock(), |f| {
+            debug_renderer(&mut *f.renderer)
+        })
+    }
+
+    pub fn update_cursors(&self) {
+        for frame in &self.frames {
+            frame.lock().layout.update_window_cursors();
+        }
+    }
+
+    pub fn show(&self) -> Result<(), ()> {
+        let selected_window = self.selected_window();
+        for frame in &self.frames {
+            frame.lock().show(&selected_window)?
+        }
+        Ok(())
+    }
+
+    pub fn getch(&self) -> Option<Input> {
+        for frame in &self.frames {
+            match frame.lock().renderer.getch() {
+                Some(input) => return Some(input),
+                None => (),
+            }
+        }
+        None
+    }
 }
