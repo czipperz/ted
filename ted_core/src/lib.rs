@@ -29,6 +29,8 @@ mod curses_renderer;
 pub use curses_renderer::*;
 mod debug_renderer;
 pub use debug_renderer::*;
+mod command;
+pub use command::*;
 mod key_map;
 pub use key_map::*;
 mod layout;
