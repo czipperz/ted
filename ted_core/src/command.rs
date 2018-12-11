@@ -14,18 +14,11 @@ use std::sync::Arc;
 ///
 /// # Examples
 ///
-/// Template for a command that only edits the current buffer:
-/// ```
-/// # use ted_core::{Buffer, BufferName};
-/// let mut buffer = Buffer::new("*scratch*".into());
-/// buffer.insert_str(0, "abcd");
-/// buffer.delete_region(2, 4).unwrap();
-/// assert_eq!(buffer.len(), 2);
-/// assert_eq!(format!("{}", buffer), "ab");
-/// ```
+/// Template for a command that edits the current window:
 /// ```
 /// extern crate parking_lot;
 /// extern crate ted_core;
+///
 /// # fn main() {
 /// use std::sync::Arc;
 /// use parking_lot::Mutex;
@@ -33,6 +26,24 @@ use std::sync::Arc;
 /// pub fn my_custom_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
 ///     let selected_window = state.lock().display.selected_window().clone();
 ///     let mut selected_window = selected_window.lock();
+///     // use selected_window
+///     Ok(())
+/// }
+/// # }
+/// ```
+///
+/// Template for a command that edits the current buffer:
+/// ```
+/// extern crate parking_lot;
+/// extern crate ted_core;
+///
+/// # fn main() {
+/// use std::sync::Arc;
+/// use parking_lot::Mutex;
+/// use ted_core::State;
+/// pub fn my_custom_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+///     let buffer = state.lock().display.selected_window_buffer();
+///     let mut buffer = buffer.lock();
 ///     // use selected_window
 ///     Ok(())
 /// }
