@@ -24,12 +24,12 @@ use std::sync::Arc;
 /// assert_eq!(format!("{}", buffer), "ab");
 /// ```
 /// ```
-/// # extern crate parking_lot;
-/// # extern crate ted_core;
+/// extern crate parking_lot;
+/// extern crate ted_core;
 /// # fn main() {
-/// # use std::sync::Arc;
-/// # use parking_lot::Mutex;
-/// # use ted_core::State;
+/// use std::sync::Arc;
+/// use parking_lot::Mutex;
+/// use ted_core::State;
 /// pub fn my_custom_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
 ///     let selected_window = state.lock().display.selected_window().clone();
 ///     let mut selected_window = selected_window.lock();
