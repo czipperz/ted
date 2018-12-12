@@ -2,6 +2,6 @@
 
 cd ~/ted || exit 1
 
-for package in . $(find . -type d -maxdepth 1 -name 'ted_*' | perl -pe 's|\./||'); do
+for package in . $(find . -maxdepth 1 -type d -name 'ted_*' | perl -pe 's|\./||' | grep -v ted_user_cfg); do
     (cd "$package"; cargo fmt)
 done
