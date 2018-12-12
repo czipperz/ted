@@ -53,7 +53,7 @@ fn increment(state: Arc<Mutex<State>>) -> Result<(), ()> {
                 inputs.push_back(input);
                 match {
                     let state = state.lock();
-                    KeyMap::lookup(&state.default_key_map, inputs, true)
+                    state.lookup(inputs, true)
                 } {
                     Ok(action) => {
                         let r = action(state.clone());
