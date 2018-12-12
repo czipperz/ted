@@ -39,6 +39,10 @@ fn main_loop(state: Arc<Mutex<State>>) -> Result<(), ()> {
     }
 }
 
+fn is_displayable(c: char) -> bool {
+    c == '\n' || c == '\t' || !c.is_control()
+}
+
 fn increment(state: Arc<Mutex<State>>) -> Result<(), ()> {
     fn increment_(state: Arc<Mutex<State>>, inputs: &mut VecDeque<Input>) -> Result<(), ()> {
         match {
@@ -65,7 +69,7 @@ fn increment(state: Arc<Mutex<State>>) -> Result<(), ()> {
                                 alt: false,
                                 function: false,
                             }
-                                if !key.is_control() =>
+                                if is_displayable(key) =>
                             {
                                 {
                                     let window = state.lock().display.selected_window();
@@ -271,5 +275,29 @@ mod tests {
                 ]
             );
         }
+    }
+
+    #[test]
+    fn increment_new_line() {
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::from(vec![kbd!(
+            '\n'
+        )]))));
+        increment(state.clone()).unwrap();
+        {
+            let selected_window = state.lock().display.selected_window();
+            let selected_window = selected_window.lock();
+            assert_eq!(selected_window.cursor.get(), 1);
+
+            let buffer = selected_window.buffer.lock();
+            assert_eq!(format!("{}", *buffer), "\n");
+        }
+    }
+
+    #[test]
+    fn test_is_displayable() {
+        assert!(!is_displayable('\r'));
+        assert!(is_displayable(' '));
+        assert!(is_displayable('\n'));
+        assert!(is_displayable('\t'));
     }
 }
