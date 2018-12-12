@@ -3,6 +3,26 @@ use std::sync::Arc;
 use ted_core::*;
 
 /// Move backwards one char on the selected [`Window`](../ted_core/struct.Window.html).
+pub fn begin_of_buffer_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
+    let mut selected_window = selected_window.lock();
+    let selected_window = &mut *selected_window;
+    let buffer = selected_window.buffer.lock();
+    selected_window.cursor.set(&buffer, 0);
+    Ok(())
+}
+
+/// Move forwards one char on the selected [`Window`](../ted_core/struct.Window.html).
+pub fn end_of_buffer_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
+    let selected_window = state.lock().display.selected_window();
+    let mut selected_window = selected_window.lock();
+    let selected_window = &mut *selected_window;
+    let buffer = selected_window.buffer.lock();
+    selected_window.cursor.set(&buffer, buffer.len());
+    Ok(())
+}
+
+/// Move backwards one char on the selected [`Window`](../ted_core/struct.Window.html).
 pub fn backward_char_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
     let selected_window = state.lock().display.selected_window();
     let mut selected_window = selected_window.lock();
@@ -192,6 +212,54 @@ pub fn forward_word(buffer: &Buffer, mut location: usize, times: isize) -> usize
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn begin_of_buffer_command_1() {
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
+
+        begin_of_buffer_command(state.clone()).unwrap();
+        {
+            let selected_window = state.lock().display.selected_window();
+            let mut selected_window = selected_window.lock();
+            let selected_window = &mut *selected_window;
+            assert_eq!(selected_window.cursor.get(), 0);
+
+            let mut buffer = selected_window.buffer.lock();
+            buffer.insert_str(0, "abcd\nefgh\nijkl\n").unwrap();
+            selected_window.cursor.set(&buffer, 4);
+        }
+
+        begin_of_buffer_command(state.clone()).unwrap();
+        {
+            let selected_window = state.lock().display.selected_window();
+            let selected_window = selected_window.lock();
+            assert_eq!(selected_window.cursor.get(), 0);
+        }
+    }
+
+    #[test]
+    fn end_of_buffer_command_1() {
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
+
+        end_of_buffer_command(state.clone()).unwrap();
+        {
+            let selected_window = state.lock().display.selected_window();
+            let mut selected_window = selected_window.lock();
+            let selected_window = &mut *selected_window;
+            assert_eq!(selected_window.cursor.get(), 0);
+
+            let mut buffer = selected_window.buffer.lock();
+            buffer.insert_str(0, "abcd\nefgh\nijkl\n").unwrap();
+            selected_window.cursor.set(&buffer, 4);
+        }
+
+        end_of_buffer_command(state.clone()).unwrap();
+        {
+            let selected_window = state.lock().display.selected_window();
+            let selected_window = selected_window.lock();
+            assert_eq!(selected_window.cursor.get(), 15);
+        }
+    }
 
     #[test]
     fn begin_of_line_command_1() {
