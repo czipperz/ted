@@ -15,12 +15,6 @@ pub struct BufferContents {
     array: Vec<S>,
 }
 
-impl BufferContents {
-    pub fn new() -> Self {
-        BufferContents { array: Vec::new() }
-    }
-}
-
 #[derive(Debug, Clone)]
 struct S {
     str: String,
@@ -28,6 +22,10 @@ struct S {
 }
 
 impl BufferContents {
+    pub fn new() -> Self {
+        BufferContents { array: Vec::new() }
+    }
+
     pub fn len(&self) -> usize {
         let mut l = 0;
         for s in &self.array {
@@ -191,6 +189,12 @@ impl BufferContents {
             end -= 1;
         }
         Ok(())
+    }
+}
+
+impl Default for BufferContents {
+    fn default() -> Self {
+        BufferContents::new()
     }
 }
 

@@ -118,6 +118,12 @@ impl Cursor {
     }
 }
 
+impl Default for Cursor {
+    fn default() -> Self {
+        Cursor::new()
+    }
+}
+
 impl PartialEq for Cursor {
     fn eq(&self, other: &Self) -> bool {
         self.location == other.location && match (self.state.upgrade(), other.state.upgrade()) {
