@@ -19,9 +19,5 @@ pub use window_commands::*;
 mod change_commands;
 pub use change_commands::*;
 
-use parking_lot::Mutex;
-use std::sync::Arc;
-use ted_core::State;
-pub fn close_ted_command(_: Arc<Mutex<State>>) -> Result<(), ()> {
-    Err(())
-}
+mod close_commands;
+pub use close_commands::*;
