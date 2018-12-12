@@ -21,3 +21,6 @@ pub use change_commands::*;
 
 mod close_commands;
 pub use close_commands::*;
+
+mod open_file;
+pub use open_file::*;
