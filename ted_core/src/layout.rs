@@ -30,6 +30,39 @@ impl Layout {
         }
     }
 
+    pub fn set_selected_window(
+        &mut self,
+        selected_window: &Arc<Mutex<Window>>,
+        new_layout: Layout,
+    ) {
+        fn set_selected_window(
+            layout: &mut Layout,
+            selected_window: &Arc<Mutex<Window>>,
+            new_layout: Layout,
+        ) -> Option<Layout> {
+            match layout {
+                Layout::Window(window) => {
+                    if !Arc::ptr_eq(window, selected_window) {
+                        return Some(new_layout);
+                    }
+                }
+                Layout::VSplit { left, right } => {
+                    return set_selected_window(left, selected_window, new_layout).and_then(
+                        |new_layout| set_selected_window(right, selected_window, new_layout),
+                    );
+                }
+                Layout::HSplit { top, bottom } => {
+                    return set_selected_window(top, selected_window, new_layout).and_then(
+                        |new_layout| set_selected_window(bottom, selected_window, new_layout),
+                    );
+                }
+            }
+            *layout = new_layout;
+            None
+        }
+        set_selected_window(self, selected_window, new_layout);
+    }
+
     /// Recursively walk the `Layout` and update all the cursors along the way.
     ///
     /// See [`Window::update_cursor`].
