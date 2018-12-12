@@ -51,8 +51,16 @@ impl Buffer {
     /// assert_eq!(buffer.len(), 0);
     /// ```
     pub fn new(name: BufferName) -> Self {
+        Buffer::new_with_buffer_contents(name, BufferContents::new())
+    }
+
+    pub fn new_with_contents(name: BufferName, contents: &str) -> Self {
+        Buffer::new_with_buffer_contents(name, contents.into())
+    }
+
+    fn new_with_buffer_contents(name: BufferName, contents: BufferContents) -> Self {
         Buffer {
-            buffer_contents: BufferContents::new(),
+            buffer_contents: contents,
             _initial_state: None,
             current_state: None,
             name,
