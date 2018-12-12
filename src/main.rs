@@ -294,10 +294,28 @@ mod tests {
     }
 
     #[test]
-    fn test_is_displayable() {
-        assert!(!is_displayable('\r'));
-        assert!(is_displayable(' '));
+    fn is_displayable_newline() {
         assert!(is_displayable('\n'));
+    }
+
+    #[test]
+    fn is_displayable_ascii() {
+        assert!(is_displayable('a'));
+        assert!(is_displayable('!'));
+    }
+
+    #[test]
+    fn is_not_displayable_feed() {
+        assert!(!is_displayable('\r'));
+    }
+
+    #[test]
+    fn is_displayable_space() {
+        assert!(is_displayable(' '));
+    }
+
+    #[test]
+    fn is_displayable_tab() {
         assert!(is_displayable('\t'));
     }
 }
