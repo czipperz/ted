@@ -2,7 +2,7 @@ use command::Command;
 use display::Display;
 use input::Input;
 use key_map::KeyMap;
-use mode::Mode;
+use mode::*;
 use parking_lot::Mutex;
 use renderer::Renderer;
 use std::collections::VecDeque;
@@ -28,12 +28,29 @@ impl State {
         }
     }
 
-    /// This function calls lookup on each
+    /// This function looks up what [`Command`] an input is bound to.
+    ///
+    /// First this looks up key bindings on each [`Mode`].  If one is
+    /// found, it immediately returns it.  If a mapping is not found
+    /// in a [`Mode`], the [`FallthroughBehavior`] is checked.
+    ///
+    /// For more information on how this function works, look at
+    /// [`KeyMap::lookup`].
+    ///
+    /// [`Command`]: type.Command.html
+    /// [`KeyMap::lookup`]: struct.KeyMap.html#method.lookup
+    /// [`Mode`]: struct.Mode.html
     pub fn lookup(&self, inputs: &mut VecDeque<Input>, throw_away: bool) -> Result<Command, bool> {
         for mode in &self.global_modes {
-            match KeyMap::lookup(&mode.lock().key_map, inputs, throw_away) {
+            let mode = mode.lock();
+            let err;
+            match KeyMap::lookup(&mode.key_map, inputs, throw_away) {
                 Ok(command) => return Ok(command),
-                Err(_) => (),
+                Err(e) => err = e,
+            }
+            match mode.fallthrough_behavior {
+                FallthroughBehavior::Fallthrough => (),
+                FallthroughBehavior::Error => return Err(err),
             }
         }
         KeyMap::lookup(&self.default_key_map, inputs, throw_away)
