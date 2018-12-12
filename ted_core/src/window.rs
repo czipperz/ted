@@ -18,11 +18,7 @@ impl Window {
     ///
     /// [`Buffer`]: struct.Buffer.html
     pub fn new() -> Self {
-        Window {
-            buffer: Arc::new(Mutex::new(Buffer::new("*scratch*".into()))),
-            buffer_key_map: Arc::new(Mutex::new(KeyMap::default())),
-            cursor: Cursor::new(),
-        }
+        Window::from(Buffer::new("*scratch*".into()))
     }
 
     /// Attempt to increment the cursor by `offset` chars.
@@ -99,6 +95,16 @@ impl Window {
         buffer.delete_region(self.cursor.get(), end)?;
         self.cursor.update(&buffer);
         Ok(())
+    }
+}
+
+impl From<Buffer> for Window {
+    fn from(buffer: Buffer) -> Self {
+        Window {
+            buffer: Arc::new(Mutex::new(buffer)),
+            buffer_key_map: Arc::default(),
+            cursor: Cursor::new(),
+        }
     }
 }
 
