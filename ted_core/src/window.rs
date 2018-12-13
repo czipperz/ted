@@ -1,6 +1,7 @@
 use buffer::*;
 use cursor::Cursor;
 use key_map::KeyMap;
+use mode::Mode;
 use parking_lot::Mutex;
 use std::sync::Arc;
 
@@ -11,6 +12,7 @@ pub struct Window {
     pub buffer: Arc<Mutex<Buffer>>,
     pub buffer_key_map: Arc<Mutex<KeyMap>>,
     pub cursor: Cursor,
+    pub window_modes: Vec<Arc<Mutex<Mode>>>,
 }
 
 impl Window {
@@ -104,6 +106,7 @@ impl From<Buffer> for Window {
             buffer: Arc::new(Mutex::new(buffer)),
             buffer_key_map: Arc::default(),
             cursor: Cursor::new(),
+            window_modes: Vec::new(),
         }
     }
 }
@@ -118,6 +121,7 @@ pub fn clone_window(window: &Arc<Mutex<Window>>) -> Arc<Mutex<Window>> {
         buffer: window.buffer.clone(),
         buffer_key_map: window.buffer_key_map.clone(),
         cursor: window.cursor.clone(),
+        window_modes: Vec::new(),
     }));
     cloned
 }

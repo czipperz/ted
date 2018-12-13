@@ -1,6 +1,7 @@
 use buffer_contents::*;
 use by_address::ByAddress;
 use change::*;
+use mode::Mode;
 use parking_lot::Mutex;
 use std::collections::{HashSet, VecDeque};
 use std::fmt;
@@ -38,6 +39,7 @@ pub struct Buffer {
     current_state: Option<Arc<Mutex<StateNode>>>,
     /// The name of the buffer.
     pub name: BufferName,
+    pub buffer_modes: Vec<Arc<Mutex<Mode>>>,
 }
 
 impl Buffer {
@@ -64,6 +66,7 @@ impl Buffer {
             _initial_state: None,
             current_state: None,
             name,
+            buffer_modes: Vec::new(),
         }
     }
 
