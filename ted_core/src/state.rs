@@ -40,7 +40,7 @@ impl State {
     /// [`Command`]: type.Command.html
     /// [`KeyMap::lookup`]: struct.KeyMap.html#method.lookup
     /// [`Mode`]: struct.Mode.html
-    pub fn lookup(&self, inputs: &mut VecDeque<Input>, throw_away: bool) -> Result<Command, bool> {
+    pub fn lookup(&self, inputs: &mut VecDeque<Input>, throw_away: bool) -> Result<Arc<Command>, bool> {
         for mode in &self.global_modes {
             let mode = mode.lock();
             let err;

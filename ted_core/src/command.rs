@@ -55,4 +55,6 @@ use std::sync::Arc;
 /// [`Buffer`]: struct.Buffer.html
 /// [`Display`]: trait.Display.html
 /// [`State`]: struct.State.html
-pub type Command = Arc<fn(Arc<Mutex<State>>) -> Result<(), ()>>;
+pub trait Command {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()>;
+}

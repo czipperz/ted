@@ -16,7 +16,7 @@ pub struct KeyMap {
 #[derive(Clone)]
 enum KeyBind {
     /// Run a function when the key is pressed.
-    Command(Command),
+    Command(Arc<Command>),
     /// Traverse a sub [`KeyMap`] when the key is pressed.
     ///
     /// [`KeyMap`]: struct.KeyMap.html
@@ -43,7 +43,7 @@ impl KeyMap {
         key_map: &Arc<Mutex<KeyMap>>,
         inputs: &mut VecDeque<Input>,
         throw_away: bool,
-    ) -> Result<Command, bool> {
+    ) -> Result<Arc<Command>, bool> {
         loop {
             match KeyMap::lookup_(key_map, inputs, throw_away)? {
                 Ok(command) => return Ok(command),
@@ -57,8 +57,8 @@ impl KeyMap {
     ///
     /// [`Input`]: enum.Input.html
     /// [`Command`]: type.Command.html
-    pub fn bind(&mut self, inputs: Vec<Input>, command: Command) {
-        self.assign(&mut inputs.into(), KeyBind::Command(command))
+    pub fn bind<C: Into<Arc<Command>>>(&mut self, inputs: Vec<Input>, command: C) {
+        self.assign(&mut inputs.into(), KeyBind::Command(command.into()))
     }
 
     /// Bind a sequence of [`Input`]s to a sub `KeyMap`.
@@ -79,7 +79,7 @@ impl KeyMap {
         key_map: &Arc<Mutex<KeyMap>>,
         inputs: &mut VecDeque<Input>,
         throw_away: bool,
-    ) -> Result<Result<Command, ()>, bool> {
+    ) -> Result<Result<Arc<Command>, ()>, bool> {
         match inputs.pop_front() {
             Some(input) => {
                 let key_map = key_map.lock();
