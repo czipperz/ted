@@ -23,10 +23,13 @@ pub enum Layout {
 }
 
 impl Layout {
+    /// Unwrap this as if it is the enumeration type `Window`
+    ///
+    /// If this is not a `Window` then panic.
     pub fn unwrap_window(&self) -> &Arc<Mutex<Window>> {
         match self {
             Layout::Window(window) => window,
-            _ => unimplemented!(),
+            _ => panic!("`Layout::unwrap_window` called not on a `Layout::Window`"),
         }
     }
 
