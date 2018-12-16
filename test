@@ -9,6 +9,7 @@ if [ "$1" = "--doc" ]; then
 else
     tests="--tests"
 fi
+tests+=" -- -q"
 
 status=0
 RUST_BACKTRACE=1 cargo test -p ted_core $tests || status=1
