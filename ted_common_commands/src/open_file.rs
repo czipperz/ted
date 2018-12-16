@@ -1,18 +1,16 @@
 use parking_lot::Mutex;
 use std::fs::File;
 use std::io::{BufReader, Read};
+use std::path::PathBuf;
 use std::sync::Arc;
 use ted_core::*;
 
-pub fn open_file(name: String, path: String) -> Result<Buffer, ()> {
+pub fn open_file(path: PathBuf) -> Result<Buffer, ()> {
     let file = File::open(&path).map_err(|_| ())?;
     let mut reader = BufReader::new(file);
     let mut buf = String::new();
     reader.read_to_string(&mut buf).map_err(|_| ())?;
-    Ok(Buffer::new_with_contents(
-        BufferName::File { name, path },
-        &buf,
-    ))
+    Ok(Buffer::new_with_contents(path.into(), &buf))
 }
 
 #[derive(Debug)]
@@ -27,10 +25,7 @@ pub fn open_file_command() -> Arc<OpenFileCommand> {
 
 impl Command for OpenFileCommand {
     fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
-        let buffer = open_file(
-            "main.rs".to_string(),
-            "/home/czipperz/ted/src/main.rs".to_string(),
-        )?;
+        let buffer = open_file("/home/czipperz/ted/src/main.rs".into())?;
         let window = Arc::new(Mutex::new(Window::from(buffer)));
         let selected_frame = state.lock().display.selected_frame.clone();
         selected_frame.lock().replace_selected_window(window);
