@@ -39,10 +39,6 @@ fn main_loop(state: Arc<Mutex<State>>) -> Result<(), ()> {
     }
 }
 
-fn is_displayable(c: char) -> bool {
-    c == '\n' || c == '\t' || !c.is_control()
-}
-
 fn increment(state: Arc<Mutex<State>>) -> Result<(), ()> {
     fn increment_(state: Arc<Mutex<State>>, inputs: &mut VecDeque<Input>) -> Result<(), ()> {
         match {
@@ -53,37 +49,15 @@ fn increment(state: Arc<Mutex<State>>) -> Result<(), ()> {
                 inputs.push_back(input);
                 match {
                     let state = state.lock();
-                    state.lookup(inputs, true)
+                    state.lookup(inputs)
                 } {
                     Ok(action) => {
-                        let r = action(state.clone());
+                        let r = action.execute(state.clone());
                         state.lock().display.show().unwrap();
                         r
                     }
-                    Err(true) => increment_(state, inputs),
-                    Err(false) => {
-                        match input {
-                            Input::Key {
-                                key,
-                                control: false,
-                                alt: false,
-                                function: false,
-                            }
-                                if is_displayable(key) =>
-                            {
-                                {
-                                    let window = state.lock().display.selected_window();
-                                    let mut window = window.lock();
-                                    window.insert(key)?;
-                                }
-                                state.lock().display.show()?;
-                            }
-                            _ => {
-                                log(format!("Invalid input {:?}", input));
-                            }
-                        }
-                        Ok(())
-                    }
+                    Err(Ok(())) => increment_(state, inputs),
+                    Err(Err(())) => Ok(()),
                 }
             }
             None => Ok(()),
@@ -97,6 +71,19 @@ fn increment(state: Arc<Mutex<State>>) -> Result<(), ()> {
 mod tests {
     use super::*;
     use std::sync::Arc;
+
+    #[derive(Debug)]
+    pub struct CloseTedCommand;
+
+    pub fn close_ted_command() -> Arc<CloseTedCommand> {
+        Arc::new(CloseTedCommand)
+    }
+
+    impl Command for CloseTedCommand {
+        fn execute(&self, _: Arc<Mutex<State>>) -> Result<(), ()> {
+            Err(())
+        }
+    }
 
     #[test]
     fn increment_1() {
@@ -243,11 +230,13 @@ mod tests {
         {
             let default_key_map = state.lock().default_key_map.clone();
             let mut default_key_map = default_key_map.lock();
-            default_key_map.bind(vec![kbd!('q')], Arc::new(|_| Err(())));
+            default_key_map.bind(vec![kbd!('q')], close_ted_command());
         }
         {
             let state = state.lock();
-            unsafe { state.display.debug_renderer().inputs.push_back(kbd!('q')) };
+            unsafe { state.display.debug_renderer() }
+                .inputs
+                .push_back(kbd!('q'));
         }
         increment(state.clone()).unwrap_err();
 
@@ -291,31 +280,5 @@ mod tests {
             let buffer = selected_window.buffer.lock();
             assert_eq!(format!("{}", *buffer), "\n");
         }
-    }
-
-    #[test]
-    fn is_displayable_newline() {
-        assert!(is_displayable('\n'));
-    }
-
-    #[test]
-    fn is_displayable_ascii() {
-        assert!(is_displayable('a'));
-        assert!(is_displayable('!'));
-    }
-
-    #[test]
-    fn is_not_displayable_feed() {
-        assert!(!is_displayable('\r'));
-    }
-
-    #[test]
-    fn is_displayable_space() {
-        assert!(is_displayable(' '));
-    }
-
-    #[test]
-    fn is_displayable_tab() {
-        assert!(is_displayable('\t'));
     }
 }

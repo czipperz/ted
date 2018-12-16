@@ -23,15 +23,27 @@ fn display_window(selected_frame: Arc<Mutex<Frame>>, window: Arc<Mutex<Window>>)
         .set_selected_window(&selected_frame.selected_window, Layout::Window(window));
 }
 
-pub fn open_file_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let buffer = open_file(
-        "main.rs".to_string(),
-        "/home/czipperz/ted/src/main.rs".to_string(),
-    )?;
-    let window = Arc::new(Mutex::new(Window::from(buffer)));
-    let selected_frame = state.lock().display.selected_frame.clone();
-    display_window(selected_frame, window);
-    Ok(())
+#[derive(Debug)]
+pub struct OpenFileCommand;
+
+/// Construct a [`OpenFileCommand`].
+///
+/// [`OpenFileCommand`]: struct.OpenFileCommand.html
+pub fn open_file_command() -> Arc<OpenFileCommand> {
+    Arc::new(OpenFileCommand)
+}
+
+impl Command for OpenFileCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let buffer = open_file(
+            "main.rs".to_string(),
+            "/home/czipperz/ted/src/main.rs".to_string(),
+        )?;
+        let window = Arc::new(Mutex::new(Window::from(buffer)));
+        let selected_frame = state.lock().display.selected_frame.clone();
+        display_window(selected_frame, window);
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -41,7 +53,7 @@ mod tests {
     #[test]
     fn test_open_file() {
         let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
-        open_file_command(state.clone()).unwrap();
+        open_file_command().execute(state.clone()).unwrap();
         let selected_window = state.lock().display.selected_window();
         let selected_window = selected_window.lock();
         assert!(

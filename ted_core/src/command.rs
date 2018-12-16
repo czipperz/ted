@@ -1,5 +1,6 @@
 use parking_lot::Mutex;
 use state::State;
+use std::fmt::Debug;
 use std::sync::Arc;
 
 /// A command to be ran when a certain sequence of keys are pressed.
@@ -55,6 +56,6 @@ use std::sync::Arc;
 /// [`Buffer`]: struct.Buffer.html
 /// [`Display`]: trait.Display.html
 /// [`State`]: struct.State.html
-pub trait Command {
+pub trait Command: Debug {
     fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()>;
 }

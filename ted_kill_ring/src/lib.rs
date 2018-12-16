@@ -90,34 +90,82 @@ pub fn paste_pop(window: &Window, times: isize) {
     }
 }
 
-pub fn copy_region_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_window = state.lock().display.selected_window();
-    let selected_window = selected_window.lock();
-    copy_region(&selected_window);
-    Ok(())
+#[derive(Debug)]
+pub struct CopyRegionCommand;
+
+/// Construct a [`CopyRegionCommand`].
+///
+/// [`CopyRegionCommand`]: struct.CopyRegionCommand.html
+pub fn copy_region_command() -> Arc<CopyRegionCommand> {
+    Arc::new(CopyRegionCommand)
 }
 
-pub fn kill_region_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_window = state.lock().display.selected_window();
-    let mut selected_window = selected_window.lock();
-    kill_region(&selected_window);
-    selected_window.update_cursor();
-    Ok(())
+impl Command for CopyRegionCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_window = state.lock().display.selected_window();
+        let selected_window = selected_window.lock();
+        copy_region(&selected_window);
+        Ok(())
+    }
 }
 
-pub fn paste_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_window = state.lock().display.selected_window();
-    let mut selected_window = selected_window.lock();
-    paste(&selected_window);
-    selected_window.update_cursor();
-    Ok(())
+#[derive(Debug)]
+pub struct KillRegionCommand;
+
+/// Construct a [`KillRegionCommand`].
+///
+/// [`KillRegionCommand`]: struct.KillRegionCommand.html
+pub fn kill_region_command() -> Arc<KillRegionCommand> {
+    Arc::new(KillRegionCommand)
 }
 
-pub fn paste_pop_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_window = state.lock().display.selected_window();
-    let selected_window = selected_window.lock();
-    paste_pop(&selected_window, 1);
-    Ok(())
+impl Command for KillRegionCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_window = state.lock().display.selected_window();
+        let mut selected_window = selected_window.lock();
+        kill_region(&selected_window);
+        selected_window.update_cursor();
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct PasteCommand;
+
+/// Construct a [`PasteCommand`].
+///
+/// [`PasteCommand`]: struct.PasteCommand.html
+pub fn paste_command() -> Arc<PasteCommand> {
+    Arc::new(PasteCommand)
+}
+
+impl Command for PasteCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_window = state.lock().display.selected_window();
+        let mut selected_window = selected_window.lock();
+        paste(&selected_window);
+        selected_window.update_cursor();
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct PastePopCommand;
+
+/// Construct a [`PastePopCommand`].
+///
+/// [`PastePopCommand`]: struct.PastePopCommand.html
+pub fn paste_pop_command() -> Arc<PastePopCommand> {
+    Arc::new(PastePopCommand)
+}
+
+impl Command for PastePopCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_window = state.lock().display.selected_window();
+        let selected_window = selected_window.lock();
+        paste_pop(&selected_window, 1);
+        Ok(())
+    }
 }
 
 #[cfg(test)]

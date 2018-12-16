@@ -7,15 +7,27 @@ use ted_core::*;
 /// See [`Buffer::undo`].
 ///
 /// [`Buffer::undo`]: ../ted_core/struct.Buffer.html#method.undo
-pub fn undo_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let buffer = {
-        let selected_window = state.lock().display.selected_window();
-        let selected_window = selected_window.lock();
-        selected_window.buffer.clone()
-    };
-    let mut buffer = buffer.lock();
-    buffer.undo();
-    Ok(())
+#[derive(Debug)]
+pub struct UndoCommand;
+
+/// Construct a [`UndoCommand`].
+///
+/// [`UndoCommand`]: struct.UndoCommand.html
+pub fn undo_command() -> Arc<UndoCommand> {
+    Arc::new(UndoCommand)
+}
+
+impl Command for UndoCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let buffer = {
+            let selected_window = state.lock().display.selected_window();
+            let selected_window = selected_window.lock();
+            selected_window.buffer.clone()
+        };
+        let mut buffer = buffer.lock();
+        buffer.undo();
+        Ok(())
+    }
 }
 
 /// Revert the last call to undo on the Buffer of the selected [`Window`](../ted_core/struct.Window.html).
@@ -23,13 +35,25 @@ pub fn undo_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
 /// See [`Buffer::redo`].
 ///
 /// [`Buffer::redo`]: ../ted_core/struct.Buffer.html#method.redo
-pub fn redo_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let buffer = {
-        let selected_window = state.lock().display.selected_window();
-        let selected_window = selected_window.lock();
-        selected_window.buffer.clone()
-    };
-    let mut buffer = buffer.lock();
-    buffer.redo();
-    Ok(())
+#[derive(Debug)]
+pub struct RedoCommand;
+
+/// Construct a [`RedoCommand`].
+///
+/// [`RedoCommand`]: struct.RedoCommand.html
+pub fn redo_command() -> Arc<RedoCommand> {
+    Arc::new(RedoCommand)
+}
+
+impl Command for RedoCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let buffer = {
+            let selected_window = state.lock().display.selected_window();
+            let selected_window = selected_window.lock();
+            selected_window.buffer.clone()
+        };
+        let mut buffer = buffer.lock();
+        buffer.redo();
+        Ok(())
+    }
 }

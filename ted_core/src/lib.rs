@@ -31,6 +31,8 @@ mod debug_renderer;
 pub use debug_renderer::*;
 mod command;
 pub use command::*;
+mod insert_command;
+pub use insert_command::*;
 mod key_map;
 pub use key_map::*;
 mod layout;

@@ -1,0 +1,9 @@
+[package]
+name = "ted_git"
+version = "0.1.0"
+authors = ["Czipperz <czipperz@gmail.com>"]
+
+[dependencies]
+ted_core = { path = "../ted_core" }
+git2 = "*"
+parking_lot = "*"

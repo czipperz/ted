@@ -3,24 +3,48 @@ use parking_lot::Mutex;
 use std::sync::Arc;
 use ted_core::*;
 
-pub fn forward_group_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_window = state.lock().display.selected_window();
-    let mut selected_window = selected_window.lock();
-    let selected_window = &mut *selected_window;
-    let buffer = selected_window.buffer.lock();
-    let new_location = forward_group(&buffer, selected_window.cursor.get(), 1);
-    selected_window.cursor.set(&buffer, new_location);
-    Ok(())
+#[derive(Debug)]
+pub struct ForwardGroupCommand;
+
+/// Construct a [`ForwardGroupCommand`].
+///
+/// [`ForwardGroupCommand`]: struct.ForwardGroupCommand.html
+pub fn forward_group_command() -> Arc<ForwardGroupCommand> {
+    Arc::new(ForwardGroupCommand)
 }
 
-pub fn backward_group_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_window = state.lock().display.selected_window();
-    let mut selected_window = selected_window.lock();
-    let selected_window = &mut *selected_window;
-    let buffer = selected_window.buffer.lock();
-    let new_location = forward_group(&buffer, selected_window.cursor.get(), -1);
-    selected_window.cursor.set(&buffer, new_location);
-    Ok(())
+impl Command for ForwardGroupCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_window = state.lock().display.selected_window();
+        let mut selected_window = selected_window.lock();
+        let selected_window = &mut *selected_window;
+        let buffer = selected_window.buffer.lock();
+        let new_location = forward_group(&buffer, selected_window.cursor.get(), 1);
+        selected_window.cursor.set(&buffer, new_location);
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct BackwardGroupCommand;
+
+/// Construct a [`BackwardGroupCommand`].
+///
+/// [`BackwardGroupCommand`]: struct.BackwardGroupCommand.html
+pub fn backward_group_command() -> Arc<BackwardGroupCommand> {
+    Arc::new(BackwardGroupCommand)
+}
+
+impl Command for BackwardGroupCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_window = state.lock().display.selected_window();
+        let mut selected_window = selected_window.lock();
+        let selected_window = &mut *selected_window;
+        let buffer = selected_window.buffer.lock();
+        let new_location = forward_group(&buffer, selected_window.cursor.get(), -1);
+        selected_window.cursor.set(&buffer, new_location);
+        Ok(())
+    }
 }
 
 pub fn forward_group(buffer: &Buffer, mut ret_location: usize, times: isize) -> usize {
@@ -102,14 +126,26 @@ pub fn forward_group(buffer: &Buffer, mut ret_location: usize, times: isize) -> 
     location
 }
 
-pub fn up_group_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_window = state.lock().display.selected_window();
-    let mut selected_window = selected_window.lock();
-    let selected_window = &mut *selected_window;
-    let buffer = selected_window.buffer.lock();
-    let new_location = up_group(&buffer, selected_window.cursor.get(), 1);
-    selected_window.cursor.set(&buffer, new_location);
-    Ok(())
+#[derive(Debug)]
+pub struct UpGroupCommand;
+
+/// Construct a [`UpGroupCommand`].
+///
+/// [`UpGroupCommand`]: struct.UpGroupCommand.html
+pub fn up_group_command() -> Arc<UpGroupCommand> {
+    Arc::new(UpGroupCommand)
+}
+
+impl Command for UpGroupCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_window = state.lock().display.selected_window();
+        let mut selected_window = selected_window.lock();
+        let selected_window = &mut *selected_window;
+        let buffer = selected_window.buffer.lock();
+        let new_location = up_group(&buffer, selected_window.cursor.get(), 1);
+        selected_window.cursor.set(&buffer, new_location);
+        Ok(())
+    }
 }
 
 pub fn up_group(buffer: &Buffer, mut location: usize, times: usize) -> usize {

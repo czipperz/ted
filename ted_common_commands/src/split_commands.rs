@@ -4,36 +4,60 @@ use ted_core::*;
 
 /// Split the selected [`Window`](../ted_core/struct.Window.html) in
 /// two vertically -- that is into a left and right part.
-pub fn vertical_split_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_frame = state.lock().display.selected_frame.clone();
-    let mut selected_frame = selected_frame.lock();
-    let selected_frame = &mut *selected_frame;
-    let window = &selected_frame.selected_window;
-    selected_frame.layout.set_selected_window(
-        &window,
-        Layout::VSplit {
-            left: Box::new(Layout::Window(window.clone())),
-            right: Box::new(Layout::Window(clone_window(window))),
-        },
-    );
-    Ok(())
+#[derive(Debug)]
+pub struct VerticalSplitCommand;
+
+/// Construct a [`VerticalSplitCommand`].
+///
+/// [`VerticalSplitCommand`]: struct.VerticalSplitCommand.html
+pub fn vertical_split_command() -> Arc<VerticalSplitCommand> {
+    Arc::new(VerticalSplitCommand)
+}
+
+impl Command for VerticalSplitCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_frame = state.lock().display.selected_frame.clone();
+        let mut selected_frame = selected_frame.lock();
+        let selected_frame = &mut *selected_frame;
+        let window = &selected_frame.selected_window;
+        selected_frame.layout.set_selected_window(
+            &window,
+            Layout::VSplit {
+                left: Box::new(Layout::Window(window.clone())),
+                right: Box::new(Layout::Window(clone_window(window))),
+            },
+        );
+        Ok(())
+    }
 }
 
 /// Split the selected [`Window`](../ted_core/struct.Window.html) in
 /// two horizontally -- that is into a top and bottom part.
-pub fn horizontal_split_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_frame = state.lock().display.selected_frame.clone();
-    let mut selected_frame = selected_frame.lock();
-    let selected_frame = &mut *selected_frame;
-    let window = &selected_frame.selected_window;
-    selected_frame.layout.set_selected_window(
-        &window,
-        Layout::HSplit {
-            top: Box::new(Layout::Window(window.clone())),
-            bottom: Box::new(Layout::Window(clone_window(window))),
-        },
-    );
-    Ok(())
+#[derive(Debug)]
+pub struct HorizontalSplitCommand;
+
+/// Construct a [`HorizontalSplitCommand`].
+///
+/// [`HorizontalSplitCommand`]: struct.HorizontalSplitCommand.html
+pub fn horizontal_split_command() -> Arc<HorizontalSplitCommand> {
+    Arc::new(HorizontalSplitCommand)
+}
+
+impl Command for HorizontalSplitCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_frame = state.lock().display.selected_frame.clone();
+        let mut selected_frame = selected_frame.lock();
+        let selected_frame = &mut *selected_frame;
+        let window = &selected_frame.selected_window;
+        selected_frame.layout.set_selected_window(
+            &window,
+            Layout::HSplit {
+                top: Box::new(Layout::Window(window.clone())),
+                bottom: Box::new(Layout::Window(clone_window(window))),
+            },
+        );
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -43,7 +67,7 @@ mod tests {
     #[test]
     fn vertical_split_command_1() {
         let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
-        vertical_split_command(state.clone()).unwrap();
+        vertical_split_command().execute(state.clone()).unwrap();
         let selected_frame = state.lock().display.selected_frame.clone();
         let selected_frame = selected_frame.lock();
         match &selected_frame.layout {
@@ -70,7 +94,7 @@ mod tests {
     #[test]
     fn horizontal_split_command_1() {
         let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
-        horizontal_split_command(state.clone()).unwrap();
+        horizontal_split_command().execute(state.clone()).unwrap();
         {
             let selected_frame = state.lock().display.selected_frame.clone();
             let selected_frame = selected_frame.lock();

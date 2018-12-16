@@ -57,26 +57,50 @@ pub fn close_window(layout: &mut Layout, window: &mut Arc<Mutex<Window>>) -> boo
 ///
 /// [`Window`]:../ted_core/struct.Window.html
 /// [`Layout`]:../ted_core/enum.Layout.html
-pub fn close_window_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_frame = state.lock().display.selected_frame.clone();
-    let mut selected_frame = selected_frame.lock();
-    let selected_frame = &mut *selected_frame;
-    close_window(
-        &mut selected_frame.layout,
-        &mut selected_frame.selected_window,
-    );
-    Ok(())
+#[derive(Debug)]
+pub struct CloseWindowCommand;
+
+/// Construct a [`CloseWindowCommand`].
+///
+/// [`CloseWindowCommand`]: struct.CloseWindowCommand.html
+pub fn close_window_command() -> Arc<CloseWindowCommand> {
+    Arc::new(CloseWindowCommand)
+}
+
+impl Command for CloseWindowCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_frame = state.lock().display.selected_frame.clone();
+        let mut selected_frame = selected_frame.lock();
+        let selected_frame = &mut *selected_frame;
+        close_window(
+            &mut selected_frame.layout,
+            &mut selected_frame.selected_window,
+        );
+        Ok(())
+    }
 }
 
 /// Close all other [`Window`]s but the selected [`Window`].
 ///
 /// [`Window`]: ../ted_core/struct.Window.html
-pub fn close_other_windows_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_frame = state.lock().display.selected_frame.clone();
-    let mut selected_frame = selected_frame.lock();
-    let selected_frame = &mut *selected_frame;
-    selected_frame.layout = Layout::Window(selected_frame.selected_window.clone());
-    Ok(())
+#[derive(Debug)]
+pub struct CloseOtherWindowsCommand;
+
+/// Construct a [`CloseOtherWindowsCommand`].
+///
+/// [`CloseOtherWindowsCommand`]: struct.CloseOtherWindowsCommand.html
+pub fn close_other_windows_command() -> Arc<CloseOtherWindowsCommand> {
+    Arc::new(CloseOtherWindowsCommand)
+}
+
+impl Command for CloseOtherWindowsCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_frame = state.lock().display.selected_frame.clone();
+        let mut selected_frame = selected_frame.lock();
+        let selected_frame = &mut *selected_frame;
+        selected_frame.layout = Layout::Window(selected_frame.selected_window.clone());
+        Ok(())
+    }
 }
 
 pub fn other_window_clockwise(layout: &Layout, window: &mut Arc<Mutex<Window>>) {
@@ -122,12 +146,24 @@ pub fn other_window_clockwise(layout: &Layout, window: &mut Arc<Mutex<Window>>) 
 /// current selected [`Window`].
 ///
 /// [`Window`]: ../ted_core/struct.Window.html
-pub fn other_window_clockwise_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_frame = state.lock().display.selected_frame.clone();
-    let mut selected_frame = selected_frame.lock();
-    let selected_frame = &mut *selected_frame;
-    other_window_clockwise(&selected_frame.layout, &mut selected_frame.selected_window);
-    Ok(())
+#[derive(Debug)]
+pub struct OtherWindowClockwiseCommand;
+
+/// Construct a [`OtherWindowClockwiseCommand`].
+///
+/// [`OtherWindowClockwiseCommand`]: struct.OtherWindowClockwiseCommand.html
+pub fn other_window_clockwise_command() -> Arc<OtherWindowClockwiseCommand> {
+    Arc::new(OtherWindowClockwiseCommand)
+}
+
+impl Command for OtherWindowClockwiseCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_frame = state.lock().display.selected_frame.clone();
+        let mut selected_frame = selected_frame.lock();
+        let selected_frame = &mut *selected_frame;
+        other_window_clockwise(&selected_frame.layout, &mut selected_frame.selected_window);
+        Ok(())
+    }
 }
 
 pub fn other_window_counter_clockwise(layout: &Layout, window: &mut Arc<Mutex<Window>>) {
@@ -173,12 +209,24 @@ pub fn other_window_counter_clockwise(layout: &Layout, window: &mut Arc<Mutex<Wi
 /// of the current selected [`Window`].
 ///
 /// [`Window`]: ../ted_core/struct.Window.html
-pub fn other_window_counter_clockwise_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_frame = state.lock().display.selected_frame.clone();
-    let mut selected_frame = selected_frame.lock();
-    let selected_frame = &mut *selected_frame;
-    other_window_counter_clockwise(&selected_frame.layout, &mut selected_frame.selected_window);
-    Ok(())
+#[derive(Debug)]
+pub struct OtherWindowCounterClockwiseCommand;
+
+/// Construct a [`OtherWindowCounterClockwiseCommand`].
+///
+/// [`OtherWindowCounterClockwiseCommand`]: struct.OtherWindowCounterClockwiseCommand.html
+pub fn other_window_counter_clockwise_command() -> Arc<OtherWindowCounterClockwiseCommand> {
+    Arc::new(OtherWindowCounterClockwiseCommand)
+}
+
+impl Command for OtherWindowCounterClockwiseCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_frame = state.lock().display.selected_frame.clone();
+        let mut selected_frame = selected_frame.lock();
+        let selected_frame = &mut *selected_frame;
+        other_window_counter_clockwise(&selected_frame.layout, &mut selected_frame.selected_window);
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -197,7 +245,7 @@ mod tests {
         }
         state.lock().display.show().unwrap();
 
-        horizontal_split_command(state.clone()).unwrap();
+        horizontal_split_command().execute(state.clone()).unwrap();
         {
             let selected_window = state.lock().display.selected_window();
             let mut selected_window = selected_window.lock();
@@ -205,7 +253,7 @@ mod tests {
         }
         state.lock().display.show().unwrap();
 
-        close_window_command(state.clone()).unwrap();
+        close_window_command().execute(state.clone()).unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
@@ -244,8 +292,8 @@ mod tests {
     fn close_window_command_2() {
         let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
 
-        horizontal_split_command(state.clone()).unwrap();
-        vertical_split_command(state.clone()).unwrap();
+        horizontal_split_command().execute(state.clone()).unwrap();
+        vertical_split_command().execute(state.clone()).unwrap();
         {
             let buffer = state.lock().display.selected_window_buffer();
             let mut buffer = buffer.lock();
@@ -291,7 +339,7 @@ mod tests {
             );
         }
 
-        close_window_command(state.clone()).unwrap();
+        close_window_command().execute(state.clone()).unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
@@ -373,8 +421,8 @@ mod tests {
             let mut selected_window = selected_window.lock();
             selected_window.set_cursor(0);
         }
-        horizontal_split_command(state.clone()).unwrap();
-        vertical_split_command(state.clone()).unwrap();
+        horizontal_split_command().execute(state.clone()).unwrap();
+        vertical_split_command().execute(state.clone()).unwrap();
         {
             let selected_window = state.lock().display.selected_window();
             let mut selected_window = selected_window.lock();
@@ -413,7 +461,9 @@ mod tests {
             );
         }
 
-        close_other_windows_command(state.clone()).unwrap();
+        close_other_windows_command()
+            .execute(state.clone())
+            .unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
@@ -482,8 +532,8 @@ mod tests {
             );
         }
 
-        horizontal_split_command(state.clone()).unwrap();
-        vertical_split_command(state.clone()).unwrap();
+        horizontal_split_command().execute(state.clone()).unwrap();
+        vertical_split_command().execute(state.clone()).unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
@@ -517,7 +567,9 @@ mod tests {
             );
         }
 
-        other_window_clockwise_command(state.clone()).unwrap();
+        other_window_clockwise_command()
+            .execute(state.clone())
+            .unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
@@ -551,7 +603,9 @@ mod tests {
             );
         }
 
-        other_window_clockwise_command(state.clone()).unwrap();
+        other_window_clockwise_command()
+            .execute(state.clone())
+            .unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
@@ -585,7 +639,9 @@ mod tests {
             );
         }
 
-        other_window_clockwise_command(state.clone()).unwrap();
+        other_window_clockwise_command()
+            .execute(state.clone())
+            .unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
@@ -654,9 +710,11 @@ mod tests {
             );
         }
 
-        vertical_split_command(state.clone()).unwrap();
-        other_window_clockwise_command(state.clone()).unwrap();
-        horizontal_split_command(state.clone()).unwrap();
+        vertical_split_command().execute(state.clone()).unwrap();
+        other_window_clockwise_command()
+            .execute(state.clone())
+            .unwrap();
+        horizontal_split_command().execute(state.clone()).unwrap();
         {
             let selected_window = state.lock().display.selected_window();
             let mut selected_window = selected_window.lock();
@@ -695,7 +753,9 @@ mod tests {
             );
         }
 
-        other_window_clockwise_command(state.clone()).unwrap();
+        other_window_clockwise_command()
+            .execute(state.clone())
+            .unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
@@ -729,7 +789,9 @@ mod tests {
             );
         }
 
-        other_window_clockwise_command(state.clone()).unwrap();
+        other_window_clockwise_command()
+            .execute(state.clone())
+            .unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
@@ -763,7 +825,9 @@ mod tests {
             );
         }
 
-        other_window_clockwise_command(state.clone()).unwrap();
+        other_window_clockwise_command()
+            .execute(state.clone())
+            .unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
@@ -808,9 +872,11 @@ mod tests {
             buffer.insert_str(0, "abcd").unwrap();
         }
 
-        vertical_split_command(state.clone()).unwrap();
-        other_window_counter_clockwise_command(state.clone()).unwrap();
-        horizontal_split_command(state.clone()).unwrap();
+        vertical_split_command().execute(state.clone()).unwrap();
+        other_window_counter_clockwise_command()
+            .execute(state.clone())
+            .unwrap();
+        horizontal_split_command().execute(state.clone()).unwrap();
 
         state.lock().display.show().unwrap();
         {
@@ -845,7 +911,9 @@ mod tests {
             );
         }
 
-        other_window_counter_clockwise_command(state.clone()).unwrap();
+        other_window_counter_clockwise_command()
+            .execute(state.clone())
+            .unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
@@ -879,7 +947,9 @@ mod tests {
             );
         }
 
-        other_window_counter_clockwise_command(state.clone()).unwrap();
+        other_window_counter_clockwise_command()
+            .execute(state.clone())
+            .unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();
@@ -913,7 +983,9 @@ mod tests {
             );
         }
 
-        other_window_counter_clockwise_command(state.clone()).unwrap();
+        other_window_counter_clockwise_command()
+            .execute(state.clone())
+            .unwrap();
         state.lock().display.show().unwrap();
         {
             let state = state.lock();

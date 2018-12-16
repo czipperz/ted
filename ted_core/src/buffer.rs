@@ -56,6 +56,16 @@ impl Buffer {
         Buffer::new_with_buffer_contents(name, BufferContents::new())
     }
 
+    /// Create a `Buffer` with some inital contents.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use ted_core::{Buffer, BufferName};
+    /// let mut buffer = Buffer::new_with_contents("*scratch*".into(), "abc");
+    /// assert_eq!(buffer.len(), 3);
+    /// assert_eq!(buffer.to_string(), "abc");
+    /// ```
     pub fn new_with_contents(name: BufferName, contents: &str) -> Self {
         Buffer::new_with_buffer_contents(name, contents.into())
     }

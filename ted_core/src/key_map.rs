@@ -25,31 +25,60 @@ enum KeyBind {
     Mapping(Vec<Input>),
 }
 
+pub enum LookupError {
+    NotEnoughInput,
+    UnboundInput(Option<Input>),
+    InputWasMapped,
+}
+
 impl KeyMap {
     /// This function performs the lookup.
     ///
     /// `Ok(command)` means an command was found and the inputs leading to
     /// it have been popped from the front of the `VecDeque`.
     ///
-    /// `Err(true)` means an command was not found because not enough
-    /// user input has been provided.  IE the user hits `C-x` and we
-    /// stall for the next key (`C-c` for stop for instance).  We don't
-    /// want to throw away those keys so `lookup_` will re-push the
-    /// popped keys onto the beginning of the `VecDeque`.
+    /// `Err(LookupError::NotEnoughInput)` means an command was not
+    /// found because not enough user input has been provided.  IE the
+    /// user hits `C-x` and we stall for the next key (`C-c` for stop
+    /// for instance).  We don't want to throw away those keys so
+    /// `lookup_` will re-push the popped keys onto the beginning of
+    /// the `VecDeque`.
     ///
-    /// `Err(false)` means an command was not found because that key
-    /// combination doesn't exist.
+    /// `Err(LookupError::UnboundInput)` means an command was not
+    /// found because that key combination doesn't exist.
+    ///
+    /// `Err(LookupError::InputWasMapped)` means that the input
+    /// sequence is mapped to a different input sequence, and the
+    /// parent function should reinvoke this with the same arguments.
     pub fn lookup(
         key_map: &Arc<Mutex<KeyMap>>,
         inputs: &mut VecDeque<Input>,
-        throw_away: bool,
-    ) -> Result<Arc<Command>, bool> {
-        loop {
-            match KeyMap::lookup_(key_map, inputs, throw_away)? {
-                Ok(command) => return Ok(command),
-                // there was a KeyBind::Mapping encountered and we must restart the search
-                Err(()) => (),
+    ) -> Result<Arc<Command>, LookupError> {
+        match inputs.pop_front() {
+            Some(input) => {
+                let key_map = key_map.lock();
+                match key_map.bindings.get(&input) {
+                    Some(KeyBind::Command(command)) => Ok(command.clone()),
+                    Some(KeyBind::SubMap(sub_map)) => {
+                        KeyMap::lookup(sub_map, inputs).map_err(|e| match e {
+                            LookupError::NotEnoughInput => {
+                                inputs.push_front(input);
+                                e
+                            }
+                            LookupError::UnboundInput(_) => LookupError::UnboundInput(None),
+                            LookupError::InputWasMapped => e,
+                        })
+                    }
+                    Some(KeyBind::Mapping(mapping)) => {
+                        for m in mapping.into_iter().rev() {
+                            inputs.push_front(*m)
+                        }
+                        Err(LookupError::InputWasMapped)
+                    }
+                    None => Err(LookupError::UnboundInput(Some(input))),
+                }
             }
+            None => Err(LookupError::NotEnoughInput),
         }
     }
 
@@ -57,8 +86,8 @@ impl KeyMap {
     ///
     /// [`Input`]: enum.Input.html
     /// [`Command`]: type.Command.html
-    pub fn bind<C: Into<Arc<Command>>>(&mut self, inputs: Vec<Input>, command: C) {
-        self.assign(&mut inputs.into(), KeyBind::Command(command.into()))
+    pub fn bind(&mut self, inputs: Vec<Input>, command: Arc<Command>) {
+        self.assign(&mut inputs.into(), KeyBind::Command(command))
     }
 
     /// Bind a sequence of [`Input`]s to a sub `KeyMap`.
@@ -73,36 +102,6 @@ impl KeyMap {
     /// [`Input`]: enum.Input.html
     pub fn map(&mut self, inputs: Vec<Input>, mapping: Vec<Input>) {
         self.assign(&mut inputs.into(), KeyBind::Mapping(mapping))
-    }
-
-    fn lookup_(
-        key_map: &Arc<Mutex<KeyMap>>,
-        inputs: &mut VecDeque<Input>,
-        throw_away: bool,
-    ) -> Result<Result<Arc<Command>, ()>, bool> {
-        match inputs.pop_front() {
-            Some(input) => {
-                let key_map = key_map.lock();
-                match key_map.bindings.get(&input) {
-                    Some(KeyBind::Command(command)) => Ok(Ok(command.clone())),
-                    Some(KeyBind::SubMap(sub_map)) => KeyMap::lookup_(sub_map, inputs, throw_away)
-                        .map_err(|e| {
-                            if !throw_away || e {
-                                inputs.push_front(input);
-                            }
-                            e
-                        }),
-                    Some(KeyBind::Mapping(mapping)) => {
-                        for m in mapping.into_iter().rev() {
-                            inputs.push_front(*m)
-                        }
-                        Ok(Err(()))
-                    }
-                    None => Err(false),
-                }
-            }
-            None => Err(true),
-        }
     }
 
     fn assign(&mut self, inputs: &mut VecDeque<Input>, mut key_bind: KeyBind) {

@@ -63,18 +63,42 @@ pub fn remove_mark(window: &Window) {
     marks.remove(&W(window));
 }
 
-pub fn set_mark_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_window = state.lock().display.selected_window();
-    let selected_window = selected_window.lock();
-    set_mark(&selected_window, selected_window.cursor.clone());
-    Ok(())
+#[derive(Debug)]
+pub struct SetMarkCommand;
+
+/// Construct a [`SetMarkCommand`].
+///
+/// [`SetMarkCommand`]: struct.SetMarkCommand.html
+pub fn set_mark_command() -> Arc<SetMarkCommand> {
+    Arc::new(SetMarkCommand)
 }
 
-pub fn remove_mark_command(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    let selected_window = state.lock().display.selected_window();
-    let selected_window = selected_window.lock();
-    remove_mark(&selected_window);
-    Ok(())
+impl Command for SetMarkCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_window = state.lock().display.selected_window();
+        let selected_window = selected_window.lock();
+        set_mark(&selected_window, selected_window.cursor.clone());
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct RemoveMarkCommand;
+
+/// Construct a [`RemoveMarkCommand`].
+///
+/// [`RemoveMarkCommand`]: struct.RemoveMarkCommand.html
+pub fn remove_mark_command() -> Arc<RemoveMarkCommand> {
+    Arc::new(RemoveMarkCommand)
+}
+
+impl Command for RemoveMarkCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+        let selected_window = state.lock().display.selected_window();
+        let selected_window = selected_window.lock();
+        remove_mark(&selected_window);
+        Ok(())
+    }
 }
 
 #[cfg(test)]
