@@ -354,7 +354,7 @@ pub fn update_cursor(
     let mut state = match ret_state.upgrade() {
         Some(state) => state,
         None => {
-            debug_assert_eq!(*ret_location, 0);
+            debug_assert!(*ret_location <= buffer.len());
             *ret_state = match &buffer.current_state {
                 Some(s) => Arc::downgrade(&s),
                 None => Weak::new(),
