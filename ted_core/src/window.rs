@@ -100,6 +100,12 @@ impl Window {
     }
 }
 
+impl Default for Window {
+    fn default() -> Self {
+        Window::new()
+    }
+}
+
 impl From<Buffer> for Window {
     fn from(buffer: Buffer) -> Self {
         Window {

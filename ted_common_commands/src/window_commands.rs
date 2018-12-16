@@ -2,22 +2,6 @@ use parking_lot::Mutex;
 use std::sync::Arc;
 use ted_core::*;
 
-fn find_first_window(layout: &Layout) -> &Arc<Mutex<Window>> {
-    match layout {
-        Layout::Window(w) => w,
-        Layout::VSplit { left, .. } => find_first_window(left),
-        Layout::HSplit { top, .. } => find_first_window(top),
-    }
-}
-
-fn find_last_window(layout: &Layout) -> &Arc<Mutex<Window>> {
-    match layout {
-        Layout::Window(w) => w,
-        Layout::VSplit { right, .. } => find_first_window(right),
-        Layout::HSplit { bottom, .. } => find_first_window(bottom),
-    }
-}
-
 pub fn close_window(layout: &mut Layout, window: &mut Arc<Mutex<Window>>) -> bool {
     let new_layout = match layout {
         Layout::Window(w) => return Arc::ptr_eq(w, window),
@@ -42,7 +26,7 @@ pub fn close_window(layout: &mut Layout, window: &mut Arc<Mutex<Window>>) -> boo
     };
     match new_layout {
         Some(new_layout) => {
-            *window = find_first_window(&new_layout).clone();
+            *window = new_layout.first_window().clone();
             *layout = *new_layout;
         }
         None => (),
@@ -113,11 +97,11 @@ pub fn other_window_clockwise(layout: &Layout, window: &mut Arc<Mutex<Window>>) 
             Layout::Window(w) => Arc::ptr_eq(w, window),
             Layout::VSplit { left, right } => {
                 if other_window_clockwise(left, window, false) {
-                    *window = find_first_window(right).clone();
+                    *window = right.first_window().clone();
                     false
                 } else if other_window_clockwise(right, window, false) {
                     if top_level {
-                        *window = find_first_window(left).clone();
+                        *window = left.first_window().clone();
                     }
                     true
                 } else {
@@ -126,11 +110,11 @@ pub fn other_window_clockwise(layout: &Layout, window: &mut Arc<Mutex<Window>>) 
             }
             Layout::HSplit { top, bottom } => {
                 if other_window_clockwise(top, window, false) {
-                    *window = find_first_window(bottom).clone();
+                    *window = bottom.first_window().clone();
                     false
                 } else if other_window_clockwise(bottom, window, false) {
                     if top_level {
-                        *window = find_first_window(top).clone();
+                        *window = top.first_window().clone();
                     }
                     true
                 } else {
@@ -176,11 +160,11 @@ pub fn other_window_counter_clockwise(layout: &Layout, window: &mut Arc<Mutex<Wi
             Layout::Window(w) => Arc::ptr_eq(w, window),
             Layout::VSplit { left, right } => {
                 if other_window_counter_clockwise(right, window, false) {
-                    *window = find_last_window(left).clone();
+                    *window = left.last_window().clone();
                     false
                 } else if other_window_counter_clockwise(left, window, false) {
                     if top_level {
-                        *window = find_last_window(right).clone();
+                        *window = right.last_window().clone();
                     }
                     true
                 } else {
@@ -189,11 +173,11 @@ pub fn other_window_counter_clockwise(layout: &Layout, window: &mut Arc<Mutex<Wi
             }
             Layout::HSplit { top, bottom } => {
                 if other_window_counter_clockwise(bottom, window, false) {
-                    *window = find_last_window(top).clone();
+                    *window = top.last_window().clone();
                     false
                 } else if other_window_counter_clockwise(top, window, false) {
                     if top_level {
-                        *window = find_last_window(bottom).clone();
+                        *window = bottom.last_window().clone();
                     }
                     true
                 } else {
