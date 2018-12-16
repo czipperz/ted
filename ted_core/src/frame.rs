@@ -26,6 +26,12 @@ impl Frame {
         selected_window.buffer.clone()
     }
 
+    pub fn replace_selected_window(&mut self, window: Arc<Mutex<Window>>) {
+        self.layout
+            .replace_selected_window(&self.selected_window, Layout::Window(window.clone()));
+        self.selected_window = window;
+    }
+
     pub fn show(&mut self, selected_window: &Arc<Mutex<Window>>) -> Result<(), ()> {
         self.renderer.show(&self.layout, selected_window)
     }

@@ -15,14 +15,6 @@ pub fn open_file(name: String, path: String) -> Result<Buffer, ()> {
     ))
 }
 
-fn display_window(selected_frame: Arc<Mutex<Frame>>, window: Arc<Mutex<Window>>) {
-    let mut selected_frame = selected_frame.lock();
-    let selected_frame = &mut *selected_frame;
-    selected_frame
-        .layout
-        .set_selected_window(&selected_frame.selected_window, Layout::Window(window));
-}
-
 #[derive(Debug)]
 pub struct OpenFileCommand;
 
@@ -41,7 +33,7 @@ impl Command for OpenFileCommand {
         )?;
         let window = Arc::new(Mutex::new(Window::from(buffer)));
         let selected_frame = state.lock().display.selected_frame.clone();
-        display_window(selected_frame, window);
+        selected_frame.lock().replace_selected_window(window);
         Ok(())
     }
 }
