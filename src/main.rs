@@ -27,6 +27,9 @@ use ted_core::*;
 use ted_user_cfg::*;
 
 fn main() {
+    std::panic::set_hook(Box::new(|info| {
+        log(format!("{}", info));
+    }));
     let mut state = State::new(CursesRenderer::new().unwrap());
     setup_state(&mut state);
     state.display.show().unwrap();
