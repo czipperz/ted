@@ -5,7 +5,9 @@ use logger::*;
 use pancurses;
 use parking_lot::Mutex;
 use renderer::Renderer;
+use std::collections::VecDeque;
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 use window::Window;
 
 /// An implementation of [`Renderer`] for a curses backend.
@@ -45,15 +47,40 @@ impl CursesRenderer {
 }
 
 impl Renderer for CursesRenderer {
-    fn show(&mut self, layout: &Layout, selected_window: &Arc<Mutex<Window>>) -> Result<(), ()> {
+    fn show(&mut self, layout: &Layout, selected_window: Option<&Arc<Mutex<Window>>>,
+            messages: &mut VecDeque<String>, message_display_time: &mut Option<Instant>) -> Result<(), ()> {
         let (rows, columns) = self.window.get_max_yx();
-        draw(
-            self,
-            layout,
-            selected_window,
-            rows as usize,
-            columns as usize,
-        )?;
+        let rows = rows as usize;
+        let columns = columns as usize;
+        draw(self, layout, selected_window, rows, columns)?;
+        match message_display_time.clone() {
+            Some(time) => {
+                if time.elapsed() > Duration::from_secs(10) {
+                    messages.pop_front();
+                    *message_display_time = None;
+                }
+            }
+            None => {
+                if !messages.is_empty() {
+                    *message_display_time = Some(Instant::now());
+                }
+            },
+        }
+        match messages.front() {
+            Some(message) =>
+                draw_window(
+                    self,
+                    message.chars(),
+                    false,
+                    None,
+                    None,
+                    rows / 2 - 5,
+                    10,
+                    10,
+                    columns - 20,
+                )?,
+            None => (),
+        }
         check(self.window.mv(self.cursor_y as i32, self.cursor_x as i32))?;
         check(self.window.refresh())?;
         Ok(())

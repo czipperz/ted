@@ -3,13 +3,17 @@ use input::Input;
 use layout::Layout;
 use parking_lot::Mutex;
 use renderer::Renderer;
+use std::collections::VecDeque;
 use std::sync::Arc;
+use std::time::Instant;
 use window::Window;
 
 pub struct Frame {
     pub layout: Layout,
     pub renderer: Box<Renderer>,
     pub selected_window: Arc<Mutex<Window>>,
+    messages: VecDeque<String>,
+    message_display_time: Option<Instant>,
 }
 
 impl Frame {
@@ -18,6 +22,8 @@ impl Frame {
             layout: Layout::Window(selected_window.clone()),
             renderer,
             selected_window: selected_window,
+            messages: VecDeque::new(),
+            message_display_time: None,
         }
     }
 
@@ -32,11 +38,21 @@ impl Frame {
         self.selected_window = window;
     }
 
-    pub fn show(&mut self, selected_window: &Arc<Mutex<Window>>) -> Result<(), ()> {
-        self.renderer.show(&self.layout, selected_window)
+    pub fn show(&mut self, is_selected_frame: bool) -> Result<(), ()> {
+        let selected_window =
+            if is_selected_frame {
+                Some(&self.selected_window)
+            } else {
+                None
+            };
+        self.renderer.show(&self.layout, selected_window, &mut self.messages, &mut self.message_display_time)
     }
 
     pub fn getch(&mut self) -> Option<Input> {
         self.renderer.getch()
+    }
+
+    pub fn add_message<S>(&mut self, message: S) where S: ToString {
+        self.messages.push_front(message.to_string());
     }
 }

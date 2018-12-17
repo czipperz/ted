@@ -26,7 +26,7 @@ pub trait DrawableRenderer: Renderer {
 pub fn draw<D>(
     display: &mut D,
     layout: &Layout,
-    selected_window: &Arc<Mutex<Window>>,
+    selected_window: Option<&Arc<Mutex<Window>>>,
     rows: usize,
     columns: usize,
 ) -> Result<(), ()>
@@ -39,10 +39,71 @@ where
     Ok(())
 }
 
+pub fn draw_window<D, I>(
+    display: &mut D,
+    mut iter: I,
+    is_selected_window: bool,
+    cursor_location: Option<usize>,
+    name: Option<&str>,
+    y: usize,
+    x: usize,
+    rows: usize,
+    columns: usize
+) -> Result<(), ()>
+where
+    D: DrawableRenderer,
+    I: Iterator<Item = char>
+{
+    let mut column = 0;
+    let mut row = 0;
+    let mut location = 0;
+    while row < rows - 1 {
+        if cursor_location.map(|c| c == location).unwrap_or(false) {
+            if is_selected_window {
+                display.set_attribute(y + row, x + column, Attribute::SelectedCursor)?;
+            } else {
+                display.set_attribute(y + row, x + column, Attribute::UnselectedCursor)?;
+            }
+        }
+        match iter.next() {
+            Some('\n') => {
+                column = 0;
+                row += 1;
+            }
+            Some(ch) => {
+                display.putch(y + row, x + column, Character::Character(ch))?;
+                column += 1;
+                if column >= columns {
+                    row += 1;
+                    column = 0;
+                }
+            }
+            None => break,
+        }
+        location += 1;
+    }
+    match name {
+        Some(name) => {
+            let mut column = 0;
+            for ch in name.chars() {
+                if column < columns {
+                    display.putch(y + rows - 1, x + column, Character::Character(ch))?;
+                    column += 1;
+                }
+            }
+            for column in 0..columns {
+                display.set_attribute(y + rows - 1, x + column, Attribute::Inverted)?;
+            }
+        }
+        None => ()
+    }
+    Ok(())
+}
+
 fn draw_rect<D>(
     display: &mut D,
     layout: &Layout,
-    selected_window: &Arc<Mutex<Window>>,
+    selected_window: Option<&Arc<Mutex<Window>>>,
     y: usize,
     x: usize,
     rows: usize,
@@ -53,49 +114,12 @@ where
 {
     match layout {
         Layout::Window(window) => {
-            let is_selected_window = Arc::ptr_eq(window, selected_window);
+            let is_selected_window = selected_window.map(|selected_window| Arc::ptr_eq(window, selected_window)).unwrap_or(false);
             let window = window.lock();
             let buffer = window.buffer.lock();
             let mut iter = buffer.iter();
-            let mut column = 0;
-            let mut row = 0;
-            let mut location = 0;
-            while row < rows - 1 {
-                if window.cursor.get() == location {
-                    if is_selected_window {
-                        display.set_attribute(y + row, x + column, Attribute::SelectedCursor)?;
-                    } else {
-                        display.set_attribute(y + row, x + column, Attribute::UnselectedCursor)?;
-                    }
-                }
-                match iter.next() {
-                    Some('\n') => {
-                        column = 0;
-                        row += 1;
-                    }
-                    Some(ch) => {
-                        display.putch(y + row, x + column, Character::Character(ch))?;
-                        column += 1;
-                        if column >= columns {
-                            row += 1;
-                            column = 0;
-                        }
-                    }
-                    None => break,
-                }
-                location += 1;
-            }
-            let mut column = 0;
-            for ch in buffer.name.display_name().chars() {
-                if column < columns {
-                    display.putch(y + rows - 1, x + column, Character::Character(ch))?;
-                    column += 1;
-                }
-            }
-            for column in 0..columns {
-                display.set_attribute(y + rows - 1, x + column, Attribute::Inverted)?;
-            }
-            Ok(())
+            draw_window(display, iter, is_selected_window, Some(window.cursor.get()),
+                        Some(buffer.name.display_name()), y, x, rows, columns)
         }
         Layout::VSplit { left, right } => {
             // 4 columns

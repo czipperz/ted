@@ -45,7 +45,9 @@ fn main_loop(state: Arc<Mutex<State>>) -> Result<(), ()> {
                 if ted_common_commands::was_closed_successfully() {
                     return Ok(());
                 } else {
-                    return Err(());
+                    let mut state = state.lock();
+                    state.display.selected_frame.lock().add_message("ERR");
+                    state.display.show()?;
                 },
         }
     }

@@ -5,6 +5,7 @@ use parking_lot::Mutex;
 use renderer::Renderer;
 use std::collections::VecDeque;
 use std::sync::Arc;
+use std::time::Instant;
 use window::Window;
 
 /// An implementation of [`Renderer`] for debugging.
@@ -119,8 +120,10 @@ impl From<Vec<Input>> for DebugRenderer {
 }
 
 impl Renderer for DebugRenderer {
-    fn show(&mut self, layout: &Layout, selected_window: &Arc<Mutex<Window>>) -> Result<(), ()> {
-        draw(self, layout, selected_window, 15, 20)
+    fn show(&mut self, layout: &Layout, selected_window: Option<&Arc<Mutex<Window>>>,
+            messages: &mut VecDeque<String>, message_display_time: &mut Option<Instant>) -> Result<(), ()> {
+        draw(self, layout, selected_window, 15, 20)?;
+        Ok(())
     }
     fn getch(&mut self) -> Option<Input> {
         self.inputs.pop_front()

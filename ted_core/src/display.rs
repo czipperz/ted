@@ -43,9 +43,8 @@ impl Display {
     }
 
     pub fn show(&self) -> Result<(), ()> {
-        let selected_window = self.selected_window();
         for frame in &self.frames {
-            frame.lock().show(&selected_window)?
+            frame.lock().show(Arc::ptr_eq(&self.selected_frame, frame))?
         }
         Ok(())
     }
