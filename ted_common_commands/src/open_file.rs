@@ -9,22 +9,35 @@ pub fn open_file(path: PathBuf) -> Result<Buffer, ()> {
     let path = path.canonicalize().map_err(|_| ())?;
     if !path.exists() {
         Err(())
-    } else if path.is_dir() {
+    } else {
         let mut buf = String::new();
-        buf.push_str(&path.display().to_string());
-        buf.push('\n');
-        for entry in path.read_dir().map_err(|_| ())? {
-            if let Ok(entry) = entry {
-                buf.push_str(entry.path().to_str().unwrap());
+        if path.is_dir() {
+            buf.push_str(&path.display().to_string());
+            buf.push_str(":\n..\n");
+            let mut entries = Vec::new();
+            for entry in path.read_dir().map_err(|_| ())? {
+                if let Ok(entry) = entry {
+                    entries.push(
+                        entry
+                            .path()
+                            .file_name()
+                            .unwrap()
+                            .to_str()
+                            .unwrap()
+                            .to_string(),
+                    );
+                }
+            }
+            entries.sort();
+            for entry in entries {
+                buf.push_str(&entry);
                 buf.push('\n');
             }
+        } else {
+            let file = File::open(&path).map_err(|_| ())?;
+            let mut reader = BufReader::new(file);
+            reader.read_to_string(&mut buf).map_err(|_| ())?;
         }
-        Ok(Buffer::new_with_contents(path.into(), &buf))
-    } else {
-        let file = File::open(&path).map_err(|_| ())?;
-        let mut reader = BufReader::new(file);
-        let mut buf = String::new();
-        reader.read_to_string(&mut buf).map_err(|_| ())?;
         Ok(Buffer::new_with_contents(path.into(), &buf))
     }
 }
