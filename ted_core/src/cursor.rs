@@ -141,3 +141,28 @@ impl fmt::Debug for Cursor {
         write!(f, "{}", self.location)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn buffer_with_contents_cursor_movement_update() {
+        let buffer = Buffer::new_with_contents("*scratch*".into(), "contents\n");
+        let mut cursor = Cursor::new();
+        assert_eq!(cursor.get(), 0);
+        cursor.update(&buffer);
+        assert_eq!(cursor.get(), 9);
+        cursor.increment(&buffer, -3);
+        assert_eq!(cursor.get(), 6);
+    }
+
+    #[test]
+    fn buffer_with_contents_cursor_movement_noupdate() {
+        let buffer = Buffer::new_with_contents("*scratch*".into(), "contents\n");
+        let mut cursor = Cursor::new();
+        assert_eq!(cursor.get(), 0);
+        cursor.increment(&buffer, -1);
+        assert_eq!(cursor.get(), 8);
+    }
+}
