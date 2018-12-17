@@ -152,8 +152,12 @@ mod tests {
         let mut cursor = Cursor::new();
         assert_eq!(cursor.get(), 0);
         cursor.update(&buffer);
+        assert_eq!(cursor.get(), 0);
+        cursor.set(&buffer, buffer.len());
         assert_eq!(cursor.get(), 9);
         cursor.increment(&buffer, -3);
+        assert_eq!(cursor.get(), 6);
+        cursor.update(&buffer);
         assert_eq!(cursor.get(), 6);
     }
 
@@ -162,6 +166,10 @@ mod tests {
         let buffer = Buffer::new_with_contents("*scratch*".into(), "contents\n");
         let mut cursor = Cursor::new();
         assert_eq!(cursor.get(), 0);
+        cursor.update(&buffer);
+        assert_eq!(cursor.get(), 0);
+        cursor.set(&buffer, buffer.len());
+        assert_eq!(cursor.get(), 9);
         cursor.increment(&buffer, -1);
         assert_eq!(cursor.get(), 8);
     }

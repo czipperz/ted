@@ -369,10 +369,12 @@ pub fn update_cursor(
         None => {
             debug_assert!(*ret_location <= buffer.len());
             *ret_state = match &buffer.current_state {
-                Some(s) => Arc::downgrade(&s),
+                Some(s) => {
+                    *ret_location = buffer.len();
+                    Arc::downgrade(&s)
+                }
                 None => Weak::new(),
             };
-            *ret_location = buffer.len();
             return;
         }
     };
