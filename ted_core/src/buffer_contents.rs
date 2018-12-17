@@ -63,13 +63,17 @@ impl BufferContents {
 
     pub fn substring(&self, mut begin: usize, mut end: usize) -> BufferContentsResult<String> {
         let mut res = String::new();
+        if end <= begin {
+            return Ok(res);
+        }
         for s in &self.array {
             if res.is_empty() {
                 if begin < s.len_chars {
                     if end < s.len_chars {
-                        return Ok(s.str[begin..end].to_string());
+                        return Ok(s.str.chars().skip(begin).take(end - begin).collect());
                     } else {
-                        res.push_str(&s.str[begin..]);
+                        res.push_str(&s.str.chars().skip(begin).collect::<String>());
+                        begin = 0;
                     }
                 } else {
                     begin -= s.len_chars;
@@ -77,6 +81,7 @@ impl BufferContents {
                 end -= s.len_chars;
             } else {
                 if end < s.len_chars {
+                    res.push_str(&s.str.chars().take(end).collect::<String>());
                     return Ok(res);
                 } else {
                     res.push_str(&s.str);
@@ -84,7 +89,11 @@ impl BufferContents {
                 }
             }
         }
-        Ok(res)
+        if begin != 0 {
+            Err(())
+        } else {
+            Ok(res)
+        }
     }
 
     pub fn insert(&mut self, loc: usize, c: char) -> BufferContentsResult<()> {
@@ -555,6 +564,35 @@ mod tests {
         assert_eq!(buf.array[0].len_chars, 1);
         assert_eq!(buf.array[1].str, "d");
         assert_eq!(buf.array[1].len_chars, 1);
+    }
+
+    #[test]
+    fn substring_ok_in_middle() {
+        let mut buf = BufferContents::new();
+        buf.insert_str(0, "abcd").unwrap();
+        assert_eq!(buf.substring(0, 4).unwrap(), "abcd");
+        assert_eq!(buf.substring(1, 3).unwrap(), "bc");
+    }
+
+    #[test]
+    fn substring_err_begin_beyond() {
+        let mut buf = BufferContents::new();
+        buf.insert_str(0, "abcd").unwrap();
+        assert!(buf.substring(5, 6).is_err());
+    }
+
+    #[test]
+    fn substring_ok_end_beyond() {
+        let mut buf = BufferContents::new();
+        buf.insert_str(0, "abcd").unwrap();
+        assert_eq!(buf.substring(1, 6).unwrap(), "bcd");
+    }
+
+    #[test]
+    fn substring_empty_end_before_begin() {
+        let mut buf = BufferContents::new();
+        buf.insert_str(0, "abcd").unwrap();
+        assert_eq!(buf.substring(4, 2).unwrap(), "");
     }
 
     #[test]
