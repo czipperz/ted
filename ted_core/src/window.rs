@@ -106,14 +106,20 @@ impl Default for Window {
     }
 }
 
-impl From<Buffer> for Window {
-    fn from(buffer: Buffer) -> Self {
+impl From<Arc<Mutex<Buffer>>> for Window {
+    fn from(buffer: Arc<Mutex<Buffer>>) -> Self {
         Window {
-            buffer: Arc::new(Mutex::new(buffer)),
+            buffer: buffer,
             buffer_key_map: Arc::default(),
             cursor: Cursor::new(),
             window_modes: Vec::new(),
         }
+    }
+}
+
+impl From<Buffer> for Window {
+    fn from(buffer: Buffer) -> Self {
+        Arc::new(Mutex::new(buffer)).into()
     }
 }
 
