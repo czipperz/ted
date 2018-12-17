@@ -18,6 +18,7 @@
 
 extern crate parking_lot;
 extern crate ted_core;
+extern crate ted_common_commands;
 extern crate ted_user_cfg;
 
 use parking_lot::Mutex;
@@ -33,12 +34,20 @@ fn main() {
     let mut state = State::new(CursesRenderer::new().unwrap());
     setup_state(&mut state);
     state.display.show().unwrap();
-    main_loop(Arc::new(Mutex::new(state))).unwrap_err();
+    main_loop(Arc::new(Mutex::new(state))).unwrap();
 }
 
 fn main_loop(state: Arc<Mutex<State>>) -> Result<(), ()> {
     loop {
-        increment(state.clone())?;
+        match increment(state.clone()) {
+            Ok(()) => (),
+            Err(()) =>
+                if ted_common_commands::was_closed_successfully() {
+                    return Ok(());
+                } else {
+                    return Err(());
+                },
+        }
     }
 }
 
