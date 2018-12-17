@@ -367,7 +367,6 @@ pub fn update_cursor(
     let mut state = match ret_state.upgrade() {
         Some(state) => state,
         None => {
-            debug_assert!(*ret_location <= buffer.len());
             *ret_state = match &buffer.current_state {
                 Some(s) => {
                     *ret_location = buffer.len();
