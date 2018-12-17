@@ -3,7 +3,6 @@ extern crate ted_core;
 extern crate ted_kill_ring;
 extern crate ted_mark;
 
-use std::sync::Arc;
 use ted_common_commands::*;
 use ted_core::*;
 use ted_kill_ring::*;
