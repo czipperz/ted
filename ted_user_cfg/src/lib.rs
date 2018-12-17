@@ -1,10 +1,12 @@
 extern crate ted_common_commands;
 extern crate ted_core;
+extern crate ted_git;
 extern crate ted_kill_ring;
 extern crate ted_mark;
 
 use ted_common_commands::*;
 use ted_core::*;
+use ted_git::*;
 use ted_kill_ring::*;
 use ted_mark::*;
 
@@ -33,6 +35,7 @@ pub fn setup_state(state: &mut State) {
     default_key_map.bind(vec![kbd!(C-'x'), kbd!('0')], close_window_command());
     default_key_map.bind(vec![kbd!(C-'x'), kbd!(C-'c')], close_ted_command());
     default_key_map.bind(vec![kbd!(C-'x'), kbd!(C-'f')], open_file_command());
+    default_key_map.bind(vec![kbd!(C-'x'), kbd!('g')], open_git_repository_command());
     default_key_map.bind(vec![kbd!(C-'x'), kbd!('n')], end_of_buffer_command());
     default_key_map.bind(vec![kbd!(C-'x'), kbd!('p')], begin_of_buffer_command());
     default_key_map.bind(vec![kbd!(C-'x'), kbd!('o')], other_window_clockwise_command());
