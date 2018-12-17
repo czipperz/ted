@@ -41,6 +41,7 @@ pub struct Buffer {
     /// The name of the buffer.
     pub name: BufferName,
     pub buffer_modes: Vec<Arc<Mutex<Mode>>>,
+    pub read_only: bool,
 }
 
 impl Buffer {
@@ -78,6 +79,7 @@ impl Buffer {
             current_state: None,
             name,
             buffer_modes: Vec::new(),
+            read_only: false,
         }
     }
 
@@ -139,6 +141,7 @@ impl Buffer {
 
     /// Insert char `c` at point `loc`.
     pub fn insert(&mut self, loc: usize, c: char) -> Result<(), ()> {
+        if self.read_only { return Err(()); }
         self.buffer_contents.insert(loc, c)?;
         self.add_change(Change {
             loc,
@@ -151,6 +154,7 @@ impl Buffer {
 
     /// Insert string `s` at point `loc`.
     pub fn insert_str(&mut self, loc: usize, s: &str) -> Result<(), ()> {
+        if self.read_only { return Err(()); }
         self.buffer_contents.insert_str(loc, s)?;
         self.add_change(Change {
             loc,
@@ -163,6 +167,7 @@ impl Buffer {
 
     /// Delete the character at point `loc`.
     pub fn delete(&mut self, loc: usize) -> Result<(), ()> {
+        if self.read_only { return Err(()); }
         let c = self.get(loc)?;
         self.buffer_contents.delete(loc)?;
         self.add_change(Change {
@@ -176,6 +181,7 @@ impl Buffer {
 
     /// Delete the region from position `begin` up until `end`.
     pub fn delete_region(&mut self, begin: usize, end: usize) -> Result<(), ()> {
+        if self.read_only { return Err(()); }
         let s = self.substring(begin, end)?;
         self.buffer_contents.delete_region(begin, end)?;
         let len_chars = s.chars().count();
@@ -186,6 +192,11 @@ impl Buffer {
             is_insert: false,
         });
         Ok(())
+    }
+
+    pub fn clear(&mut self) -> Result<(), ()> {
+        let len = self.len();
+        self.delete_region(0, len)
     }
 
     /// Handle adding another node to the state graph and pointing `current_state` to it.
@@ -221,7 +232,7 @@ impl Buffer {
     /// to `insert`, `insert_str`, `delete`, or `delete_range` is
     /// considered a change.
     ///
-    /// If there are no edits to undo,
+    /// If there are no edits to undo, returns false.
     ///
     /// # Examples
     ///
@@ -232,16 +243,17 @@ impl Buffer {
     /// buffer.insert(1, 'b').unwrap();
     /// assert_eq!(format!("{}", buffer), "abc");
     ///
-    /// assert!(buffer.undo());
+    /// assert!(buffer.undo().unwrap());
     /// assert_eq!(format!("{}", buffer), "ac");
     ///
-    /// assert!(buffer.undo());
+    /// assert!(buffer.undo().unwrap());
     /// assert_eq!(format!("{}", buffer), "");
     ///
-    /// assert!(!buffer.undo());
+    /// assert!(!buffer.undo().unwrap());
     /// assert_eq!(format!("{}", buffer), "");
     /// ```
-    pub fn undo(&mut self) -> bool {
+    pub fn undo(&mut self) -> Result<bool, ()> {
+        if self.read_only { return Err(()); }
         match self.current_state.take() {
             Some(current_state) => {
                 let current_state = current_state.lock();
@@ -257,9 +269,9 @@ impl Buffer {
                         .unwrap();
                 }
                 self.current_state = current_state.pred.upgrade();
-                true
+                Ok(true)
             }
-            None => false,
+            None => Ok(false),
         }
     }
 
@@ -276,16 +288,17 @@ impl Buffer {
     /// assert_eq!(format!("{}", buffer), "abc");
     ///
     /// // Redo has nothing to redo
-    /// assert!(!buffer.redo());
+    /// assert!(!buffer.redo().unwrap());
     /// assert_eq!(format!("{}", buffer), "abc");
     ///
-    /// assert!(buffer.undo());
+    /// assert!(buffer.undo().unwrap());
     /// assert_eq!(format!("{}", buffer), "ac");
     ///
-    /// assert!(buffer.redo());
+    /// assert!(buffer.redo().unwrap());
     /// assert_eq!(format!("{}", buffer), "abc");
     /// ```
-    pub fn redo(&mut self) -> bool {
+    pub fn redo(&mut self) -> Result<bool, ()> {
+        if self.read_only { return Err(()); }
         match self.current_state.take() {
             Some(current_state_lock) => {
                 {
@@ -307,16 +320,27 @@ impl Buffer {
                                 }
                             }
                             self.current_state = Some(next_state.clone());
-                            return true;
+                            return Ok(true);
                         }
                         None => {}
                     }
                 }
                 self.current_state = Some(current_state_lock);
-                false
+                Ok(false)
             }
-            None => false,
+            None => Ok(false),
         }
+    }
+
+    /// Erase the history of the `Buffer`.
+    ///
+    /// This function should probably only be called on `Buffer`s with
+    /// [`BufferName::Internal`] names.
+    ///
+    /// [`BufferName::Internal`]: enum.BufferName.html#variant.Internal
+    pub fn erase_history(&mut self) {
+        self._initial_state = None;
+        self.current_state = None;
     }
 }
 
@@ -449,17 +473,17 @@ mod tests {
     fn undo_1() {
         let mut buffer = Buffer::new("*scratch*".into());
         assert_eq!(format!("{}", buffer), "");
-        assert!(!buffer.undo());
+        assert!(!buffer.undo().unwrap());
         assert_eq!(format!("{}", buffer), "");
         buffer.insert_str(0, "Helllo World").unwrap();
         assert_eq!(format!("{}", buffer), "Helllo World");
         buffer.delete(2).unwrap();
         assert_eq!(format!("{}", buffer), "Hello World");
-        assert!(buffer.undo());
+        assert!(buffer.undo().unwrap());
         assert_eq!(format!("{}", buffer), "Helllo World");
-        assert!(buffer.undo());
+        assert!(buffer.undo().unwrap());
         assert_eq!(format!("{}", buffer), "");
-        assert!(!buffer.undo());
+        assert!(!buffer.undo().unwrap());
         assert_eq!(format!("{}", buffer), "");
     }
 
@@ -483,32 +507,32 @@ mod tests {
         assert_eq!(format!("{}", buffer), "Hello World");
         assert_eq!(cursor.get(), 11);
 
-        assert!(buffer.undo());
+        assert!(buffer.undo().unwrap());
         cursor.update(&buffer);
         assert_eq!(format!("{}", buffer), "Helllo World");
         assert_eq!(cursor.get(), 12);
 
-        assert!(buffer.redo());
+        assert!(buffer.redo().unwrap());
         cursor.update(&buffer);
         assert_eq!(format!("{}", buffer), "Hello World");
         assert_eq!(cursor.get(), 11);
 
-        assert!(!buffer.redo());
+        assert!(!buffer.redo().unwrap());
         cursor.update(&buffer);
         assert_eq!(format!("{}", buffer), "Hello World");
         assert_eq!(cursor.get(), 11);
 
-        assert!(buffer.undo());
+        assert!(buffer.undo().unwrap());
         cursor.update(&buffer);
         assert_eq!(format!("{}", buffer), "Helllo World");
         assert_eq!(cursor.get(), 12);
 
-        assert!(buffer.undo());
+        assert!(buffer.undo().unwrap());
         cursor.update(&buffer);
         assert_eq!(format!("{}", buffer), "");
         assert_eq!(cursor.get(), 0);
 
-        assert!(!buffer.undo());
+        assert!(!buffer.undo().unwrap());
         cursor.update(&buffer);
         assert_eq!(format!("{}", buffer), "");
         assert_eq!(cursor.get(), 0);
@@ -529,12 +553,12 @@ mod tests {
         assert_eq!(format!("{}", buffer), "Hi");
         assert_eq!(cursor.get(), 2);
 
-        assert!(buffer.undo());
+        assert!(buffer.undo().unwrap());
         cursor.update(&buffer);
         assert_eq!(format!("{}", buffer), "");
         assert_eq!(cursor.get(), 0);
 
-        assert!(!buffer.undo());
+        assert!(!buffer.undo().unwrap());
         cursor.update(&buffer);
         assert_eq!(format!("{}", buffer), "");
         assert_eq!(cursor.get(), 0);

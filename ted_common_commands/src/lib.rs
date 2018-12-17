@@ -24,3 +24,6 @@ pub use close_commands::*;
 
 mod open_file;
 pub use open_file::*;
+
+mod read_only_commands;
+pub use read_only_commands::*;

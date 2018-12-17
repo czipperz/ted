@@ -25,7 +25,7 @@ impl Command for UndoCommand {
             selected_window.buffer.clone()
         };
         let mut buffer = buffer.lock();
-        buffer.undo();
+        buffer.undo()?;
         Ok(())
     }
 }
@@ -53,7 +53,7 @@ impl Command for RedoCommand {
             selected_window.buffer.clone()
         };
         let mut buffer = buffer.lock();
-        buffer.redo();
+        buffer.redo()?;
         Ok(())
     }
 }
