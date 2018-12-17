@@ -131,3 +131,50 @@ pub fn clone_window(window: &Arc<Mutex<Window>>) -> Arc<Mutex<Window>> {
     }));
     cloned
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn window_increment_cursor() {
+        let mut window = Window::new();
+        {
+            let mut buffer = window.buffer.lock();
+            buffer.insert_str(0, "abc").unwrap();
+            window.cursor.set(&buffer, 0);
+        }
+        assert_eq!(window.cursor.get(), 0);
+        window.increment_cursor(1);
+        assert_eq!(window.cursor.get(), 1);
+        window.increment_cursor(1);
+        assert_eq!(window.cursor.get(), 2);
+        window.increment_cursor(-1);
+        assert_eq!(window.cursor.get(), 1);
+        window.increment_cursor(2);
+        assert_eq!(window.cursor.get(), 3);
+        window.increment_cursor(-4);
+        assert_eq!(window.cursor.get(), 0);
+    }
+
+    #[test]
+    fn window_set_cursor() {
+        let mut window = Window::new();
+        {
+            let mut buffer = window.buffer.lock();
+            buffer.insert_str(0, "abc").unwrap();
+            window.cursor.set(&buffer, 0);
+        }
+        assert_eq!(window.cursor.get(), 0);
+        window.set_cursor(0);
+        assert_eq!(window.cursor.get(), 0);
+        window.set_cursor(2);
+        assert_eq!(window.cursor.get(), 2);
+        window.set_cursor(3);
+        assert_eq!(window.cursor.get(), 3);
+        window.set_cursor(1);
+        assert_eq!(window.cursor.get(), 1);
+        window.set_cursor(100);
+        assert_eq!(window.cursor.get(), 3);
+    }
+}
