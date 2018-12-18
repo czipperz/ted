@@ -177,7 +177,7 @@ mod tests {
     #[test]
     fn paste_nothing() {
         let window = Window::new();
-        paste(&window);
+        paste(&window).unwrap();
         assert_eq!(window.buffer.lock().to_string(), "");
     }
 
@@ -188,7 +188,7 @@ mod tests {
         insert_kill(&window, "abc".to_string());
         assert_eq!(window.cursor.get(), 10);
 
-        paste(&window);
+        paste(&window).unwrap();
         window.update_cursor();
 
         assert_eq!(window.buffer.lock().to_string(), "americanedabc");
@@ -203,7 +203,7 @@ mod tests {
         insert_kill(&window, "def".to_string());
         assert_eq!(window.cursor.get(), 0);
 
-        paste(&window);
+        paste(&window).unwrap();
         window.update_cursor();
 
         assert_eq!(window.buffer.lock().to_string(), "def");
@@ -218,7 +218,7 @@ mod tests {
         insert_kill(&window, "def".to_string());
         assert_eq!(window.cursor.get(), 0);
 
-        paste(&window);
+        paste(&window).unwrap();
         window.update_cursor();
 
         assert_eq!(window.buffer.lock().to_string(), "def");
