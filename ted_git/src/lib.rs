@@ -38,7 +38,7 @@ pub fn refresh_git_repository(path: &Path, buffer: &mut Buffer) -> Result<(), ()
     buf.push_str(&repo.workdir().unwrap().display().to_string());
     buf.push_str(": ");
     buf.push_str(&format!("{:?}", repo.state()));
-    buf.push_str("\n\n");
+    buf.push('\n');
     let statuses = repo.statuses(None).map_err(|_| ())?;
     if !statuses.is_empty() {
         let mut staged = Vec::new();
@@ -59,7 +59,9 @@ pub fn refresh_git_repository(path: &Path, buffer: &mut Buffer) -> Result<(), ()
             }
         }
 
-        buf.push_str("Staged files: \n");
+        if !staged.is_empty() {
+            buf.push_str("\nStaged files: \n");
+        }
         for (file, stat) in staged {
             if stat.is_index_new() {
                 buf.push('N');
@@ -79,7 +81,9 @@ pub fn refresh_git_repository(path: &Path, buffer: &mut Buffer) -> Result<(), ()
             buf.push('\n');
         }
 
-        buf.push_str("\nUnstaged files: \n");
+        if !unstaged.is_empty() {
+            buf.push_str("\nUnstaged files: \n");
+        }
         for (file, stat) in unstaged {
             if stat.is_wt_new() {
                 buf.push('N');
