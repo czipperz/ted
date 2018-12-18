@@ -88,6 +88,7 @@ fn increment(state: Arc<Mutex<State>>) -> Result<(), String> {
 mod tests {
     use super::*;
     use std::sync::Arc;
+    use ted_common_commands::close_ted_command;
 
     #[test]
     fn increment_1() {
