@@ -52,7 +52,7 @@ pub fn close_window_command() -> Arc<CloseWindowCommand> {
 }
 
 impl Command for CloseWindowCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_frame = state.lock().display.selected_frame.clone();
         let mut selected_frame = selected_frame.lock();
         let selected_frame = &mut *selected_frame;
@@ -78,7 +78,7 @@ pub fn close_other_windows_command() -> Arc<CloseOtherWindowsCommand> {
 }
 
 impl Command for CloseOtherWindowsCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_frame = state.lock().display.selected_frame.clone();
         let mut selected_frame = selected_frame.lock();
         let selected_frame = &mut *selected_frame;
@@ -141,7 +141,7 @@ pub fn other_window_clockwise_command() -> Arc<OtherWindowClockwiseCommand> {
 }
 
 impl Command for OtherWindowClockwiseCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_frame = state.lock().display.selected_frame.clone();
         let mut selected_frame = selected_frame.lock();
         let selected_frame = &mut *selected_frame;
@@ -204,7 +204,7 @@ pub fn other_window_counter_clockwise_command() -> Arc<OtherWindowCounterClockwi
 }
 
 impl Command for OtherWindowCounterClockwiseCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_frame = state.lock().display.selected_frame.clone();
         let mut selected_frame = selected_frame.lock();
         let selected_frame = &mut *selected_frame;

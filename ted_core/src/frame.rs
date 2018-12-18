@@ -38,7 +38,7 @@ impl Frame {
         self.selected_window = window;
     }
 
-    pub fn show(&mut self, is_selected_frame: bool) -> Result<(), ()> {
+    pub fn show(&mut self, is_selected_frame: bool) -> Result<(), String> {
         let selected_window =
             if is_selected_frame {
                 Some(&self.selected_window)

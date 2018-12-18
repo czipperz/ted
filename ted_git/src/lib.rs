@@ -16,7 +16,7 @@ pub fn open_git_repository_command() -> Arc<OpenGitRepository> {
 }
 
 impl Command for OpenGitRepository {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let window = open_git_repository(PathBuf::from("/home/czipperz/ted/src"))?;
         let window = Arc::new(Mutex::new(window));
         let selected_frame = state.lock().display.selected_frame.clone();
@@ -25,21 +25,21 @@ impl Command for OpenGitRepository {
     }
 }
 
-pub fn open_git_repository(path: PathBuf) -> Result<Window, ()> {
+pub fn open_git_repository(path: PathBuf) -> Result<Window, String> {
     let mut buffer = Buffer::new(path.clone().into());
     refresh_git_repository(&path, &mut buffer)?;
     Ok(Window::from(buffer))
 }
 
-pub fn refresh_git_repository(path: &Path, buffer: &mut Buffer) -> Result<(), ()> {
+pub fn refresh_git_repository(path: &Path, buffer: &mut Buffer) -> Result<(), String> {
     buffer.read_only = false;
     let mut buf = String::new();
-    let repo = Repository::discover(path).map_err(|_| ())?;
+    let repo = Repository::discover(path).map_err(|e| e.to_string())?;
     buf.push_str(&repo.workdir().unwrap().display().to_string());
     buf.push_str(": ");
     buf.push_str(&format!("{:?}", repo.state()));
     buf.push('\n');
-    let statuses = repo.statuses(None).map_err(|_| ())?;
+    let statuses = repo.statuses(None).map_err(|e| e.to_string())?;
     if !statuses.is_empty() {
         let mut staged = Vec::new();
         let mut unstaged = Vec::new();

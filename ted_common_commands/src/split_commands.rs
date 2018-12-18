@@ -15,7 +15,7 @@ pub fn vertical_split_command() -> Arc<VerticalSplitCommand> {
 }
 
 impl Command for VerticalSplitCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_frame = state.lock().display.selected_frame.clone();
         let mut selected_frame = selected_frame.lock();
         let selected_frame = &mut *selected_frame;
@@ -44,7 +44,7 @@ pub fn horizontal_split_command() -> Arc<HorizontalSplitCommand> {
 }
 
 impl Command for HorizontalSplitCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_frame = state.lock().display.selected_frame.clone();
         let mut selected_frame = selected_frame.lock();
         let selected_frame = &mut *selected_frame;

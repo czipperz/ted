@@ -57,5 +57,5 @@ use std::sync::Arc;
 /// [`Display`]: trait.Display.html
 /// [`State`]: struct.State.html
 pub trait Command: Debug {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()>;
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String>;
 }

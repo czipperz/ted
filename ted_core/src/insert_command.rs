@@ -10,7 +10,7 @@ pub fn insert_command(key: char) -> Arc<Command> {
 }
 
 impl Command for InsertCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         selected_window.insert(self.0)

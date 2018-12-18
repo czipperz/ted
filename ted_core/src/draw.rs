@@ -18,9 +18,9 @@ pub enum Attribute {
 }
 
 pub trait DrawableRenderer: Renderer {
-    fn erase(&mut self) -> Result<(), ()>;
-    fn putch(&mut self, y: usize, x: usize, ch: Character) -> Result<(), ()>;
-    fn set_attribute(&mut self, y: usize, x: usize, at: Attribute) -> Result<(), ()>;
+    fn erase(&mut self) -> Result<(), String>;
+    fn putch(&mut self, y: usize, x: usize, ch: Character) -> Result<(), String>;
+    fn set_attribute(&mut self, y: usize, x: usize, at: Attribute) -> Result<(), String>;
 }
 
 pub fn draw<D>(
@@ -29,7 +29,7 @@ pub fn draw<D>(
     selected_window: Option<&Arc<Mutex<Window>>>,
     rows: usize,
     columns: usize,
-) -> Result<(), ()>
+) -> Result<(), String>
 where
     D: DrawableRenderer,
 {
@@ -49,7 +49,7 @@ pub fn draw_window<D, I>(
     x: usize,
     mut rows: usize,
     columns: usize
-) -> Result<(), ()>
+) -> Result<(), String>
 where
     D: DrawableRenderer,
     I: Iterator<Item = char>
@@ -111,7 +111,7 @@ fn draw_rect<D>(
     x: usize,
     rows: usize,
     columns: usize,
-) -> Result<(), ()>
+) -> Result<(), String>
 where
     D: DrawableRenderer,
 {

@@ -18,7 +18,7 @@ pub fn undo_command() -> Arc<UndoCommand> {
 }
 
 impl Command for UndoCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let buffer = {
             let selected_window = state.lock().display.selected_window();
             let selected_window = selected_window.lock();
@@ -46,7 +46,7 @@ pub fn redo_command() -> Arc<RedoCommand> {
 }
 
 impl Command for RedoCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let buffer = {
             let selected_window = state.lock().display.selected_window();
             let selected_window = selected_window.lock();

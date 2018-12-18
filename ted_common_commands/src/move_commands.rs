@@ -14,7 +14,7 @@ pub fn begin_of_buffer_command() -> Arc<BeginOfBufferCommand> {
 }
 
 impl Command for BeginOfBufferCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;
@@ -36,7 +36,7 @@ pub fn end_of_buffer_command() -> Arc<EndOfBufferCommand> {
 }
 
 impl Command for EndOfBufferCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;
@@ -58,7 +58,7 @@ pub fn backward_char_command() -> Arc<BackwardCharCommand> {
 }
 
 impl Command for BackwardCharCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         selected_window.increment_cursor(-1);
@@ -78,7 +78,7 @@ pub fn forward_char_command() -> Arc<ForwardCharCommand> {
 }
 
 impl Command for ForwardCharCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         selected_window.increment_cursor(1);
@@ -98,7 +98,7 @@ pub fn begin_of_line_command() -> Arc<BeginOfLineCommand> {
 }
 
 impl Command for BeginOfLineCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;
@@ -136,7 +136,7 @@ pub fn end_of_line_command() -> Arc<EndOfLineCommand> {
 }
 
 impl Command for EndOfLineCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;
@@ -174,7 +174,7 @@ pub fn forward_line_command() -> Arc<ForwardLineCommand> {
 }
 
 impl Command for ForwardLineCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;
@@ -197,7 +197,7 @@ pub fn backward_line_command() -> Arc<BackwardLineCommand> {
 }
 
 impl Command for BackwardLineCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;
@@ -246,7 +246,7 @@ pub fn forward_word_command() -> Arc<ForwardWordCommand> {
 }
 
 impl Command for ForwardWordCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;
@@ -269,7 +269,7 @@ pub fn backward_word_command() -> Arc<BackwardWordCommand> {
 }
 
 impl Command for BackwardWordCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;

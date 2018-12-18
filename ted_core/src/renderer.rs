@@ -17,7 +17,7 @@ pub trait Renderer: Send {
     ///
     /// [`Layout`]: enum.Layout.html
     fn show(&mut self, layout: &Layout, selected_window: Option<&Arc<Mutex<Window>>>,
-            messages: &mut VecDeque<String>, message_display_time: &mut Option<Instant>) -> Result<(), ()>;
+            messages: &mut VecDeque<String>, message_display_time: &mut Option<Instant>) -> Result<(), String>;
 
     /// Get the next user [`Input`] event if any.
     ///

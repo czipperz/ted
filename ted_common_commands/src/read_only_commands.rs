@@ -13,7 +13,7 @@ pub fn toggle_read_only_command() -> Arc<ToggleReadOnly> {
 }
 
 impl Command for ToggleReadOnly {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let buffer = state.lock().display.selected_window_buffer();
         let mut buffer = buffer.lock();
         buffer.read_only = !buffer.read_only;

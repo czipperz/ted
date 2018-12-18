@@ -102,7 +102,7 @@ mod tests {
         Arc::new(BlankCommand)
     }
     impl Command for BlankCommand {
-        fn execute(&self, _: Arc<Mutex<State>>) -> Result<(), ()> {
+        fn execute(&self, _: Arc<Mutex<State>>) -> Result<(), String> {
             Ok(())
         }
     }

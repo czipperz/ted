@@ -14,7 +14,7 @@ pub fn delete_backward_char_command() -> Arc<DeleteBackwardCharCommand> {
 }
 
 impl Command for DeleteBackwardCharCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;
@@ -40,7 +40,7 @@ pub fn delete_forward_char_command() -> Arc<DeleteForwardCharCommand> {
 }
 
 impl Command for DeleteForwardCharCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;

@@ -42,7 +42,7 @@ impl Display {
         }
     }
 
-    pub fn show(&self) -> Result<(), ()> {
+    pub fn show(&self) -> Result<(), String> {
         for frame in &self.frames {
             frame.lock().show(Arc::ptr_eq(&self.selected_frame, frame))?
         }

@@ -34,27 +34,27 @@ fn main() {
     let mut state = State::new(CursesRenderer::new().unwrap());
     setup_state(&mut state);
     state.display.show().unwrap();
-    main_loop(Arc::new(Mutex::new(state))).unwrap();
+    main_loop(Arc::new(Mutex::new(state)));
 }
 
-fn main_loop(state: Arc<Mutex<State>>) -> Result<(), ()> {
+fn main_loop(state: Arc<Mutex<State>>) {
     loop {
         match increment(state.clone()) {
             Ok(()) => (),
-            Err(()) =>
+            Err(message) =>
                 if ted_common_commands::was_closed_successfully() {
-                    return Ok(());
+                    return;
                 } else {
                     let mut state = state.lock();
-                    state.display.selected_frame.lock().add_message("ERR");
-                    state.display.show()?;
+                    state.display.selected_frame.lock().add_message(message);
+                    state.display.show().unwrap();
                 },
         }
     }
 }
 
-fn increment(state: Arc<Mutex<State>>) -> Result<(), ()> {
-    fn increment_(state: Arc<Mutex<State>>, inputs: &mut VecDeque<Input>) -> Result<(), ()> {
+fn increment(state: Arc<Mutex<State>>) -> Result<(), String> {
+    fn increment_(state: Arc<Mutex<State>>, inputs: &mut VecDeque<Input>) -> Result<(), String> {
         match {
             let state = state.lock();
             state.display.getch()
@@ -89,19 +89,6 @@ fn increment(state: Arc<Mutex<State>>) -> Result<(), ()> {
 mod tests {
     use super::*;
     use std::sync::Arc;
-
-    #[derive(Debug)]
-    pub struct CloseTedCommand;
-
-    pub fn close_ted_command() -> Arc<CloseTedCommand> {
-        Arc::new(CloseTedCommand)
-    }
-
-    impl Command for CloseTedCommand {
-        fn execute(&self, _: Arc<Mutex<State>>) -> Result<(), ()> {
-            Err(())
-        }
-    }
 
     #[test]
     fn increment_1() {

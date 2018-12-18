@@ -130,7 +130,7 @@ impl Renderer for DebugRenderer {
     }
 }
 impl DrawableRenderer for DebugRenderer {
-    fn erase(&mut self) -> Result<(), ()> {
+    fn erase(&mut self) -> Result<(), String> {
         self.selected_cursors.clear();
         self.unselected_cursors.clear();
         for r in &mut self.buffer {
@@ -140,25 +140,25 @@ impl DrawableRenderer for DebugRenderer {
         }
         Ok(())
     }
-    fn putch(&mut self, y: usize, x: usize, ch: Character) -> Result<(), ()> {
+    fn putch(&mut self, y: usize, x: usize, ch: Character) -> Result<(), String> {
         let c = match ch {
             Character::Character(ch) => ch,
             Character::VLine => '|',
             Character::HLine => '-',
         };
         if y > self.buffer.len() {
-            Err(())
+            Err("Error: DebugRenderer::putch(): y out of bounds".to_string())
         } else {
             let row = &mut self.buffer[y];
             if x > row.len() {
-                Err(())
+                Err("Error: DebugRenderer::putch(): x out of bounds".to_string())
             } else {
                 row[x] = c;
                 Ok(())
             }
         }
     }
-    fn set_attribute(&mut self, y: usize, x: usize, at: Attribute) -> Result<(), ()> {
+    fn set_attribute(&mut self, y: usize, x: usize, at: Attribute) -> Result<(), String> {
         match at {
             Attribute::SelectedCursor => self.selected_cursors.push((y, x)),
             Attribute::UnselectedCursor => self.unselected_cursors.push((y, x)),

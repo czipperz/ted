@@ -74,7 +74,7 @@ pub fn set_mark_command() -> Arc<SetMarkCommand> {
 }
 
 impl Command for SetMarkCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let selected_window = selected_window.lock();
         set_mark(&selected_window, selected_window.cursor.clone());
@@ -93,7 +93,7 @@ pub fn remove_mark_command() -> Arc<RemoveMarkCommand> {
 }
 
 impl Command for RemoveMarkCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let selected_window = selected_window.lock();
         remove_mark(&selected_window);

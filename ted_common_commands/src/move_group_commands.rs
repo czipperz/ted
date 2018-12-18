@@ -14,7 +14,7 @@ pub fn forward_group_command() -> Arc<ForwardGroupCommand> {
 }
 
 impl Command for ForwardGroupCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;
@@ -36,7 +36,7 @@ pub fn backward_group_command() -> Arc<BackwardGroupCommand> {
 }
 
 impl Command for BackwardGroupCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;
@@ -137,7 +137,7 @@ pub fn up_group_command() -> Arc<UpGroupCommand> {
 }
 
 impl Command for UpGroupCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         let selected_window = &mut *selected_window;

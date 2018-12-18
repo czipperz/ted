@@ -48,7 +48,7 @@ impl CursesRenderer {
 
 impl Renderer for CursesRenderer {
     fn show(&mut self, layout: &Layout, selected_window: Option<&Arc<Mutex<Window>>>,
-            messages: &mut VecDeque<String>, message_display_time: &mut Option<Instant>) -> Result<(), ()> {
+            messages: &mut VecDeque<String>, message_display_time: &mut Option<Instant>) -> Result<(), String> {
         let (rows, columns) = self.window.get_max_yx();
         let rows = rows as usize;
         let columns = columns as usize;
@@ -96,8 +96,8 @@ impl Renderer for CursesRenderer {
             },
             None => (),
         }
-        check(self.window.mv(self.cursor_y as i32, self.cursor_x as i32))?;
-        check(self.window.refresh())?;
+        check(self.window.mv(self.cursor_y as i32, self.cursor_x as i32)).map_err(|()| "Error: Curses mv()".to_string())?;
+        check(self.window.refresh()).map_err(|()| "Error: Curses refresh()".to_string())?;
         Ok(())
     }
 
@@ -167,20 +167,20 @@ fn convert_to_key(c: char, alt: bool) -> Input {
 }
 
 impl DrawableRenderer for CursesRenderer {
-    fn erase(&mut self) -> Result<(), ()> {
-        check(self.window.erase())
+    fn erase(&mut self) -> Result<(), String> {
+        check(self.window.erase()).map_err(|()| "Error: Curses erase()".to_string())
     }
 
-    fn putch(&mut self, y: usize, x: usize, ch: Character) -> Result<(), ()> {
+    fn putch(&mut self, y: usize, x: usize, ch: Character) -> Result<(), String> {
         let c = match ch {
             Character::Character(ch) => ch,
             Character::VLine => '|',
             Character::HLine => '-',
         };
-        check(self.window.mvaddch(y as i32, x as i32, c))
+        check(self.window.mvaddch(y as i32, x as i32, c)).map_err(|()| "Error: Curses putch()".to_string())
     }
 
-    fn set_attribute(&mut self, y: usize, x: usize, at: Attribute) -> Result<(), ()> {
+    fn set_attribute(&mut self, y: usize, x: usize, at: Attribute) -> Result<(), String> {
         match at {
             Attribute::SelectedCursor => {
                 self.cursor_y = y as i32;
@@ -194,7 +194,7 @@ impl DrawableRenderer for CursesRenderer {
                 1,
                 pancurses::Attribute::Reverse.into(),
                 0,
-            )),
+            )).map_err(|()| "Error: Curses mvchgat()".to_string()),
         }
     }
 }

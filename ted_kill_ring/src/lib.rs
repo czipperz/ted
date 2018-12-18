@@ -44,7 +44,7 @@ fn insert_kill(window: &Window, substring: String) {
     );
 }
 
-pub fn copy_region(window: &Window) -> Result<(), ()> {
+pub fn copy_region(window: &Window) -> Result<(), String> {
     let substring = {
         let buffer = window.buffer.lock();
         substring_region(window, &buffer).1
@@ -53,7 +53,7 @@ pub fn copy_region(window: &Window) -> Result<(), ()> {
     Ok(())
 }
 
-pub fn kill_region(window: &Window) -> Result<(), ()> {
+pub fn kill_region(window: &Window) -> Result<(), String> {
     let substring = {
         let mut buffer = window.buffer.lock();
         let (region, substring) = substring_region(window, &buffer);
@@ -64,7 +64,7 @@ pub fn kill_region(window: &Window) -> Result<(), ()> {
     Ok(())
 }
 
-pub fn paste(window: &Window) -> Result<(), ()> {
+pub fn paste(window: &Window) -> Result<(), String> {
     let mut buffer = window.buffer.lock();
     let mut kills = KILLS.lock();
     if let Some(kill_ring) = kills.get_mut(&W(window)) {
@@ -77,7 +77,7 @@ pub fn paste(window: &Window) -> Result<(), ()> {
     Ok(())
 }
 
-pub fn paste_pop(window: &Window, times: isize) -> Result<(), ()> {
+pub fn paste_pop(window: &Window, times: isize) -> Result<(), String> {
     fn modulus(a: isize, b: isize) -> isize {
         ((a % b) + b) % b
     }
@@ -103,7 +103,7 @@ pub fn copy_region_command() -> Arc<CopyRegionCommand> {
 }
 
 impl Command for CopyRegionCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let selected_window = selected_window.lock();
         copy_region(&selected_window)?;
@@ -122,7 +122,7 @@ pub fn kill_region_command() -> Arc<KillRegionCommand> {
 }
 
 impl Command for KillRegionCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         kill_region(&selected_window)?;
@@ -142,7 +142,7 @@ pub fn paste_command() -> Arc<PasteCommand> {
 }
 
 impl Command for PasteCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let mut selected_window = selected_window.lock();
         paste(&selected_window)?;
@@ -162,7 +162,7 @@ pub fn paste_pop_command() -> Arc<PastePopCommand> {
 }
 
 impl Command for PastePopCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_window = state.lock().display.selected_window();
         let selected_window = selected_window.lock();
         paste_pop(&selected_window, 1)?;

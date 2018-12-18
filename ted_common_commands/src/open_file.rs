@@ -5,17 +5,17 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use ted_core::*;
 
-pub fn open_file(path: PathBuf) -> Result<Buffer, ()> {
-    let path = path.canonicalize().map_err(|_| ())?;
+pub fn open_file(path: PathBuf) -> Result<Buffer, String> {
+    let path = path.canonicalize().map_err(|e| e.to_string())?;
     if !path.exists() {
-        Err(())
+        Err(format!("Path does not exist {}", path.display()))
     } else {
         let mut buf = String::new();
         if path.is_dir() {
             buf.push_str(&path.display().to_string());
             buf.push_str(":\n..\n");
             let mut entries = Vec::new();
-            for entry in path.read_dir().map_err(|_| ())? {
+            for entry in path.read_dir().map_err(|e| e.to_string())? {
                 if let Ok(entry) = entry {
                     entries.push(
                         entry
@@ -34,9 +34,9 @@ pub fn open_file(path: PathBuf) -> Result<Buffer, ()> {
                 buf.push('\n');
             }
         } else {
-            let file = File::open(&path).map_err(|_| ())?;
+            let file = File::open(&path).map_err(|e| e.to_string())?;
             let mut reader = BufReader::new(file);
-            reader.read_to_string(&mut buf).map_err(|_| ())?;
+            reader.read_to_string(&mut buf).map_err(|e| e.to_string())?;
         }
         Ok(Buffer::new_with_contents(path.into(), &buf))
     }
@@ -53,7 +53,7 @@ pub fn open_file_command() -> Arc<OpenFileCommand> {
 }
 
 impl Command for OpenFileCommand {
-    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), ()> {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let buffer = open_file("/home/czipperz/ted/src/main.rs".into())?;
         let window = Arc::new(Mutex::new(Window::from(buffer)));
         let selected_frame = state.lock().display.selected_frame.clone();
