@@ -173,4 +173,19 @@ mod tests {
         cursor.increment(&buffer, -1);
         assert_eq!(cursor.get(), 8);
     }
+
+    #[test]
+    fn buffer_with_contents_then_delete_update_doesnt_move_cursor() {
+        let mut buffer = Buffer::new_with_contents("*scratch*".into(), "contents");
+        let mut cursor = Cursor::new();
+        assert!(cursor.is_updated(&buffer));
+        assert_eq!(cursor.get(), 0);
+
+        buffer.delete(3).unwrap();
+        assert!(!cursor.is_updated(&buffer));
+        assert_eq!(cursor.get(), 0);
+        cursor.update(&buffer);
+        assert!(cursor.is_updated(&buffer));
+        assert_eq!(cursor.get(), 0);
+    }
 }

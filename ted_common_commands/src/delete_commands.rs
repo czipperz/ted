@@ -192,4 +192,43 @@ mod tests {
             assert_eq!(format!("{}", *buffer), "bd");
         }
     }
+
+    #[test]
+    fn delete_forward_char_with_contents_buffer() {
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
+
+        {
+            let selected_window = state.lock().display.selected_window();
+            let mut selected_window = selected_window.lock();
+            let buffer = selected_window.buffer.clone();
+            let mut buffer = buffer.lock();
+            buffer.insert_str(0, "abcdefg").unwrap();
+            buffer.erase_history();
+            selected_window.cursor.set(&buffer, 0);
+        }
+
+        delete_forward_char_command()
+            .execute(state.clone())
+            .unwrap();
+        {
+            let selected_window = state.lock().display.selected_window();
+            let selected_window = selected_window.lock();
+            let buffer = selected_window.buffer.lock();
+            assert!(selected_window.cursor.is_updated(&buffer));
+            assert_eq!(selected_window.cursor.get(), 0);
+            assert_eq!(buffer.to_string(), "bcdefg");
+        }
+
+        delete_forward_char_command()
+            .execute(state.clone())
+            .unwrap();
+        {
+            let selected_window = state.lock().display.selected_window();
+            let selected_window = selected_window.lock();
+            assert_eq!(selected_window.cursor.get(), 0);
+
+            let buffer = selected_window.buffer.lock();
+            assert_eq!(buffer.to_string(), "cdefg");
+        }
+    }
 }

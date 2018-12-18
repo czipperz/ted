@@ -396,7 +396,7 @@ pub fn update_cursor(
         None => {
             *ret_state = match &buffer.current_state {
                 Some(s) => {
-                    *ret_location = buffer.len();
+                    *ret_location = s.lock().change.offset_cursor_redo(*ret_location);
                     Arc::downgrade(&s)
                 }
                 None => Weak::new(),
