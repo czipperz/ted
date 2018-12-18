@@ -200,6 +200,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "ted_common_commands"
 version = "0.1.0"
 dependencies = [
+ "lazy_static 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "ted_core 0.1.0",
 ]

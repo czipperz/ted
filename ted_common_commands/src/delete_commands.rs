@@ -21,7 +21,7 @@ impl Command for DeleteBackwardCharCommand {
         if selected_window.cursor.get() != 0 {
             let mut buffer = selected_window.buffer.lock();
             debug_assert!(selected_window.cursor.is_updated(&buffer));
-            buffer.delete(selected_window.cursor.get() - 1).unwrap();
+            buffer.delete(selected_window.cursor.get() - 1)?;
             selected_window.cursor.update(&buffer);
         }
         Ok(())
@@ -47,7 +47,7 @@ impl Command for DeleteForwardCharCommand {
         let mut buffer = selected_window.buffer.lock();
         debug_assert!(selected_window.cursor.is_updated(&buffer));
         if selected_window.cursor.get() != buffer.len() {
-            buffer.delete(selected_window.cursor.get()).unwrap();
+            buffer.delete(selected_window.cursor.get())?;
             selected_window.cursor.update(&buffer);
         }
         Ok(())
