@@ -47,7 +47,7 @@ pub fn draw_window<D, I>(
     name: Option<&str>,
     y: usize,
     x: usize,
-    rows: usize,
+    mut rows: usize,
     columns: usize
 ) -> Result<(), ()>
 where
@@ -57,7 +57,10 @@ where
     let mut column = 0;
     let mut row = 0;
     let mut location = 0;
-    while row < rows - 1 {
+    if name.is_some() {
+        rows -= 1;
+    }
+    while row < rows {
         if cursor_location.map(|c| c == location).unwrap_or(false) {
             if is_selected_window {
                 display.set_attribute(y + row, x + column, Attribute::SelectedCursor)?;
@@ -87,12 +90,12 @@ where
             let mut column = 0;
             for ch in name.chars() {
                 if column < columns {
-                    display.putch(y + rows - 1, x + column, Character::Character(ch))?;
+                    display.putch(y + rows, x + column, Character::Character(ch))?;
                     column += 1;
                 }
             }
             for column in 0..columns {
-                display.set_attribute(y + rows - 1, x + column, Attribute::Inverted)?;
+                display.set_attribute(y + rows, x + column, Attribute::Inverted)?;
             }
         }
         None => ()

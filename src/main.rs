@@ -60,6 +60,7 @@ fn increment(state: Arc<Mutex<State>>) -> Result<(), ()> {
             state.display.getch()
         } {
             Some(input) => {
+                state.lock().display.show()?;
                 inputs.push_back(input);
                 match {
                     let state = state.lock();
@@ -74,7 +75,10 @@ fn increment(state: Arc<Mutex<State>>) -> Result<(), ()> {
                     Err(Err(())) => Ok(()),
                 }
             }
-            None => Ok(()),
+            None => {
+                state.lock().display.show()?;
+                Ok(())
+            },
         }
     }
 

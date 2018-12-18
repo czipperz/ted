@@ -67,18 +67,33 @@ impl Renderer for CursesRenderer {
             },
         }
         match messages.front() {
-            Some(message) =>
+            Some(message) => {
+                self.set_attribute(rows - 3, 9, Attribute::Inverted)?;
+                self.putch(rows - 3, 9, Character::Character('.'))?;
+                self.set_attribute(rows - 2, 9, Attribute::Inverted)?;
+                self.putch(rows - 2, 9, Character::VLine)?;
+                for i in 10..=columns-10 {
+                    self.set_attribute(rows - 3, i, Attribute::Inverted)?;
+                    self.putch(rows - 3, i, Character::HLine)?;
+                    self.set_attribute(rows - 2, i, Attribute::Inverted)?;
+                    self.putch(rows - 2, i, Character::Character(' '))?
+                }
+                self.set_attribute(rows - 3, columns - 9, Attribute::Inverted)?;
+                self.putch(rows - 3, columns - 9, Character::Character('.'))?;
+                self.set_attribute(rows - 2, columns - 9, Attribute::Inverted)?;
+                self.putch(rows - 2, columns - 9, Character::VLine)?;
                 draw_window(
                     self,
                     message.chars(),
                     false,
                     None,
                     None,
-                    rows / 2 - 5,
+                    rows - 2,
                     10,
-                    10,
+                    1,
                     columns - 20,
-                )?,
+                )?;
+            },
             None => (),
         }
         check(self.window.mv(self.cursor_y as i32, self.cursor_x as i32))?;

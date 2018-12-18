@@ -53,6 +53,6 @@ impl Frame {
     }
 
     pub fn add_message<S>(&mut self, message: S) where S: ToString {
-        self.messages.push_front(message.to_string());
+        self.messages.push_back(message.to_string());
     }
 }
