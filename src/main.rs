@@ -17,8 +17,8 @@
 //! [`Action`]: ../ted_core/type.Action.html
 
 extern crate parking_lot;
-extern crate ted_core;
 extern crate ted_common_commands;
+extern crate ted_core;
 extern crate ted_user_cfg;
 
 use parking_lot::Mutex;
@@ -41,14 +41,13 @@ fn main_loop(state: Arc<Mutex<State>>) {
     loop {
         match increment(state.clone()) {
             Ok(()) => (),
-            Err(message) =>
-                if ted_common_commands::was_closed_successfully() {
-                    return;
-                } else {
-                    let mut state = state.lock();
-                    state.display.selected_frame.lock().add_message(message);
-                    state.display.show().unwrap();
-                },
+            Err(message) => if ted_common_commands::was_closed_successfully() {
+                return;
+            } else {
+                let mut state = state.lock();
+                state.display.selected_frame.lock().add_message(message);
+                state.display.show().unwrap();
+            },
         }
     }
 }
@@ -78,7 +77,7 @@ fn increment(state: Arc<Mutex<State>>) -> Result<(), String> {
             None => {
                 state.lock().display.show()?;
                 Ok(())
-            },
+            }
         }
     }
 
@@ -289,10 +288,16 @@ mod tests {
 
     #[test]
     fn increment_double_bind() {
-        let state = Arc::new(Mutex::new(State::new(DebugRenderer::from(vec![kbd!('a'), kbd!('a'), kbd!('b')]))));
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::from(vec![
+            kbd!('a'),
+            kbd!('a'),
+            kbd!('b'),
+        ]))));
         {
             let default_key_map = state.lock().default_key_map.clone();
-            default_key_map.lock().bind(vec![kbd!('a'), kbd!('b')], close_ted_command());
+            default_key_map
+                .lock()
+                .bind(vec![kbd!('a'), kbd!('b')], close_ted_command());
         }
 
         increment(state.clone()).unwrap();

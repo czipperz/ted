@@ -39,20 +39,27 @@ impl Frame {
     }
 
     pub fn show(&mut self, is_selected_frame: bool) -> Result<(), String> {
-        let selected_window =
-            if is_selected_frame {
-                Some(&self.selected_window)
-            } else {
-                None
-            };
-        self.renderer.show(&self.layout, selected_window, &mut self.messages, &mut self.message_display_time)
+        let selected_window = if is_selected_frame {
+            Some(&self.selected_window)
+        } else {
+            None
+        };
+        self.renderer.show(
+            &self.layout,
+            selected_window,
+            &mut self.messages,
+            &mut self.message_display_time,
+        )
     }
 
     pub fn getch(&mut self) -> Option<Input> {
         self.renderer.getch()
     }
 
-    pub fn add_message<S>(&mut self, message: S) where S: ToString {
+    pub fn add_message<S>(&mut self, message: S)
+    where
+        S: ToString,
+    {
         self.messages.push_back(message.to_string());
     }
 }

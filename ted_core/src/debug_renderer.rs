@@ -120,8 +120,13 @@ impl From<Vec<Input>> for DebugRenderer {
 }
 
 impl Renderer for DebugRenderer {
-    fn show(&mut self, layout: &Layout, selected_window: Option<&Arc<Mutex<Window>>>,
-            messages: &mut VecDeque<String>, message_display_time: &mut Option<Instant>) -> Result<(), ()> {
+    fn show(
+        &mut self,
+        layout: &Layout,
+        selected_window: Option<&Arc<Mutex<Window>>>,
+        _messages: &mut VecDeque<String>,
+        _message_display_time: &mut Option<Instant>,
+    ) -> Result<(), String> {
         draw(self, layout, selected_window, 15, 20)?;
         Ok(())
     }

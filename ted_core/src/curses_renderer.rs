@@ -47,8 +47,13 @@ impl CursesRenderer {
 }
 
 impl Renderer for CursesRenderer {
-    fn show(&mut self, layout: &Layout, selected_window: Option<&Arc<Mutex<Window>>>,
-            messages: &mut VecDeque<String>, message_display_time: &mut Option<Instant>) -> Result<(), String> {
+    fn show(
+        &mut self,
+        layout: &Layout,
+        selected_window: Option<&Arc<Mutex<Window>>>,
+        messages: &mut VecDeque<String>,
+        message_display_time: &mut Option<Instant>,
+    ) -> Result<(), String> {
         let (rows, columns) = self.window.get_max_yx();
         let rows = rows as usize;
         let columns = columns as usize;
@@ -64,7 +69,7 @@ impl Renderer for CursesRenderer {
                 if !messages.is_empty() {
                     *message_display_time = Some(Instant::now());
                 }
-            },
+            }
         }
         match messages.front() {
             Some(message) => {
@@ -72,7 +77,7 @@ impl Renderer for CursesRenderer {
                 self.putch(rows - 3, 9, Character::Character('.'))?;
                 self.set_attribute(rows - 2, 9, Attribute::Inverted)?;
                 self.putch(rows - 2, 9, Character::VLine)?;
-                for i in 10..=columns-10 {
+                for i in 10..=columns - 10 {
                     self.set_attribute(rows - 3, i, Attribute::Inverted)?;
                     self.putch(rows - 3, i, Character::HLine)?;
                     self.set_attribute(rows - 2, i, Attribute::Inverted)?;
@@ -93,10 +98,11 @@ impl Renderer for CursesRenderer {
                     1,
                     columns - 20,
                 )?;
-            },
+            }
             None => (),
         }
-        check(self.window.mv(self.cursor_y as i32, self.cursor_x as i32)).map_err(|()| "Error: Curses mv()".to_string())?;
+        check(self.window.mv(self.cursor_y as i32, self.cursor_x as i32))
+            .map_err(|()| "Error: Curses mv()".to_string())?;
         check(self.window.refresh()).map_err(|()| "Error: Curses refresh()".to_string())?;
         Ok(())
     }
@@ -177,7 +183,8 @@ impl DrawableRenderer for CursesRenderer {
             Character::VLine => '|',
             Character::HLine => '-',
         };
-        check(self.window.mvaddch(y as i32, x as i32, c)).map_err(|()| "Error: Curses putch()".to_string())
+        check(self.window.mvaddch(y as i32, x as i32, c))
+            .map_err(|()| "Error: Curses putch()".to_string())
     }
 
     fn set_attribute(&mut self, y: usize, x: usize, at: Attribute) -> Result<(), String> {

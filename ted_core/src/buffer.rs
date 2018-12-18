@@ -136,13 +136,21 @@ impl Buffer {
 
     /// Retrieve a substring from position `begin` up until `end`.
     pub fn substring(&self, begin: usize, end: usize) -> Result<String, String> {
-        self.buffer_contents.substring(begin, end).map_err(|()| "Error: Index out of bounds in Buffer::substring()".to_string())
+        self.buffer_contents
+            .substring(begin, end)
+            .map_err(|()| "Error: Index out of bounds in Buffer::substring()".to_string())
     }
 
     /// Insert char `c` at point `loc`.
     pub fn insert(&mut self, loc: usize, c: char) -> Result<(), String> {
-        if self.read_only { return Err("Error: Buffer::insert() cannot be called on a read only Buffer".to_string()); }
-        self.buffer_contents.insert(loc, c).map_err(|()| "Error: Index out of bounds in Buffer::insert()")?;
+        if self.read_only {
+            return Err(
+                "Error: Buffer::insert() cannot be called on a read only Buffer".to_string(),
+            );
+        }
+        self.buffer_contents
+            .insert(loc, c)
+            .map_err(|()| "Error: Index out of bounds in Buffer::insert()")?;
         self.add_change(Change {
             loc,
             s: c.to_string(),
@@ -154,8 +162,14 @@ impl Buffer {
 
     /// Insert string `s` at point `loc`.
     pub fn insert_str(&mut self, loc: usize, s: &str) -> Result<(), String> {
-        if self.read_only { return Err("Error: Buffer::insert_str() cannot be called on a read only Buffer".to_string()); }
-        self.buffer_contents.insert_str(loc, s).map_err(|()| "Error: Index out of bounds in Buffer::insert_str()".to_string())?;
+        if self.read_only {
+            return Err(
+                "Error: Buffer::insert_str() cannot be called on a read only Buffer".to_string(),
+            );
+        }
+        self.buffer_contents
+            .insert_str(loc, s)
+            .map_err(|()| "Error: Index out of bounds in Buffer::insert_str()".to_string())?;
         self.add_change(Change {
             loc,
             s: s.to_string(),
@@ -167,9 +181,17 @@ impl Buffer {
 
     /// Delete the character at point `loc`.
     pub fn delete(&mut self, loc: usize) -> Result<(), String> {
-        if self.read_only { return Err("Error: Buffer::delete() cannot be called on a read only Buffer".to_string()); }
-        let c = self.get(loc).map_err(|()| "Error: Index out of bounds in Buffer::delete()".to_string())?;
-        self.buffer_contents.delete(loc).map_err(|()| "Error: Index out of bounds in Buffer::delete()".to_string())?;
+        if self.read_only {
+            return Err(
+                "Error: Buffer::delete() cannot be called on a read only Buffer".to_string(),
+            );
+        }
+        let c = self
+            .get(loc)
+            .map_err(|()| "Error: Index out of bounds in Buffer::delete()".to_string())?;
+        self.buffer_contents
+            .delete(loc)
+            .map_err(|()| "Error: Index out of bounds in Buffer::delete()".to_string())?;
         self.add_change(Change {
             loc,
             s: c.to_string(),
@@ -181,9 +203,15 @@ impl Buffer {
 
     /// Delete the region from position `begin` up until `end`.
     pub fn delete_region(&mut self, begin: usize, end: usize) -> Result<(), String> {
-        if self.read_only { return Err("Error: Buffer::delete_region() cannot be called on a read only Buffer".to_string()); }
+        if self.read_only {
+            return Err(
+                "Error: Buffer::delete_region() cannot be called on a read only Buffer".to_string(),
+            );
+        }
         let s = self.substring(begin, end)?;
-        self.buffer_contents.delete_region(begin, end).map_err(|()| "Error: Index out of bounds in Buffer::delete_region()".to_string())?;
+        self.buffer_contents
+            .delete_region(begin, end)
+            .map_err(|()| "Error: Index out of bounds in Buffer::delete_region()".to_string())?;
         let len_chars = s.chars().count();
         self.add_change(Change {
             loc: begin,
@@ -254,7 +282,9 @@ impl Buffer {
     /// assert_eq!(format!("{}", buffer), "");
     /// ```
     pub fn undo(&mut self) -> Result<bool, String> {
-        if self.read_only { return Err("Error: Buffer::undo() cannot be called on a read only Buffer".to_string()); }
+        if self.read_only {
+            return Err("Error: Buffer::undo() cannot be called on a read only Buffer".to_string());
+        }
         match self.current_state.take() {
             Some(current_state) => {
                 let current_state = current_state.lock();
@@ -263,8 +293,7 @@ impl Buffer {
                         .delete_region(
                             current_state.change.loc,
                             current_state.change.loc + current_state.change.len_chars,
-                        )
-                        .map_err(|()| "Error: Index out of bounds in Buffer::undo()".to_string())?;
+                        ).map_err(|()| "Error: Index out of bounds in Buffer::undo()".to_string())?;
                 } else {
                     self.buffer_contents
                         .insert_str(current_state.change.loc, &current_state.change.s)
@@ -300,7 +329,9 @@ impl Buffer {
     /// assert_eq!(format!("{}", buffer), "abc");
     /// ```
     pub fn redo(&mut self) -> Result<bool, String> {
-        if self.read_only { return Err("Error: Buffer::undo() cannot be called on a read only Buffer".to_string()); }
+        if self.read_only {
+            return Err("Error: Buffer::undo() cannot be called on a read only Buffer".to_string());
+        }
         match self.current_state.take() {
             Some(current_state_lock) => {
                 {
@@ -314,12 +345,17 @@ impl Buffer {
                                         .delete_region(
                                             next_state.change.loc,
                                             next_state.change.loc + next_state.change.len_chars,
-                                        )
-                                        .map_err(|()| "Error: Index out of bounds in Buffer::redo()".to_string())?;
+                                        ).map_err(|()| {
+                                            "Error: Index out of bounds in Buffer::redo()"
+                                                .to_string()
+                                        })?;
                                 } else {
                                     self.buffer_contents
                                         .insert_str(next_state.change.loc, &next_state.change.s)
-                                        .map_err(|()| "Error: Index out of bounds in Buffer::redo()".to_string())?;
+                                        .map_err(|()| {
+                                            "Error: Index out of bounds in Buffer::redo()"
+                                                .to_string()
+                                        })?;
                                 }
                             }
                             self.current_state = Some(next_state.clone());

@@ -60,14 +60,26 @@ pub fn refresh_git_repository(path: &Path, buffer: &mut Buffer) -> Result<(), St
         let mut unstaged = Vec::new();
         for status in statuses.iter() {
             use std::rc::Rc;
-            let file = Rc::new(String::from_utf8_lossy(status.path_bytes()).to_owned().to_string());
+            let file = Rc::new(
+                String::from_utf8_lossy(status.path_bytes())
+                    .to_owned()
+                    .to_string(),
+            );
             let stat = status.status();
-            if stat.is_index_new() | stat.is_index_modified() | stat.is_index_deleted() |
-            stat.is_index_typechange() | stat.is_index_renamed() {
+            if stat.is_index_new()
+                | stat.is_index_modified()
+                | stat.is_index_deleted()
+                | stat.is_index_typechange()
+                | stat.is_index_renamed()
+            {
                 staged.push((file.clone(), stat));
             }
-            if stat.is_wt_new() | stat.is_wt_modified() | stat.is_wt_deleted() |
-            stat.is_wt_typechange() | stat.is_wt_renamed() {
+            if stat.is_wt_new()
+                | stat.is_wt_modified()
+                | stat.is_wt_deleted()
+                | stat.is_wt_typechange()
+                | stat.is_wt_renamed()
+            {
                 if !stat.is_ignored() {
                     unstaged.push((file, stat));
                 }

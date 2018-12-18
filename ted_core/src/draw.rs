@@ -48,11 +48,11 @@ pub fn draw_window<D, I>(
     y: usize,
     x: usize,
     mut rows: usize,
-    columns: usize
+    columns: usize,
 ) -> Result<(), String>
 where
     D: DrawableRenderer,
-    I: Iterator<Item = char>
+    I: Iterator<Item = char>,
 {
     let mut column = 0;
     let mut row = 0;
@@ -98,7 +98,7 @@ where
                 display.set_attribute(y + rows, x + column, Attribute::Inverted)?;
             }
         }
-        None => ()
+        None => (),
     }
     Ok(())
 }
@@ -117,12 +117,23 @@ where
 {
     match layout {
         Layout::Window(window) => {
-            let is_selected_window = selected_window.map(|selected_window| Arc::ptr_eq(window, selected_window)).unwrap_or(false);
+            let is_selected_window = selected_window
+                .map(|selected_window| Arc::ptr_eq(window, selected_window))
+                .unwrap_or(false);
             let window = window.lock();
             let buffer = window.buffer.lock();
             let mut iter = buffer.iter();
-            draw_window(display, iter, is_selected_window, Some(window.cursor.get()),
-                        Some(buffer.name.display_name()), y, x, rows, columns)
+            draw_window(
+                display,
+                iter,
+                is_selected_window,
+                Some(window.cursor.get()),
+                Some(buffer.name.display_name()),
+                y,
+                x,
+                rows,
+                columns,
+            )
         }
         Layout::VSplit { left, right } => {
             // 4 columns
