@@ -25,6 +25,21 @@ impl Command for OpenGitRepository {
     }
 }
 
+#[derive(Debug)]
+pub struct RefreshGitRepository;
+
+pub fn refresh_git_repository_command() -> Arc<RefreshGitRepository> {
+    Arc::new(RefreshGitRepository)
+}
+
+impl Command for RefreshGitRepository {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
+        let buffer = state.lock().display.selected_window_buffer();
+        refresh_git_repository(Path::new("/home/czipperz/ted/src"), &mut *buffer.lock())?;
+        Ok(())
+    }
+}
+
 pub fn open_git_repository(path: PathBuf) -> Result<Window, String> {
     let mut buffer = Buffer::new(path.clone().into());
     refresh_git_repository(&path, &mut buffer)?;
