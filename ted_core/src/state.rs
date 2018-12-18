@@ -141,6 +141,24 @@ mod tests {
     }
 
     #[test]
+    fn lookup_two_same_key() {
+        let state = State::new(DebugRenderer::new());
+        let command = blank_command();
+        state
+            .default_key_map
+            .lock()
+            .bind(vec![kbd!('a'), kbd!('a')], command.clone());
+        assert!(state.lookup(&mut vec![].into()).is_err());
+        assert!(state.lookup(&mut vec![kbd!('a')].into()).is_err());
+        assert!(Arc::ptr_eq(
+            &state
+                .lookup(&mut vec![kbd!('a'), kbd!('a')].into())
+                .unwrap(),
+            &command
+        ));
+    }
+
+    #[test]
     fn lookup_with_mapping() {
         let state = State::new(DebugRenderer::new());
         let command = blank_command();

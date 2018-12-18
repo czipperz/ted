@@ -299,4 +299,35 @@ mod tests {
             assert_eq!(format!("{}", *buffer), "\n");
         }
     }
+
+    #[test]
+    fn increment_double_bind() {
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::from(vec![kbd!('a'), kbd!('a'), kbd!('b')]))));
+        {
+            let default_key_map = state.lock().default_key_map.clone();
+            default_key_map.lock().bind(vec![kbd!('a'), kbd!('b')], close_ted_command());
+        }
+
+        increment(state.clone()).unwrap();
+        {
+            let selected_window = state.lock().display.selected_window();
+            let selected_window = selected_window.lock();
+
+            let buffer = selected_window.buffer.lock();
+            assert_eq!(buffer.to_string(), "");
+
+            assert_eq!(selected_window.cursor.get(), 0);
+        }
+
+        increment(state.clone()).unwrap();
+        {
+            let selected_window = state.lock().display.selected_window();
+            let selected_window = selected_window.lock();
+
+            let buffer = selected_window.buffer.lock();
+            assert_eq!(buffer.to_string(), "b");
+
+            assert_eq!(selected_window.cursor.get(), 1);
+        }
+    }
 }
