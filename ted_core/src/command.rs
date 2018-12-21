@@ -59,3 +59,14 @@ use std::sync::Arc;
 pub trait Command: Debug {
     fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String>;
 }
+
+#[derive(Debug)]
+pub struct BlankCommand;
+pub fn blank_command() -> Arc<Command> {
+    Arc::new(BlankCommand)
+}
+impl Command for BlankCommand {
+    fn execute(&self, _: Arc<Mutex<State>>) -> Result<(), String> {
+        Ok(())
+    }
+}

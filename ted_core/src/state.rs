@@ -116,17 +116,6 @@ mod tests {
     use super::*;
     use debug_renderer::DebugRenderer;
 
-    #[derive(Debug)]
-    struct BlankCommand;
-    fn blank_command() -> Arc<Command> {
-        Arc::new(BlankCommand)
-    }
-    impl Command for BlankCommand {
-        fn execute(&self, _: Arc<Mutex<State>>) -> Result<(), String> {
-            Ok(())
-        }
-    }
-
     #[test]
     fn lookup_basic() {
         let state = State::new(DebugRenderer::new());
