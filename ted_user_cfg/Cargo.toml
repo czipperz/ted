@@ -9,3 +9,4 @@ ted_core = { path = "../ted_core" }
 ted_git = { path = "../ted_git" }
 ted_kill_ring = { path = "../ted_kill_ring" }
 ted_mark = { path = "../ted_mark" }
+ted_other_window = { path = "../ted_other_window" }

@@ -17,6 +17,7 @@ RUST_BACKTRACE=1 cargo test -p ted_common_commands $tests || status=1
 RUST_BACKTRACE=1 cargo test -p ted_git $tests || status=1
 RUST_BACKTRACE=1 cargo test -p ted_mark $tests || status=1
 RUST_BACKTRACE=1 cargo test -p ted_kill_ring $tests || status=1
+RUST_BACKTRACE=1 cargo test -p ted_other_window $tests || status=1
 RUST_BACKTRACE=1 cargo test -p ted_user_cfg $tests || status=1
 RUST_BACKTRACE=1 cargo test -p ted $tests || status=1
 exit $status

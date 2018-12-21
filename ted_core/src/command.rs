@@ -60,6 +60,12 @@ pub trait Command: Debug + Send + Sync {
     fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String>;
 }
 
+impl<T> Command for Arc<T> where T: Command {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
+        (**self).execute(state)
+    }
+}
+
 #[derive(Debug)]
 pub struct BlankCommand;
 pub fn blank_command() -> Arc<Command> {
