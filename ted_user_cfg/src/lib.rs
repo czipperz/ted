@@ -3,12 +3,14 @@ extern crate ted_core;
 extern crate ted_git;
 extern crate ted_kill_ring;
 extern crate ted_mark;
+extern crate ted_other_window;
 
 use ted_common_commands::*;
 use ted_core::*;
 use ted_git::*;
 use ted_kill_ring::*;
 use ted_mark::*;
+use ted_other_window::*;
 
 pub fn setup_state(state: &mut State) {
     let mut default_key_map = state.default_key_map.lock();
@@ -32,6 +34,8 @@ pub fn setup_state(state: &mut State) {
     default_key_map.bind(vec![kbd!(C-'x'), kbd!('1')], close_other_windows_command());
     default_key_map.bind(vec![kbd!(C-'x'), kbd!('2')], horizontal_split_command());
     default_key_map.bind(vec![kbd!(C-'x'), kbd!('3')], vertical_split_command());
+    default_key_map.map(vec![kbd!(C-'x'), kbd!('4'), kbd!('f')], vec![kbd!(C-'x'), kbd!('4'), kbd!(C-'f')]);
+    default_key_map.bind(vec![kbd!(C-'x'), kbd!('4'), kbd!(C-'f')], with_other_window_clockwise(open_file_command()));
     default_key_map.bind(vec![kbd!(C-'x'), kbd!('0')], close_window_command());
     default_key_map.bind(vec![kbd!(C-'x'), kbd!(C-'c')], close_ted_command());
     default_key_map.bind(vec![kbd!(C-'x'), kbd!(C-'f')], open_file_command());
