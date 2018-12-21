@@ -73,36 +73,7 @@ impl Command for GitAddCommand {
         let selected_window = state.lock().display.selected_window();
         let selected_window = selected_window.lock();
         let mut buffer = selected_window.buffer.lock();
-        check_if_in_git_mode(&buffer)?;
-        let mut cursor = begin_of_line(&buffer, selected_window.cursor.get());
-        {
-            let prev_line = forward_line(&buffer, cursor, -1);
-            if prev_line == cursor {
-                return Err(
-                    "Error: Place the cursor on the line of a file before adding".to_string(),
-                );
-            }
-            cursor = prev_line;
-        }
-        loop {
-            let substring = buffer.substring(cursor, end_of_line(&buffer, cursor))?;
-            if substring == "Staged files: " {
-                return Err("Error: File is already added".to_string());
-            }
-            if substring == "Unstaged files: " {
-                break;
-            }
-            if cursor == 0 {
-                return Err(
-                    "Error: Place the cursor on the line of a file before adding".to_string(),
-                );
-            }
-            cursor = forward_line(&buffer, cursor, -1);
-        }
-        let file = PathBuf::from(buffer.substring(
-            begin_of_line(&buffer, selected_window.cursor.get()) + 2,
-            end_of_line(&buffer, selected_window.cursor.get()),
-        )?);
+        let file = get_highlighted_file(&buffer, false, selected_window.cursor.get())?;
         git_add(buffer.name.file_path.as_ref().unwrap(), &file)?;
         refresh_git_repository(
             &buffer.name.file_path.as_ref().unwrap().clone(),
@@ -118,9 +89,85 @@ pub fn git_add(directory: &Path, file: &Path) -> Result<(), String> {
         directory.display().to_string(),
         file.display().to_string()
     ));
-    let repo = Repository::discover(directory).map_err(|e| e.to_string())?;
-    let mut index = repo.index().map_err(|e| e.to_string())?;
-    index.add_path(file).map_err(|e| e.to_string())?;
-    index.write().map_err(|e| e.to_string())?;
+    let repo = check(Repository::discover(directory))?;
+    let mut index = check(repo.index())?;
+    check(index.add_path(file))?;
+    check(index.write())?;
     Ok(())
+}
+
+#[derive(Debug)]
+pub struct GitUnstageCommand;
+
+pub fn git_unstage_command() -> Arc<GitUnstageCommand> {
+    Arc::new(GitUnstageCommand)
+}
+
+impl Command for GitUnstageCommand {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
+        let selected_window = state.lock().display.selected_window();
+        let selected_window = selected_window.lock();
+        let mut buffer = selected_window.buffer.lock();
+        let file = get_highlighted_file(&buffer, true, selected_window.cursor.get())?;
+        git_unstage(buffer.name.file_path.as_ref().unwrap(), &file)?;
+        refresh_git_repository(
+            &buffer.name.file_path.as_ref().unwrap().clone(),
+            &mut buffer,
+        )?;
+        Ok(())
+    }
+}
+
+pub fn git_unstage(directory: &Path, file: &Path) -> Result<(), String> {
+    log_debug(format!(
+        "{}: git unstage {}",
+        directory.display().to_string(),
+        file.display().to_string()
+    ));
+    let repo = check(Repository::discover(directory))?;
+    let target = check(check(repo.head())?.peel(ObjectType::Commit))?;
+    check(repo.reset_default(Some(&target), Some(file)))?;
+    Ok(())
+}
+
+fn get_highlighted_file(buffer: &Buffer, is_staged: bool, mut cursor: usize) -> Result<PathBuf, String> {
+    let initial_cursor = cursor;
+    check_if_in_git_mode(&buffer)?;
+    cursor = begin_of_line(&buffer, cursor);
+    {
+        let prev_line = forward_line(&buffer, cursor, -1);
+        if prev_line == cursor {
+            return Err(
+                "Error: Place the cursor on the line of a file before adding".to_string(),
+            );
+        }
+        cursor = prev_line;
+    }
+    loop {
+        let substring = buffer.substring(cursor, end_of_line(&buffer, cursor))?;
+        if substring == "Staged files: " {
+            if is_staged {
+                break;
+            } else {
+                return Err("Error: File is already staged".to_string());
+            }
+        }
+        if substring == "Unstaged files: " {
+            if is_staged {
+                return Err("Error: File is not staged".to_string());
+            } else {
+                break;
+            }
+        }
+        if cursor == 0 {
+            return Err(
+                "Error: Place the cursor on the line of a file before adding".to_string(),
+            );
+        }
+        cursor = forward_line(&buffer, cursor, -1);
+    }
+    Ok(PathBuf::from(buffer.substring(
+        begin_of_line(&buffer, initial_cursor) + 2,
+        end_of_line(&buffer, initial_cursor),
+    )?))
 }

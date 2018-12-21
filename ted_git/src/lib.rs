@@ -6,7 +6,7 @@ extern crate ted_common_commands;
 extern crate ted_core;
 
 mod refresh_git_repository;
-pub use refresh_git_repository::*;
+pub use refresh_git_repository::refresh_git_repository;
 
 mod commands;
 pub use commands::*;
