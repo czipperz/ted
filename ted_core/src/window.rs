@@ -2,6 +2,7 @@ use buffer::*;
 use cursor::Cursor;
 use key_map::KeyMap;
 use mode::Mode;
+use layout::Layout;
 use parking_lot::Mutex;
 use std::sync::Arc;
 
@@ -120,6 +121,18 @@ impl From<Arc<Mutex<Buffer>>> for Window {
 impl From<Buffer> for Window {
     fn from(buffer: Buffer) -> Self {
         Arc::new(Mutex::new(buffer)).into()
+    }
+}
+
+impl Into<Box<Layout>> for Window {
+    fn into(self) -> Box<Layout> {
+        Box::new(self.into())
+    }
+}
+
+impl Into<Box<Layout>> for Arc<Mutex<Window>> {
+    fn into(self) -> Box<Layout> {
+        Box::new(self.into())
     }
 }
 

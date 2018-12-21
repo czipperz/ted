@@ -147,14 +147,14 @@ mod tests {
     fn first_window_vsplit_of_hsplits() {
         let correct: Arc<Mutex<Window>> = Arc::default();
         let layout = Layout::VSplit {
-            left: Box::new(Layout::HSplit {
-                top: Box::new(Layout::Window(correct.clone())),
-                bottom: Box::new(Layout::default()),
-            }),
-            right: Box::new(Layout::HSplit {
-                top: Box::new(Layout::default()),
-                bottom: Box::new(Layout::default()),
-            }),
+            left: Layout::HSplit {
+                top: correct.clone().into(),
+                bottom: Layout::default().into(),
+            }.into(),
+            right: Layout::HSplit {
+                top: Layout::default().into(),
+                bottom: Layout::default().into(),
+            }.into(),
         };
         assert!(Arc::ptr_eq(layout.first_window(), &correct));
     }
@@ -163,14 +163,14 @@ mod tests {
     fn first_window_hsplit_of_vsplits() {
         let correct: Arc<Mutex<Window>> = Arc::default();
         let layout = Layout::HSplit {
-            top: Box::new(Layout::VSplit {
-                left: Box::new(Layout::Window(correct.clone())),
-                right: Box::new(Layout::default()),
-            }),
-            bottom: Box::new(Layout::VSplit {
-                left: Box::new(Layout::default()),
-                right: Box::new(Layout::default()),
-            }),
+            top: Layout::VSplit {
+                left: correct.clone().into(),
+                right: Layout::default().into(),
+            }.into(),
+            bottom: Layout::VSplit {
+                left: Layout::default().into(),
+                right: Layout::default().into(),
+            }.into(),
         };
         assert!(Arc::ptr_eq(layout.first_window(), &correct));
     }
@@ -179,14 +179,14 @@ mod tests {
     fn last_window_vsplit_of_hsplits() {
         let correct: Arc<Mutex<Window>> = Arc::default();
         let layout = Layout::VSplit {
-            left: Box::new(Layout::HSplit {
-                top: Box::new(Layout::default()),
-                bottom: Box::new(Layout::default()),
-            }),
-            right: Box::new(Layout::HSplit {
-                top: Box::new(Layout::default()),
-                bottom: Box::new(Layout::Window(correct.clone())),
-            }),
+            left: Layout::HSplit {
+                top: Layout::default().into(),
+                bottom: Layout::default().into(),
+            }.into(),
+            right: Layout::HSplit {
+                top: Layout::default().into(),
+                bottom: correct.clone().into(),
+            }.into(),
         };
         assert!(Arc::ptr_eq(layout.last_window(), &correct));
     }
@@ -195,14 +195,14 @@ mod tests {
     fn last_window_hsplit_of_vsplits() {
         let correct: Arc<Mutex<Window>> = Arc::default();
         let layout = Layout::HSplit {
-            top: Box::new(Layout::VSplit {
-                left: Box::new(Layout::default()),
-                right: Box::new(Layout::default()),
-            }),
-            bottom: Box::new(Layout::VSplit {
-                left: Box::new(Layout::default()),
-                right: Box::new(Layout::Window(correct.clone())),
-            }),
+            top: Layout::VSplit {
+                left: Layout::default().into(),
+                right: Layout::default().into(),
+            }.into(),
+            bottom: Layout::VSplit {
+                left: Layout::default().into(),
+                right: correct.clone().into(),
+            }.into(),
         };
         assert!(Arc::ptr_eq(layout.last_window(), &correct));
     }

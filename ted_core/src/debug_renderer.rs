@@ -281,9 +281,9 @@ mod tests {
                 .layout
                 .unwrap_window()
                 .clone();
-            let bottom = Box::new(Layout::Window(clone_window(&window)));
+            let bottom = clone_window(&window).into();
             state.display.selected_frame.lock().layout = Layout::HSplit {
-                top: Box::new(Layout::Window(window.clone())),
+                top: window.into(),
                 bottom,
             };
         }
@@ -366,9 +366,9 @@ mod tests {
                 .layout
                 .unwrap_window()
                 .clone();
-            let right = Box::new(Layout::Window(clone_window(&window)));
+            let right = clone_window(&window).into();
             state.display.selected_frame.lock().layout = Layout::VSplit {
-                left: Box::new(Layout::Window(window.clone())),
+                left: window.into(),
                 right,
             };
         }
@@ -442,8 +442,8 @@ mod tests {
                 .unwrap_window()
                 .clone();
             state.display.selected_frame.lock().layout = Layout::VSplit {
-                left: Box::new(Layout::Window(window.clone())),
-                right: Box::new(Layout::Window(window.clone())),
+                left: window.clone().into(),
+                right: window.clone().into(),
             };
         }
         {

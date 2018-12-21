@@ -23,8 +23,8 @@ impl Command for VerticalSplitCommand {
         selected_frame.layout.replace_selected_window(
             &window,
             Layout::VSplit {
-                left: Box::new(Layout::Window(window.clone())),
-                right: Box::new(Layout::Window(clone_window(window))),
+                left: window.clone().into(),
+                right: clone_window(window).into(),
             },
         );
         Ok(())
@@ -52,8 +52,8 @@ impl Command for HorizontalSplitCommand {
         selected_frame.layout.replace_selected_window(
             &window,
             Layout::HSplit {
-                top: Box::new(Layout::Window(window.clone())),
-                bottom: Box::new(Layout::Window(clone_window(window))),
+                top: window.clone().into(),
+                bottom: clone_window(window).into(),
             },
         );
         Ok(())
