@@ -5,7 +5,7 @@ use mode::Mode;
 use parking_lot::Mutex;
 use std::collections::{HashSet, VecDeque};
 use std::fmt;
-use std::path::PathBuf;
+use std::path::*;
 use std::sync::{Arc, Weak};
 
 /// The actual text storage structure
@@ -390,23 +390,23 @@ impl fmt::Display for Buffer {
 }
 
 /// The name of the Buffer
-pub enum BufferName {
-    File(PathBuf),
-    Internal(String),
+pub struct BufferName {
+    pub display_name: String,
+    pub file_path: Option<PathBuf>,
 }
 
-impl BufferName {
-    pub fn display_name(&self) -> &str {
-        match self {
-            BufferName::File(file) => file.file_name().unwrap().to_str().unwrap(),
-            BufferName::Internal(name) => &name,
-        }
+impl<'a> From<&'a Path> for BufferName {
+    fn from(p: &'a Path) -> Self {
+        p.to_path_buf().into()
     }
 }
 
 impl From<PathBuf> for BufferName {
     fn from(p: PathBuf) -> Self {
-        BufferName::File(p)
+        BufferName {
+            display_name: p.file_name().unwrap().to_str().unwrap().to_string(),
+            file_path: Some(p),
+        }
     }
 }
 
@@ -417,8 +417,11 @@ impl<'a> From<&'a str> for BufferName {
 }
 
 impl From<String> for BufferName {
-    fn from(s: String) -> Self {
-        BufferName::Internal(s)
+    fn from(display_name: String) -> Self {
+        BufferName {
+            display_name,
+            file_path: None,
+        }
     }
 }
 

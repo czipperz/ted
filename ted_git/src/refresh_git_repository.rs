@@ -1,12 +1,19 @@
 use git2::*;
+use git_mode::*;
 use std::path::Path;
 use ted_core::*;
 
 pub fn refresh_git_repository(path: &Path, buffer: &mut Buffer) -> Result<(), String> {
     buffer.read_only = false;
+    buffer.buffer_modes.push(git_mode());
     let mut buf = String::new();
     let repo = Repository::discover(path).map_err(|e| e.to_string())?;
-    buf.push_str(&repo.workdir().unwrap().display().to_string());
+    let workdir = repo.workdir().unwrap();
+    buffer.name = BufferName {
+        display_name: format!("*git* {}", workdir.file_name().unwrap().to_str().unwrap()),
+        file_path: Some(workdir.to_path_buf()),
+    };
+    buf.push_str(&workdir.display().to_string());
     buf.push_str(": ");
     buf.push_str(&format!("{:?}", repo.state()));
     buf.push('\n');

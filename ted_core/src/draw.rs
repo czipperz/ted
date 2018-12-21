@@ -128,7 +128,7 @@ where
                 iter,
                 is_selected_window,
                 Some(window.cursor.get()),
-                Some(buffer.name.display_name()),
+                Some(&buffer.name.display_name),
                 y,
                 x,
                 rows,

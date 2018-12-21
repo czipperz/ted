@@ -4,6 +4,8 @@ version = "0.1.0"
 authors = ["Czipperz <czipperz@gmail.com>"]
 
 [dependencies]
+ted_common_commands = { path = "../ted_common_commands" }
 ted_core = { path = "../ted_core" }
 git2 = "*"
+lazy_static = "*"
 parking_lot = "*"

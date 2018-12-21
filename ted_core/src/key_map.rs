@@ -1,4 +1,4 @@
-use command::Command;
+use command::*;
 use input::Input;
 use parking_lot::Mutex;
 use std::collections::{HashMap, VecDeque};
@@ -25,6 +25,7 @@ enum KeyBind {
     Mapping(Vec<Input>),
 }
 
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub enum LookupError {
     NotEnoughInput,
     UnboundInput(Option<Input>),

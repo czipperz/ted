@@ -56,7 +56,7 @@ use std::sync::Arc;
 /// [`Buffer`]: struct.Buffer.html
 /// [`Display`]: trait.Display.html
 /// [`State`]: struct.State.html
-pub trait Command: Debug {
+pub trait Command: Debug + Send + Sync {
     fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String>;
 }
 

@@ -332,7 +332,9 @@ name = "ted_git"
 version = "0.1.0"
 dependencies = [
  "git2 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lazy_static 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ted_common_commands 0.1.0",
  "ted_core 0.1.0",
 ]
 
