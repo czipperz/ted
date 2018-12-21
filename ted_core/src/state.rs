@@ -1,4 +1,4 @@
-use command::Command;
+use command::*;
 use display::Display;
 use input::Input;
 use insert_command::insert_command;
@@ -43,28 +43,48 @@ impl State {
     /// [`KeyMap::lookup`]: struct.KeyMap.html#method.lookup
     /// [`Mode`]: struct.Mode.html
     pub fn lookup(&self, inputs: &mut VecDeque<Input>) -> Result<Arc<Command>, Result<(), ()>> {
+        {
+            let buffer = self.display.selected_window_buffer();
+            let buffer = buffer.lock();
+            for mode in &buffer.buffer_modes {
+                let mode = mode.lock();
+                match KeyMap::lookup(&mode.key_map, inputs, true) {
+                    Ok(command) => return Ok(command),
+                    Err(LookupError::NotEnoughInput) => return Err(Ok(())),
+                    Err(LookupError::UnboundInput(_)) => (),
+                    Err(LookupError::InputWasMapped) => return self.lookup(inputs),
+                }
+            }
+        }
+        {
+            let selected_window = self.display.selected_window();
+            let selected_window = selected_window.lock();
+            for mode in &selected_window.window_modes {
+                let mode = mode.lock();
+                match KeyMap::lookup(&mode.key_map, inputs, true) {
+                    Ok(command) => return Ok(command),
+                    Err(LookupError::NotEnoughInput) => return Err(Ok(())),
+                    Err(LookupError::UnboundInput(_)) => (),
+                    Err(LookupError::InputWasMapped) => return self.lookup(inputs),
+                }
+            }
+        }
         for mode in &self.global_modes {
             let mode = mode.lock();
-            match KeyMap::lookup(&mode.key_map, inputs) {
+            match KeyMap::lookup(&mode.key_map, inputs, true) {
                 Ok(command) => return Ok(command),
                 Err(LookupError::NotEnoughInput) => return Err(Ok(())),
                 Err(LookupError::UnboundInput(_)) => (),
                 Err(LookupError::InputWasMapped) => return self.lookup(inputs),
             }
-            match mode.fallthrough_behavior {
-                FallthroughBehavior::Continue => (),
-                FallthroughBehavior::InsertKey => {
-                    return insert_key_behavior(inputs.pop_front().unwrap())
-                }
-                FallthroughBehavior::Stop => return Err(Err(())),
-            }
         }
-        KeyMap::lookup(&self.default_key_map, inputs).or_else(|err| match err {
-            LookupError::NotEnoughInput => Err(Ok(())),
-            LookupError::UnboundInput(Some(i)) => insert_key_behavior(i),
-            LookupError::UnboundInput(_) => Err(Err(())),
-            LookupError::InputWasMapped => self.lookup(inputs),
-        })
+        match KeyMap::lookup(&self.default_key_map, inputs, false) {
+            Ok(command) => Ok(command),
+            Err(LookupError::NotEnoughInput) => Err(Ok(())),
+            Err(LookupError::UnboundInput(Some(i))) => insert_key_behavior(i),
+            Err(LookupError::UnboundInput(_)) => Err(Err(())),
+            Err(LookupError::InputWasMapped) => self.lookup(inputs),
+        }
     }
 }
 

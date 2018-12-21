@@ -14,12 +14,6 @@ use std::sync::Arc;
 pub struct Mode {
     /// The mapping
     pub key_map: Arc<Mutex<KeyMap>>,
-    /// What happens if `key_map` has an unbound key.
-    ///
-    /// For more information see [`FallthroughBehavior`]
-    ///
-    /// [`FallthroughBehavior`]: enum.FallthroughBehavior.html
-    pub fallthrough_behavior: FallthroughBehavior,
 }
 
 impl Mode {
@@ -36,22 +30,6 @@ impl Default for Mode {
 
 impl From<Arc<Mutex<KeyMap>>> for Mode {
     fn from(key_map: Arc<Mutex<KeyMap>>) -> Self {
-        Mode {
-            key_map,
-            fallthrough_behavior: FallthroughBehavior::Continue,
-        }
+        Mode { key_map }
     }
-}
-
-/// This allows a [`Mode`] to specify what to do if a key is unbound in it.
-///
-/// [`Mode`]: struct.Mode.html
-pub enum FallthroughBehavior {
-    /// If a key is not found then just continue looking.  This is the default.
-    Continue,
-    /// If a key is not found then insert the key that was pressed
-    /// into the buffer.
-    InsertKey,
-    /// If a key is not found then stop looking.
-    Stop,
 }

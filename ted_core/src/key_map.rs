@@ -53,6 +53,7 @@ impl KeyMap {
     pub fn lookup(
         key_map: &Arc<Mutex<KeyMap>>,
         inputs: &mut VecDeque<Input>,
+        save_input_on_error: bool,
     ) -> Result<Arc<Command>, LookupError> {
         match inputs.pop_front() {
             Some(input) => {
@@ -60,13 +61,20 @@ impl KeyMap {
                 match key_map.bindings.get(&input) {
                     Some(KeyBind::Command(command)) => Ok(command.clone()),
                     Some(KeyBind::SubMap(sub_map)) => {
-                        KeyMap::lookup(sub_map, inputs).map_err(|e| match e {
-                            LookupError::NotEnoughInput => {
+                        KeyMap::lookup(sub_map, inputs, save_input_on_error).map_err(|e| {
+                            if save_input_on_error {
                                 inputs.push_front(input);
-                                e
                             }
-                            LookupError::UnboundInput(_) => LookupError::UnboundInput(None),
-                            LookupError::InputWasMapped => e,
+                            match e {
+                                LookupError::NotEnoughInput => {
+                                    if !save_input_on_error {
+                                        inputs.push_front(input);
+                                    }
+                                    e
+                                }
+                                LookupError::UnboundInput(_) => LookupError::UnboundInput(None),
+                                LookupError::InputWasMapped => e,
+                            }
                         })
                     }
                     Some(KeyBind::Mapping(mapping)) => {
@@ -75,7 +83,12 @@ impl KeyMap {
                         }
                         Err(LookupError::InputWasMapped)
                     }
-                    None => Err(LookupError::UnboundInput(Some(input))),
+                    None => {
+                        if save_input_on_error {
+                            inputs.push_front(input);
+                        }
+                        Err(LookupError::UnboundInput(Some(input)))
+                    }
                 }
             }
             None => Err(LookupError::NotEnoughInput),
@@ -143,7 +156,6 @@ impl KeyMap {
             }
             None => unreachable!(),
         }
-        //self.bindings.insert(input, binding);
     }
 }
 
@@ -152,5 +164,40 @@ impl Default for KeyMap {
         KeyMap {
             bindings: HashMap::new(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn key_map_lookup_bound_key() {
+        let mut key_map = KeyMap::default();
+        key_map.bind(vec![kbd!('g')], blank_command());
+        let key_map = Arc::new(Mutex::new(key_map));
+        let mut input = vec![kbd!('g')].into();
+        assert!(KeyMap::lookup(&key_map, &mut input, true).is_ok());
+        assert_eq!(input, vec![]);
+        let mut input = vec![kbd!('g')].into();
+        assert!(KeyMap::lookup(&key_map, &mut input, false).is_ok());
+        assert_eq!(input, vec![]);
+    }
+
+    #[test]
+    fn key_map_lookup_unbound_key() {
+        let key_map = Arc::new(Mutex::new(KeyMap::default()));
+        let mut input = vec![kbd!(C - 'x')].into();
+        assert_eq!(
+            KeyMap::lookup(&key_map, &mut input, true).unwrap_err(),
+            LookupError::UnboundInput(Some(kbd!(C - 'x')))
+        );
+        assert_eq!(input, vec![kbd!(C - 'x')]);
+        let mut input = vec![kbd!(C - 'x')].into();
+        assert_eq!(
+            KeyMap::lookup(&key_map, &mut input, false).unwrap_err(),
+            LookupError::UnboundInput(Some(kbd!(C - 'x')))
+        );
+        assert_eq!(input, vec![]);
     }
 }
