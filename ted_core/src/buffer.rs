@@ -36,8 +36,8 @@ use std::sync::{Arc, Weak};
 /// ```
 pub struct Buffer {
     buffer_contents: BufferContents,
-    _initial_state: Option<Arc<Mutex<StateNode>>>,
-    current_state: Option<Arc<Mutex<StateNode>>>,
+    initial_state: Arc<Mutex<StateNode>>,
+    current_state: Arc<Mutex<StateNode>>,
     /// The name of the buffer.
     pub name: BufferName,
     pub buffer_modes: Vec<Arc<Mutex<Mode>>>,
@@ -73,10 +73,11 @@ impl Buffer {
     }
 
     fn new_with_buffer_contents(name: BufferName, contents: BufferContents) -> Self {
+        let state: Arc<Mutex<StateNode>> = Arc::default();
         Buffer {
             buffer_contents: contents,
-            _initial_state: None,
-            current_state: None,
+            initial_state: state.clone(),
+            current_state: state,
             name,
             buffer_modes: Vec::new(),
             read_only: false,
@@ -230,29 +231,16 @@ impl Buffer {
 
     /// Handle adding another node to the state graph and pointing `current_state` to it.
     fn add_change(&mut self, change: Change) {
-        match self.current_state.take() {
-            Some(current_state) => {
-                let node = Arc::new(Mutex::new(StateNode {
-                    pred: Arc::downgrade(&current_state),
-                    succ: Vec::new(),
-                    change,
-                }));
-                {
-                    let mut current_state = current_state.lock();
-                    current_state.succ.push(node.clone());
-                }
-                self.current_state = Some(node);
-            }
-            None => {
-                let node = Arc::new(Mutex::new(StateNode {
-                    pred: Weak::new(),
-                    succ: Vec::new(),
-                    change,
-                }));
-                self._initial_state = Some(node.clone());
-                self.current_state = Some(node);
-            }
+        let node = Arc::new(Mutex::new(StateNode {
+            pred: Arc::downgrade(&self.current_state),
+            succ: Vec::new(),
+            change,
+        }));
+        {
+            let mut current_state = self.current_state.lock();
+            current_state.succ.push(node.clone());
         }
+        self.current_state = node;
     }
 
     /// Undo the last change.
@@ -285,25 +273,27 @@ impl Buffer {
         if self.read_only {
             return Err("Error: Buffer::undo() cannot be called on a read only Buffer".to_string());
         }
-        match self.current_state.take() {
-            Some(current_state) => {
-                let current_state = current_state.lock();
-                if current_state.change.is_insert {
-                    self.buffer_contents
-                        .delete_region(
-                            current_state.change.loc,
-                            current_state.change.loc + current_state.change.len_chars,
-                        ).map_err(|()| "Error: Index out of bounds in Buffer::undo()".to_string())?;
-                } else {
-                    self.buffer_contents
-                        .insert_str(current_state.change.loc, &current_state.change.s)
-                        .map_err(|()| "Error: Index out of bounds in Buffer::undo()".to_string())?;
-                }
-                self.current_state = current_state.pred.upgrade();
-                Ok(true)
+        let pred;
+        {
+            let current_state = self.current_state.lock();
+            pred = match current_state.pred.upgrade() {
+                Some(pred) => pred,
+                None => return Ok(false),
+            };
+            if current_state.change.is_insert {
+                self.buffer_contents
+                    .delete_region(
+                        current_state.change.loc,
+                        current_state.change.loc + current_state.change.len_chars,
+                    ).map_err(|()| "Error: Index out of bounds in Buffer::undo()".to_string())?;
+            } else {
+                self.buffer_contents
+                    .insert_str(current_state.change.loc, &current_state.change.s)
+                    .map_err(|()| "Error: Index out of bounds in Buffer::undo()".to_string())?;
             }
-            None => Ok(false),
         }
+        self.current_state = pred;
+        Ok(true)
     }
 
     /// Redo the last change if it has been undone.
@@ -332,54 +322,42 @@ impl Buffer {
         if self.read_only {
             return Err("Error: Buffer::undo() cannot be called on a read only Buffer".to_string());
         }
-        match self.current_state.take() {
-            Some(current_state_lock) => {
+        {
+            let current_state = self.current_state.clone();
+            let current_state = current_state.lock();
+            if let Some(next_state) = current_state.succ.last() {
                 {
-                    let current_state = current_state_lock.lock();
-                    match current_state.succ.last() {
-                        Some(next_state) => {
-                            {
-                                let next_state = next_state.lock();
-                                if !next_state.change.is_insert {
-                                    self.buffer_contents
-                                        .delete_region(
-                                            next_state.change.loc,
-                                            next_state.change.loc + next_state.change.len_chars,
-                                        ).map_err(|()| {
-                                            "Error: Index out of bounds in Buffer::redo()"
-                                                .to_string()
-                                        })?;
-                                } else {
-                                    self.buffer_contents
-                                        .insert_str(next_state.change.loc, &next_state.change.s)
-                                        .map_err(|()| {
-                                            "Error: Index out of bounds in Buffer::redo()"
-                                                .to_string()
-                                        })?;
-                                }
-                            }
-                            self.current_state = Some(next_state.clone());
-                            return Ok(true);
-                        }
-                        None => {}
+                    let next_state = next_state.lock();
+                    if !next_state.change.is_insert {
+                        self.buffer_contents
+                            .delete_region(
+                                next_state.change.loc,
+                                next_state.change.loc + next_state.change.len_chars,
+                            ).map_err(|()| {
+                                "Error: Index out of bounds in Buffer::redo()"
+                                    .to_string()
+                            })?;
+                    } else {
+                        self.buffer_contents
+                            .insert_str(next_state.change.loc, &next_state.change.s)
+                            .map_err(|()| {
+                                "Error: Index out of bounds in Buffer::redo()"
+                                    .to_string()
+                            })?;
                     }
                 }
-                self.current_state = Some(current_state_lock);
-                Ok(false)
+                self.current_state = next_state.clone();
+                return Ok(true);
             }
-            None => Ok(false),
         }
+        Ok(false)
     }
 
     /// Erase the history of the `Buffer`.
-    ///
-    /// This function should probably only be called on `Buffer`s with
-    /// [`BufferName::Internal`] names.
-    ///
-    /// [`BufferName::Internal`]: enum.BufferName.html#variant.Internal
     pub fn erase_history(&mut self) {
-        self._initial_state = None;
-        self.current_state = None;
+        let state: Arc<Mutex<StateNode>> = Arc::default();
+        self.initial_state = state.clone();
+        self.current_state = state;
     }
 }
 
@@ -433,18 +411,15 @@ pub fn update_cursor(
     let mut state = match ret_state.upgrade() {
         Some(state) => state,
         None => {
-            *ret_state = match &buffer.current_state {
-                Some(s) => {
-                    *ret_location = s.lock().change.offset_cursor_redo(*ret_location);
-                    Arc::downgrade(&s)
-                }
-                None => Weak::new(),
-            };
+            if !Arc::ptr_eq(&buffer.current_state, &buffer.initial_state) {
+                *ret_location = buffer.current_state.lock().change.offset_cursor_redo(*ret_location);
+                *ret_state = Arc::downgrade(&buffer.current_state)
+            }
             return;
         }
     };
     let mut location = *ret_location;
-    if buffer.current_state.is_none() {
+    if Arc::ptr_eq(&buffer.current_state, &buffer.initial_state) {
         let mut state_lock = state;
         loop {
             state_lock = {
@@ -465,7 +440,7 @@ pub fn update_cursor(
     loop {
         if history.insert(ByAddress(state.clone())) {
             // haven't seen this item before
-            if Arc::ptr_eq(&state, buffer.current_state.as_ref().unwrap()) {
+            if Arc::ptr_eq(&state, &buffer.current_state) {
                 *ret_state = Arc::downgrade(&state);
                 *ret_location = location;
                 return;
@@ -496,15 +471,7 @@ pub fn update_cursor(
 }
 
 pub fn is_updated_cursor(buffer: &Buffer, state: &Weak<Mutex<StateNode>>) -> bool {
-    let state = state.upgrade();
-    if buffer.current_state.is_none() && state.is_none() {
-        true
-    } else if buffer.current_state.is_none() || state.is_none() {
-        false
-    } else {
-        let current_state = buffer.current_state.as_ref().unwrap();
-        Arc::ptr_eq(current_state, &state.unwrap())
-    }
+    Arc::ptr_eq(&buffer.current_state, &state.upgrade().as_ref().unwrap_or(&buffer.initial_state))
 }
 
 #[cfg(test)]
@@ -578,6 +545,11 @@ mod tests {
         cursor.update(&buffer);
         assert_eq!(format!("{}", buffer), "");
         assert_eq!(cursor.get(), 0);
+
+        assert!(buffer.redo().unwrap());
+        cursor.update(&buffer);
+        assert_eq!(format!("{}", buffer), "Helllo World");
+        assert_eq!(cursor.get(), 12);
     }
 
     #[test]
@@ -604,5 +576,18 @@ mod tests {
         cursor.update(&buffer);
         assert_eq!(format!("{}", buffer), "");
         assert_eq!(cursor.get(), 0);
+    }
+
+    #[test]
+    fn new_with_contents_redo_after_undo() {
+        let mut buffer = Buffer::new_with_contents("*scratch*".into(), "Example text");
+
+        assert_eq!(buffer.to_string(), "Example text");
+        buffer.insert_str(0, "Some ").unwrap();
+        assert_eq!(buffer.to_string(), "Some Example text");
+        buffer.undo().unwrap();
+        assert_eq!(buffer.to_string(), "Example text");
+        buffer.redo().unwrap();
+        assert_eq!(buffer.to_string(), "Some Example text");
     }
 }

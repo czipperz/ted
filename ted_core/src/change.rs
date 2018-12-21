@@ -1,6 +1,7 @@
 use parking_lot::Mutex;
 use std::sync::{Arc, Weak};
 
+#[derive(Default)]
 pub struct StateNode {
     pub pred: Weak<Mutex<StateNode>>,
     pub succ: Vec<Arc<Mutex<StateNode>>>,
@@ -48,6 +49,14 @@ impl Change {
             } else {
                 cursor
             }
+        }
+    }
+}
+
+impl Default for Change {
+    fn default() -> Self {
+        Change {
+            loc: 0, s: String::default(), len_chars: 0, is_insert: true,
         }
     }
 }
