@@ -6,7 +6,10 @@ use std::sync::Arc;
 use ted_core::*;
 
 pub fn open_file(path: PathBuf) -> Result<Buffer, String> {
-    let path = path.canonicalize().map_err(|e| e.to_string())?;
+    fn check<O, E: ToString>(r: Result<O, E>) -> Result<O, String> {
+        r.map_err(|e| e.to_string())
+    }
+    let path = check(path.canonicalize())?;
     if !path.exists() {
         Err(format!("Path does not exist {}", path.display()))
     } else {
@@ -15,7 +18,7 @@ pub fn open_file(path: PathBuf) -> Result<Buffer, String> {
             buf.push_str(&path.display().to_string());
             buf.push_str(":\n..\n");
             let mut entries = Vec::new();
-            for entry in path.read_dir().map_err(|e| e.to_string())? {
+            for entry in check(path.read_dir())? {
                 if let Ok(entry) = entry {
                     entries.push(
                         entry
@@ -34,9 +37,9 @@ pub fn open_file(path: PathBuf) -> Result<Buffer, String> {
                 buf.push('\n');
             }
         } else {
-            let file = File::open(&path).map_err(|e| e.to_string())?;
+            let file = check(File::open(&path))?;
             let mut reader = BufReader::new(file);
-            reader.read_to_string(&mut buf).map_err(|e| e.to_string())?;
+            check(reader.read_to_string(&mut buf))?;
         }
         Ok(Buffer::new_with_contents(path.into(), &buf))
     }
