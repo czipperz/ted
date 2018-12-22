@@ -369,13 +369,13 @@ impl fmt::Display for Buffer {
 
 /// The name of the Buffer
 pub struct BufferName {
-    pub display_name: String,
-    pub file_path: Option<PathBuf>,
+    pub name: String,
+    pub path: Option<PathBuf>,
 }
 
 impl BufferName {
     pub fn parent(&self) -> Option<&Path> {
-        self.file_path.as_ref().and_then(|p| p.parent())
+        self.path.as_ref().and_then(|p| p.parent())
     }
 }
 
@@ -388,8 +388,8 @@ impl<'a> From<&'a Path> for BufferName {
 impl From<PathBuf> for BufferName {
     fn from(p: PathBuf) -> Self {
         BufferName {
-            display_name: p.file_name().unwrap().to_str().unwrap().to_string(),
-            file_path: Some(p),
+            name: p.file_name().unwrap().to_str().unwrap().to_string(),
+            path: Some(p),
         }
     }
 }
@@ -401,10 +401,10 @@ impl<'a> From<&'a str> for BufferName {
 }
 
 impl From<String> for BufferName {
-    fn from(display_name: String) -> Self {
+    fn from(name: String) -> Self {
         BufferName {
-            display_name,
-            file_path: None,
+            name,
+            path: None,
         }
     }
 }

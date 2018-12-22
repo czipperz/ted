@@ -48,10 +48,9 @@ impl Command for GitRefreshRepositoryCommand {
     fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let buffer = state.lock().display.selected_window_buffer();
         let mut buffer = buffer.lock();
-        match buffer.name.file_path.clone() {
-            Some(repository_path) => git_refresh_repository(&repository_path, &mut buffer),
-            None => Err(ERROR_FILE_PATH_NONE.into()),
-        }
+        let repository_path = buffer.name.path.clone().ok_or_else(|| ERROR_FILE_PATH_NONE)?;
+        git_refresh_repository(&repository_path, &mut buffer)?;
+        Ok(())
     }
 }
 
@@ -62,9 +61,9 @@ pub fn git_refresh_repository(repository_path: &Path, buffer: &mut Buffer) -> Re
     let repo = check(Repository::discover(repository_path))?;
     let workdir = repo.workdir().ok_or_else(|| ERROR_REPOSITORY_WORKDIR_NONE)?;
     buffer.name = BufferName {
-        display_name: format!("*git* {}", workdir.file_name().ok_or_else(|| ERROR_REPOSITORY_WORKDIR_NONE)?
-                              .to_str().ok_or_else(|| ERROR_REPOSITORY_WORKDIR_TO_STR_NONE)?),
-        file_path: Some(workdir.to_path_buf()),
+        name: format!("*git* {}", workdir.file_name().ok_or_else(|| ERROR_REPOSITORY_WORKDIR_NONE)?
+                      .to_str().ok_or_else(|| ERROR_REPOSITORY_WORKDIR_TO_STR_NONE)?),
+        path: Some(workdir.to_path_buf()),
     };
     buf.push_str(&workdir.display().to_string());
     buf.push_str(": ");

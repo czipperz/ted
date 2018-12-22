@@ -22,7 +22,7 @@ impl Command for GitAddCommand {
         };
         let (repository_path, file) = {
             let buffer = buffer.lock();
-            (buffer.name.file_path.as_ref().ok_or_else(|| "Error: Cannot open git repository")?.to_path_buf(),
+            (buffer.name.path.as_ref().ok_or_else(|| "Error: Cannot open git repository")?.to_path_buf(),
              get_highlighted_file_unstaged(&buffer, cursor)?)
         };
         git_add(&repository_path, &file)?;
@@ -63,7 +63,7 @@ impl Command for GitUnstageCommand {
         };
         let (repository_path, file) = {
             let buffer = buffer.lock();
-            (buffer.name.file_path.as_ref().ok_or_else(|| "Error: Cannot open git repository")?.to_path_buf(),
+            (buffer.name.path.as_ref().ok_or_else(|| "Error: Cannot open git repository")?.to_path_buf(),
              get_highlighted_file_staged(&buffer, cursor)?)
         };
         git_unstage(&repository_path, &file)?;

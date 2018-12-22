@@ -25,7 +25,7 @@ impl Command for GitDiffCommand {
         };
         let (repository_path, (file, is_staged)) = {
             let buffer = buffer.lock();
-            (buffer.name.file_path.as_ref().ok_or_else(|| "Error: ".to_string())?.clone(),
+            (buffer.name.path.as_ref().ok_or_else(|| ERROR_FILE_PATH_NONE)?.clone(),
              get_highlighted_file(&buffer, cursor)?)
         };
         {
@@ -34,8 +34,8 @@ impl Command for GitDiffCommand {
                 let abs_path = repository_path.join(file);
                 let mut buffer = Buffer::new_with_contents(
                     BufferName {
-                        display_name: format!("*git diff* {}", abs_path.display()),
-                        file_path: Some(abs_path),
+                        name: format!("*git diff* {}", abs_path.display()),
+                        path: Some(abs_path),
                     },
                     &diff_text);
                 buffer.read_only = true;
