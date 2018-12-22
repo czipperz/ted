@@ -373,6 +373,12 @@ pub struct BufferName {
     pub file_path: Option<PathBuf>,
 }
 
+impl BufferName {
+    pub fn parent(&self) -> Option<&Path> {
+        self.file_path.as_ref().and_then(|p| p.parent())
+    }
+}
+
 impl<'a> From<&'a Path> for BufferName {
     fn from(p: &'a Path) -> Self {
         p.to_path_buf().into()
