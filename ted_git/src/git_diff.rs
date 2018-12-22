@@ -25,7 +25,7 @@ impl Command for GitDiffCommand {
         };
         let (repository_path, (file, is_staged)) = {
             let buffer = buffer.lock();
-            (buffer.name.path.as_ref().ok_or_else(|| ERROR_FILE_PATH_NONE)?.clone(),
+            (buffer.name.path.as_ref().ok_or(ERROR_FILE_PATH_NONE)?.clone(),
              get_highlighted_file(&buffer, cursor)?)
         };
         {

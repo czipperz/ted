@@ -1,3 +1,4 @@
+use git_common::*;
 use git_diff::*;
 use git_repository::*;
 use git_stage::*;
@@ -27,7 +28,7 @@ pub fn check_if_in_git_mode(buffer: &Buffer) -> Result<(), String> {
     if is_in_git_mode(buffer) {
         Ok(())
     } else {
-        Err("Error: Not in git mode".to_string())
+        Err(ERROR_NOT_IN_GIT_MODE)?
     }
 }
 

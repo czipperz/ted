@@ -20,7 +20,7 @@ impl Command for GitOpenRepositoryCommand {
         let repository_path = {
             let buffer = selected_window.lock().buffer.clone();
             let buffer = buffer.lock();
-            buffer.name.parent().ok_or_else(|| "Error: Cannot open git repository".to_string())?.to_path_buf()
+            buffer.name.parent().ok_or(ERROR_FILE_PATH_NONE)?.to_path_buf()
         };
         let window = git_open_repository(&repository_path)?;
         let window = Arc::new(Mutex::new(window));
@@ -48,7 +48,7 @@ impl Command for GitRefreshRepositoryCommand {
     fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let buffer = state.lock().display.selected_window_buffer();
         let mut buffer = buffer.lock();
-        let repository_path = buffer.name.path.clone().ok_or_else(|| ERROR_FILE_PATH_NONE)?;
+        let repository_path = buffer.name.path.clone().ok_or(ERROR_FILE_PATH_NONE)?;
         git_refresh_repository(&repository_path, &mut buffer)?;
         Ok(())
     }
@@ -59,10 +59,10 @@ pub fn git_refresh_repository(repository_path: &Path, buffer: &mut Buffer) -> Re
     buffer.buffer_modes.push(git_mode());
     let mut buf = String::new();
     let repo = check(Repository::discover(repository_path))?;
-    let workdir = repo.workdir().ok_or_else(|| ERROR_REPOSITORY_WORKDIR_NONE)?;
+    let workdir = repo.workdir().ok_or(ERROR_REPOSITORY_WORKDIR_NONE)?;
     buffer.name = BufferName {
-        name: format!("*git* {}", workdir.file_name().ok_or_else(|| ERROR_REPOSITORY_WORKDIR_NONE)?
-                      .to_str().ok_or_else(|| ERROR_REPOSITORY_WORKDIR_TO_STR_NONE)?),
+        name: format!("*git* {}", workdir.file_name().ok_or(ERROR_REPOSITORY_WORKDIR_NONE)?
+                      .to_str().ok_or(ERROR_REPOSITORY_WORKDIR_TO_STR_NONE)?),
         path: Some(workdir.to_path_buf()),
     };
     buf.push_str(&workdir.display().to_string());
