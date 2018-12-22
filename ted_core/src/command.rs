@@ -1,6 +1,6 @@
 use parking_lot::Mutex;
 use state::State;
-use std::fmt::Debug;
+use std::fmt;
 use std::sync::Arc;
 
 /// A command to be ran when a certain sequence of keys are pressed.
@@ -56,15 +56,46 @@ use std::sync::Arc;
 /// [`Buffer`]: struct.Buffer.html
 /// [`Display`]: trait.Display.html
 /// [`State`]: struct.State.html
-pub trait Command: Debug + Send + Sync {
+pub trait Command: fmt::Debug + Send + Sync {
     fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String>;
 }
 
 impl<T> Command for Arc<T> where T: Command {
     fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
-        (**self).execute(state)
+        let st: &T = &self;
+        st.execute(state)
     }
 }
+
+
+pub struct FunctionCommand<F> {
+    f: F,
+}
+
+impl<F> From<F> for FunctionCommand<F>
+where F: Fn(Arc<Mutex<State>>) -> Result<(), String> + Send + Sync + fmt::Pointer {
+    fn from(f: F) -> Self {
+        FunctionCommand { f }
+    }
+}
+
+pub fn function_command<F>(f: F) -> Arc<FunctionCommand<F>>
+where F: Fn(Arc<Mutex<State>>) -> Result<(), String> + Send + Sync + fmt::Pointer {
+    Arc::new(f.into())
+}
+
+impl<F> Command for FunctionCommand<F> where F: Fn(Arc<Mutex<State>>) -> Result<(), String> + Send + Sync + fmt::Pointer {
+    fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
+        (self.f)(state)
+    }
+}
+
+impl<F> fmt::Debug for FunctionCommand<F> where F: fmt::Pointer {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "FunctionCommand for {:p}", self.f)
+    }
+}
+
 
 #[derive(Debug)]
 pub struct BlankCommand;
@@ -74,5 +105,31 @@ pub fn blank_command() -> Arc<Command> {
 impl Command for BlankCommand {
     fn execute(&self, _: Arc<Mutex<State>>) -> Result<(), String> {
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use debug_renderer::*;
+
+    fn type_assert(_: Arc<Command>) {}
+
+    #[test]
+    #[should_panic]
+    fn arc_command_works() {
+        let f: fn(Arc<Mutex<State>>) -> Result<(), String> = |_| { panic!() };
+        let command = function_command(f);
+        type_assert(Arc::new(command.clone()));
+        let _ = command.execute(Arc::new(Mutex::new(State::new(DebugRenderer::new()))));
+    }
+
+    #[test]
+    #[should_panic]
+    fn function_command_works() {
+        let f: fn(Arc<Mutex<State>>) -> Result<(), String> = |_| { panic!() };
+        let command = function_command(f);
+        type_assert(command.clone());
+        let _ = command.execute(Arc::new(Mutex::new(State::new(DebugRenderer::new()))));
     }
 }
