@@ -54,29 +54,28 @@ fn main_loop(state: Arc<Mutex<State>>) {
 
 fn increment(state: Arc<Mutex<State>>) -> Result<(), String> {
     fn increment_(state: Arc<Mutex<State>>, inputs: &mut VecDeque<Input>) -> Result<(), String> {
-        match {
-            let state = state.lock();
-            state.display.getch()
-        } {
-            Some(input) => {
-                state.lock().display.show()?;
-                inputs.push_back(input);
-                match {
-                    let state = state.lock();
-                    state.lookup(inputs)
-                } {
-                    Ok(action) => {
-                        let r = action.execute(state.clone());
-                        state.lock().display.show().unwrap();
-                        r
+        loop {
+            match {
+                let state = state.lock();
+                state.display.getch()
+            } {
+                Some(input) => {
+                    state.lock().display.show()?;
+                    inputs.push_back(input);
+                    match {
+                        let state = state.lock();
+                        state.lookup(inputs)
+                    } {
+                        Ok(action) => {
+                            let r = action.execute(state.clone());
+                            state.lock().display.show().unwrap();
+                            return r;
+                        }
+                        Err(Ok(())) => (),
+                        Err(Err(())) => return Ok(()),
                     }
-                    Err(Ok(())) => increment_(state, inputs),
-                    Err(Err(())) => Ok(()),
                 }
-            }
-            None => {
-                state.lock().display.show()?;
-                Ok(())
+                None => state.lock().display.show()?
             }
         }
     }

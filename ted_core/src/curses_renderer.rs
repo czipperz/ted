@@ -35,8 +35,10 @@ impl CursesRenderer {
     /// Initialize the curses backend and wrap it in the CursesRenderer object.
     pub fn new() -> Result<Self, ()> {
         let window = pancurses::initscr();
+        check(pancurses::cbreak())?;
         check(pancurses::raw())?;
         check(pancurses::noecho())?;
+        check(window.nodelay(true))?;
         Ok(Self {
             window,
             cursor_y: 0,
