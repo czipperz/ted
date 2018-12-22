@@ -23,15 +23,15 @@ impl Command for GitDiffCommand {
             (selected_window.buffer.clone(),
              selected_window.cursor.get())
         };
-        let (path, (file, is_staged)) = {
+        let (repository_path, (file, is_staged)) = {
             let buffer = buffer.lock();
             (buffer.name.file_path.as_ref().ok_or_else(|| "Error: ".to_string())?.clone(),
              get_highlighted_file(&buffer, cursor)?)
         };
         {
-            let diff_text = git_diff(&path, &file, is_staged)?;
+            let diff_text = git_diff(&repository_path, &file, is_staged)?;
             let buffer = {
-                let abs_path = path.join(file);
+                let abs_path = repository_path.join(file);
                 let mut buffer = Buffer::new_with_contents(
                     BufferName {
                         display_name: format!("*git diff* {}", abs_path.display()),
@@ -48,19 +48,19 @@ impl Command for GitDiffCommand {
         }
         {
             let mut buffer = buffer.lock();
-            git_refresh_repository(&path, &mut buffer)?;
+            git_refresh_repository(&repository_path, &mut buffer)?;
         }
         Ok(())
     }
 }
 
-pub fn git_diff(directory: &Path, file: &Path, is_staged: bool) -> Result<String, String> {
+pub fn git_diff(repository_path: &Path, file: &Path, is_staged: bool) -> Result<String, String> {
     log_debug(format!(
         "{}: git diff {}",
-        directory.display().to_string(),
+        repository_path.display().to_string(),
         file.display().to_string()
     ));
-    let repo = check(Repository::discover(directory))?;
+    let repo = check(Repository::discover(repository_path))?;
     let mut options = DiffOptions::new();
     options.pathspec(file);
     let diff = check(if is_staged {

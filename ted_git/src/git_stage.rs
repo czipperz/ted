@@ -20,28 +20,28 @@ impl Command for GitAddCommand {
             let selected_window = selected_window.lock();
             (selected_window.buffer.clone(), selected_window.cursor.get())
         };
-        let (path, file) = {
+        let (repository_path, file) = {
             let buffer = buffer.lock();
             (buffer.name.file_path.as_ref().ok_or_else(|| "Error: Cannot open git repository")?.to_path_buf(),
              get_highlighted_file_unstaged(&buffer, cursor)?)
         };
-        git_add(&path, &file)?;
+        git_add(&repository_path, &file)?;
         {
             let mut buffer = buffer.lock();
-            git_refresh_repository(&path, &mut buffer)?;
+            git_refresh_repository(&repository_path, &mut buffer)?;
         }
         Ok(())
     }
 }
 
-pub fn git_add(directory: &Path, file: &Path) -> Result<(), String> {
+pub fn git_add(repository_path: &Path, file: &Path) -> Result<(), String> {
     log_debug(format!(
         "{}: git add {}",
-        directory.display().to_string(),
+        repository_path.display().to_string(),
         file.display().to_string()
     ));
-    let repo = check(Repository::discover(directory))?;
-    let mut index = check(repo.index())?;
+    let repository = check(Repository::discover(repository_path))?;
+    let mut index = check(repository.index())?;
     check(index.add_path(file))?;
     check(index.write())?;
     Ok(())
@@ -61,28 +61,28 @@ impl Command for GitUnstageCommand {
             let selected_window = selected_window.lock();
             (selected_window.buffer.clone(), selected_window.cursor.get())
         };
-        let (path, file) = {
+        let (repository_path, file) = {
             let buffer = buffer.lock();
             (buffer.name.file_path.as_ref().ok_or_else(|| "Error: Cannot open git repository")?.to_path_buf(),
              get_highlighted_file_staged(&buffer, cursor)?)
         };
-        git_unstage(&path, &file)?;
+        git_unstage(&repository_path, &file)?;
         {
             let mut buffer = buffer.lock();
-            git_refresh_repository(&path, &mut buffer)?;
+            git_refresh_repository(&repository_path, &mut buffer)?;
         }
         Ok(())
     }
 }
 
-pub fn git_unstage(directory: &Path, file: &Path) -> Result<(), String> {
+pub fn git_unstage(repository_path: &Path, file: &Path) -> Result<(), String> {
     log_debug(format!(
         "{}: git unstage {}",
-        directory.display().to_string(),
+        repository_path.display().to_string(),
         file.display().to_string()
     ));
-    let repo = check(Repository::discover(directory))?;
-    let target = check(check(repo.head())?.peel(ObjectType::Commit))?;
-    check(repo.reset_default(Some(&target), Some(file)))?;
+    let repository = check(Repository::discover(repository_path))?;
+    let target = check(check(repository.head())?.peel(ObjectType::Commit))?;
+    check(repository.reset_default(Some(&target), Some(file)))?;
     Ok(())
 }

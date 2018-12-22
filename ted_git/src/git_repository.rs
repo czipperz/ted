@@ -17,12 +17,12 @@ impl Command for GitOpenRepositoryCommand {
     fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_frame = state.lock().display.selected_frame.clone();
         let selected_window = selected_frame.lock().selected_window.clone();
-        let path = {
+        let repository_path = {
             let buffer = selected_window.lock().buffer.clone();
             let buffer = buffer.lock();
             buffer.name.parent().ok_or_else(|| "Error: Cannot open git repository".to_string())?.to_path_buf()
         };
-        let window = git_open_repository(&path)?;
+        let window = git_open_repository(&repository_path)?;
         let window = Arc::new(Mutex::new(window));
         let mut selected_frame = selected_frame.lock();
         selected_frame.layout.replace_selected_window(&selected_window, window.clone());
@@ -31,9 +31,9 @@ impl Command for GitOpenRepositoryCommand {
     }
 }
 
-pub fn git_open_repository(path: &Path) -> Result<Window, String> {
-    let mut buffer = Buffer::new(path.into());
-    git_refresh_repository(&path, &mut buffer)?;
+pub fn git_open_repository(repository_path: &Path) -> Result<Window, String> {
+    let mut buffer = Buffer::new(repository_path.into());
+    git_refresh_repository(&repository_path, &mut buffer)?;
     Ok(Window::from(buffer))
 }
 
@@ -49,17 +49,17 @@ impl Command for GitRefreshRepositoryCommand {
         let buffer = state.lock().display.selected_window_buffer();
         let mut buffer = buffer.lock();
         match buffer.name.file_path.clone() {
-            Some(path) => git_refresh_repository(&path, &mut buffer),
+            Some(repository_path) => git_refresh_repository(&repository_path, &mut buffer),
             None => Err(ERROR_FILE_PATH_NONE.into()),
         }
     }
 }
 
-pub fn git_refresh_repository(path: &Path, buffer: &mut Buffer) -> Result<(), String> {
+pub fn git_refresh_repository(repository_path: &Path, buffer: &mut Buffer) -> Result<(), String> {
     buffer.read_only = false;
     buffer.buffer_modes.push(git_mode());
     let mut buf = String::new();
-    let repo = check(Repository::discover(path))?;
+    let repo = check(Repository::discover(repository_path))?;
     let workdir = repo.workdir().ok_or_else(|| ERROR_REPOSITORY_WORKDIR_NONE)?;
     buffer.name = BufferName {
         display_name: format!("*git* {}", workdir.file_name().ok_or_else(|| ERROR_REPOSITORY_WORKDIR_NONE)?
@@ -76,11 +76,7 @@ pub fn git_refresh_repository(path: &Path, buffer: &mut Buffer) -> Result<(), St
         let mut unstaged = Vec::new();
         for status in statuses.iter() {
             use std::rc::Rc;
-            let file = Rc::new(
-                String::from_utf8_lossy(status.path_bytes())
-                    .to_owned()
-                    .to_string(),
-            );
+            let file = Rc::new(status.path().unwrap().to_string());
             let stat = status.status();
             if stat.is_index_new()
                 | stat.is_index_modified()
