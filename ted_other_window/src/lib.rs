@@ -1,29 +1,41 @@
-extern crate ted_core;
-extern crate ted_common_commands;
 extern crate parking_lot;
+extern crate ted_common_commands;
+extern crate ted_core;
 
-use ted_core::*;
-use ted_common_commands::*;
-use std::sync::Arc;
 use parking_lot::Mutex;
+use std::sync::Arc;
+use ted_common_commands::*;
+use ted_core::*;
 
 #[derive(Debug)]
 pub struct WithOtherWindowClockwiseCommand<T> {
     command: T,
 }
 
-pub fn with_other_window_clockwise<T>(command: T) -> Arc<WithOtherWindowClockwiseCommand<T>> where T: Command {
+pub fn with_other_window_clockwise<T>(command: T) -> Arc<WithOtherWindowClockwiseCommand<T>>
+where
+    T: Command,
+{
     Arc::new(WithOtherWindowClockwiseCommand { command })
 }
 
-impl<T> Command for WithOtherWindowClockwiseCommand<T> where T: Command {
+impl<T> Command for WithOtherWindowClockwiseCommand<T>
+where
+    T: Command,
+{
     fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
         let selected_frame = state.lock().display.selected_frame.clone();
         let mut selected_window = selected_frame.lock().selected_window.clone();
         other_window_clockwise(&selected_frame.lock().layout, &mut selected_window);
-        std::mem::swap(&mut selected_frame.lock().selected_window, &mut selected_window);
+        std::mem::swap(
+            &mut selected_frame.lock().selected_window,
+            &mut selected_window,
+        );
         let r = self.command.execute(state);
-        std::mem::swap(&mut selected_frame.lock().selected_window, &mut selected_window);
+        std::mem::swap(
+            &mut selected_frame.lock().selected_window,
+            &mut selected_window,
+        );
         r
     }
 }
@@ -65,7 +77,9 @@ mod tests {
 
         let at_this = assert_at_window_command(window);
         at_this.execute(state.clone()).unwrap();
-        with_other_window_clockwise(at_this).execute(state.clone()).unwrap();
+        with_other_window_clockwise(at_this)
+            .execute(state.clone())
+            .unwrap();
     }
 
     #[test]
@@ -81,11 +95,19 @@ mod tests {
 
         let at_this = assert_at_window_command(window);
         assert!(at_this.execute(state.clone()).is_ok());
-        assert!(with_other_window_clockwise(at_this).execute(state.clone()).is_err());
+        assert!(
+            with_other_window_clockwise(at_this)
+                .execute(state.clone())
+                .is_err()
+        );
 
         let at_other = assert_at_window_command(other);
         assert!(at_other.execute(state.clone()).is_err());
-        assert!(with_other_window_clockwise(at_other).execute(state.clone()).is_ok());
+        assert!(
+            with_other_window_clockwise(at_other)
+                .execute(state.clone())
+                .is_ok()
+        );
     }
 
     #[test]
@@ -104,10 +126,18 @@ mod tests {
 
         let at_this = assert_at_window_command(this);
         assert!(at_this.execute(state.clone()).is_ok());
-        assert!(with_other_window_clockwise(at_this).execute(state.clone()).is_err());
+        assert!(
+            with_other_window_clockwise(at_this)
+                .execute(state.clone())
+                .is_err()
+        );
 
         let at_other = assert_at_window_command(other);
         assert!(at_other.execute(state.clone()).is_err());
-        assert!(with_other_window_clockwise(at_other).execute(state.clone()).is_ok());
+        assert!(
+            with_other_window_clockwise(at_other)
+                .execute(state.clone())
+                .is_ok()
+        );
     }
 }

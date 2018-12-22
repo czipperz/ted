@@ -1,8 +1,8 @@
 use buffer::*;
 use cursor::Cursor;
 use key_map::KeyMap;
-use mode::Mode;
 use layout::Layout;
+use mode::Mode;
 use parking_lot::Mutex;
 use std::sync::Arc;
 

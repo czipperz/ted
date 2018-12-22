@@ -75,7 +75,7 @@ fn increment(state: Arc<Mutex<State>>) -> Result<(), String> {
                         Err(Err(())) => return Ok(()),
                     }
                 }
-                None => state.lock().display.show()?
+                None => state.lock().display.show()?,
             }
         }
     }

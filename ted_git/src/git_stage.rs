@@ -22,8 +22,15 @@ impl Command for GitAddCommand {
         };
         let (repository_path, file) = {
             let buffer = buffer.lock();
-            (buffer.name.path.as_ref().ok_or(ERROR_REPOSITORY_WORKDIR_NONE)?.to_path_buf(),
-             get_highlighted_file_unstaged(&buffer, cursor)?)
+            (
+                buffer
+                    .name
+                    .path
+                    .as_ref()
+                    .ok_or(ERROR_REPOSITORY_WORKDIR_NONE)?
+                    .to_path_buf(),
+                get_highlighted_file_unstaged(&buffer, cursor)?,
+            )
         };
         git_add(&repository_path, &file)?;
         {
@@ -63,8 +70,15 @@ impl Command for GitUnstageCommand {
         };
         let (repository_path, file) = {
             let buffer = buffer.lock();
-            (buffer.name.path.as_ref().ok_or(ERROR_REPOSITORY_WORKDIR_NONE)?.to_path_buf(),
-             get_highlighted_file_staged(&buffer, cursor)?)
+            (
+                buffer
+                    .name
+                    .path
+                    .as_ref()
+                    .ok_or(ERROR_REPOSITORY_WORKDIR_NONE)?
+                    .to_path_buf(),
+                get_highlighted_file_staged(&buffer, cursor)?,
+            )
         };
         git_unstage(&repository_path, &file)?;
         {

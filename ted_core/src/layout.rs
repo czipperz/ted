@@ -34,11 +34,7 @@ impl Layout {
     }
 
     /// Replace `window` with a new `Layout`.
-    pub fn replace_window<L: Into<Layout>>(
-        &mut self,
-        window: &Arc<Mutex<Window>>,
-        new_layout: L,
-    ) {
+    pub fn replace_window<L: Into<Layout>>(&mut self, window: &Arc<Mutex<Window>>, new_layout: L) {
         fn replace_window(
             layout: &mut Layout,
             selected_window: &Arc<Mutex<Window>>,
@@ -51,14 +47,12 @@ impl Layout {
                     }
                 }
                 Layout::VSplit { left, right } => {
-                    return replace_window(left, selected_window, new_layout).and_then(
-                        |new_layout| replace_window(right, selected_window, new_layout),
-                    );
+                    return replace_window(left, selected_window, new_layout)
+                        .and_then(|new_layout| replace_window(right, selected_window, new_layout));
                 }
                 Layout::HSplit { top, bottom } => {
-                    return replace_window(top, selected_window, new_layout).and_then(
-                        |new_layout| replace_window(bottom, selected_window, new_layout),
-                    );
+                    return replace_window(top, selected_window, new_layout)
+                        .and_then(|new_layout| replace_window(bottom, selected_window, new_layout));
                 }
             }
             *layout = new_layout;

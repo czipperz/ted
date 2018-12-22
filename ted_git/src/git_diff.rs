@@ -20,13 +20,14 @@ impl Command for GitDiffCommand {
         let selected_window = selected_frame.lock().selected_window.clone();
         let (buffer, cursor) = {
             let selected_window = selected_window.lock();
-            (selected_window.buffer.clone(),
-             selected_window.cursor.get())
+            (selected_window.buffer.clone(), selected_window.cursor.get())
         };
         let (repository_path, (file, is_staged)) = {
             let buffer = buffer.lock();
-            (buffer.name.path.as_ref().ok_or(ERROR_FILE_PATH_NONE)?.clone(),
-             get_highlighted_file(&buffer, cursor)?)
+            (
+                buffer.name.path.clone().ok_or(ERROR_FILE_PATH_NONE)?,
+                get_highlighted_file(&buffer, cursor)?,
+            )
         };
         {
             let diff_text = git_diff(&repository_path, &file, is_staged)?;
@@ -37,13 +38,16 @@ impl Command for GitDiffCommand {
                         name: format!("*git diff* {}", abs_path.display()),
                         path: Some(abs_path),
                     },
-                    &diff_text);
+                    &diff_text,
+                );
                 buffer.read_only = true;
                 buffer
             };
             let window = Arc::new(Mutex::new(Window::from(buffer)));
             let mut selected_frame = selected_frame.lock();
-            selected_frame.layout.replace_window(&selected_window, window.clone());
+            selected_frame
+                .layout
+                .replace_window(&selected_window, window.clone());
             selected_frame.selected_window = window;
         }
         {
@@ -88,11 +92,17 @@ pub fn git_diff(repository_path: &Path, file: &Path, is_staged: bool) -> Result<
             true
         }),
         Some(&mut |_delta, hunk| {
-            diff_text.lock().push_str(&format!("{}", str::from_utf8(hunk.header()).unwrap()));
+            diff_text
+                .lock()
+                .push_str(&format!("{}", str::from_utf8(hunk.header()).unwrap()));
             true
         }),
         Some(&mut |_delta, _hunk, line| {
-            diff_text.lock().push_str(&format!("{}{}", line.origin(), str::from_utf8(line.content()).unwrap()));
+            diff_text.lock().push_str(&format!(
+                "{}{}",
+                line.origin(),
+                str::from_utf8(line.content()).unwrap()
+            ));
             true
         }),
     ))?;

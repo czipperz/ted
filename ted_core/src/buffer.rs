@@ -146,7 +146,9 @@ impl Buffer {
 
     /// Insert char `c` at point `loc`.
     pub fn insert(&mut self, loc: usize, c: char) -> Result<(), String> {
-        if self.read_only { Err(ERROR_READ_ONLY)? }
+        if self.read_only {
+            Err(ERROR_READ_ONLY)?
+        }
         self.buffer_contents
             .insert(loc, c)
             .map_err(|()| "Error: Index out of bounds in Buffer::insert()")?;
@@ -161,7 +163,9 @@ impl Buffer {
 
     /// Insert string `s` at point `loc`.
     pub fn insert_str(&mut self, loc: usize, s: &str) -> Result<(), String> {
-        if self.read_only { Err(ERROR_READ_ONLY)? }
+        if self.read_only {
+            Err(ERROR_READ_ONLY)?
+        }
         self.buffer_contents
             .insert_str(loc, s)
             .map_err(|()| "Error: Index out of bounds in Buffer::insert_str()".to_string())?;
@@ -176,7 +180,9 @@ impl Buffer {
 
     /// Delete the character at point `loc`.
     pub fn delete(&mut self, loc: usize) -> Result<(), String> {
-        if self.read_only { Err(ERROR_READ_ONLY)? }
+        if self.read_only {
+            Err(ERROR_READ_ONLY)?
+        }
         let c = self
             .get(loc)
             .map_err(|()| "Error: Index out of bounds in Buffer::delete()".to_string())?;
@@ -194,7 +200,9 @@ impl Buffer {
 
     /// Delete the region from position `begin` up until `end`.
     pub fn delete_region(&mut self, begin: usize, end: usize) -> Result<(), String> {
-        if self.read_only { Err(ERROR_READ_ONLY)? }
+        if self.read_only {
+            Err(ERROR_READ_ONLY)?
+        }
         let s = self.substring(begin, end)?;
         self.buffer_contents
             .delete_region(begin, end)
@@ -256,7 +264,9 @@ impl Buffer {
     /// assert_eq!(format!("{}", buffer), "");
     /// ```
     pub fn undo(&mut self) -> Result<bool, String> {
-        if self.read_only { Err(ERROR_READ_ONLY)? }
+        if self.read_only {
+            Err(ERROR_READ_ONLY)?
+        }
         let pred;
         {
             let current_state = self.current_state.lock();
@@ -303,7 +313,9 @@ impl Buffer {
     /// assert_eq!(format!("{}", buffer), "abc");
     /// ```
     pub fn redo(&mut self) -> Result<bool, String> {
-        if self.read_only { Err(ERROR_READ_ONLY)? }
+        if self.read_only {
+            Err(ERROR_READ_ONLY)?
+        }
         let current_state = self.current_state.clone();
         let current_state = current_state.lock();
         if let Some(next_state) = current_state.succ.last() {
@@ -314,17 +326,11 @@ impl Buffer {
                         .delete_region(
                             next_state.change.loc,
                             next_state.change.loc + next_state.change.len_chars,
-                        ).map_err(|()| {
-                            "Error: Index out of bounds in Buffer::redo()"
-                                .to_string()
-                        })?;
+                        ).map_err(|()| "Error: Index out of bounds in Buffer::redo()")?;
                 } else {
                     self.buffer_contents
                         .insert_str(next_state.change.loc, &next_state.change.s)
-                        .map_err(|()| {
-                            "Error: Index out of bounds in Buffer::redo()"
-                                .to_string()
-                        })?;
+                        .map_err(|()| "Error: Index out of bounds in Buffer::redo()")?;
                 }
             }
             self.current_state = next_state.clone();
@@ -382,10 +388,7 @@ impl<'a> From<&'a str> for BufferName {
 
 impl From<String> for BufferName {
     fn from(name: String) -> Self {
-        BufferName {
-            name,
-            path: None,
-        }
+        BufferName { name, path: None }
     }
 }
 
@@ -398,7 +401,11 @@ pub fn update_cursor(
         Some(state) => state,
         None => {
             if !Arc::ptr_eq(&buffer.current_state, &buffer.initial_state) {
-                *ret_location = buffer.current_state.lock().change.offset_cursor_redo(*ret_location);
+                *ret_location = buffer
+                    .current_state
+                    .lock()
+                    .change
+                    .offset_cursor_redo(*ret_location);
                 *ret_state = Arc::downgrade(&buffer.current_state)
             }
             return;
@@ -457,7 +464,10 @@ pub fn update_cursor(
 }
 
 pub fn is_updated_cursor(buffer: &Buffer, state: &Weak<Mutex<StateNode>>) -> bool {
-    Arc::ptr_eq(&buffer.current_state, &state.upgrade().as_ref().unwrap_or(&buffer.initial_state))
+    Arc::ptr_eq(
+        &buffer.current_state,
+        &state.upgrade().as_ref().unwrap_or(&buffer.initial_state),
+    )
 }
 
 #[cfg(test)]

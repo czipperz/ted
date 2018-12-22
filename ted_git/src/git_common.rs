@@ -40,20 +40,27 @@ pub fn get_highlighted_file(buffer: &Buffer, mut cursor: usize) -> Result<(PathB
 
 pub fn get_highlighted_file_staged(buffer: &Buffer, cursor: usize) -> Result<PathBuf, String> {
     let (path, is_staged) = get_highlighted_file(buffer, cursor)?;
-    if !is_staged { Err(ERROR_UNSTAGED)? }
+    if !is_staged {
+        Err(ERROR_UNSTAGED)?
+    }
     Ok(path)
 }
 
 pub fn get_highlighted_file_unstaged(buffer: &Buffer, cursor: usize) -> Result<PathBuf, String> {
     let (path, is_staged) = get_highlighted_file(buffer, cursor)?;
-    if is_staged { Err(ERROR_STAGED)? }
+    if is_staged {
+        Err(ERROR_STAGED)?
+    }
     Ok(path)
 }
 
 pub const ERROR_FILE_PATH_NONE: &'static str = "Error: Not a git repository";
-pub const ERROR_REPOSITORY_WORKDIR_NONE: &'static str = "Error: Git repository has no associated directory";
-pub const ERROR_REPOSITORY_WORKDIR_TO_STR_NONE: &'static str = "Error: Git repository directory is not valid unicode";
+pub const ERROR_REPOSITORY_WORKDIR_NONE: &'static str =
+    "Error: Git repository has no associated directory";
+pub const ERROR_REPOSITORY_WORKDIR_TO_STR_NONE: &'static str =
+    "Error: Git repository directory is not valid unicode";
 pub const ERROR_NOT_IN_GIT_MODE: &'static str = "Error: Not in git mode";
-pub const ERROR_NO_FILE_HIGHLIGHTED: &'static str = "Error: Place the cursor on the line of a file before adding";
+pub const ERROR_NO_FILE_HIGHLIGHTED: &'static str =
+    "Error: Place the cursor on the line of a file before adding";
 pub const ERROR_STAGED: &'static str = "Error: File is staged";
 pub const ERROR_UNSTAGED: &'static str = "Error: File is unstaged";

@@ -56,7 +56,10 @@ impl Change {
 impl Default for Change {
     fn default() -> Self {
         Change {
-            loc: 0, s: String::default(), len_chars: 0, is_insert: true,
+            loc: 0,
+            s: String::default(),
+            len_chars: 0,
+            is_insert: true,
         }
     }
 }
