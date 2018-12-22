@@ -34,7 +34,7 @@ impl Frame {
 
     pub fn replace_selected_window(&mut self, window: Arc<Mutex<Window>>) {
         self.layout
-            .replace_selected_window(&self.selected_window, Layout::Window(window.clone()));
+            .replace_window(&self.selected_window, Layout::Window(window.clone()));
         self.selected_window = window;
     }
 

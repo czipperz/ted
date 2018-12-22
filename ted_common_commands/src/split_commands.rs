@@ -20,7 +20,7 @@ impl Command for VerticalSplitCommand {
         let mut selected_frame = selected_frame.lock();
         let selected_frame = &mut *selected_frame;
         let window = &selected_frame.selected_window;
-        selected_frame.layout.replace_selected_window(
+        selected_frame.layout.replace_window(
             &window,
             Layout::VSplit {
                 left: window.clone().into(),
@@ -49,7 +49,7 @@ impl Command for HorizontalSplitCommand {
         let mut selected_frame = selected_frame.lock();
         let selected_frame = &mut *selected_frame;
         let window = &selected_frame.selected_window;
-        selected_frame.layout.replace_selected_window(
+        selected_frame.layout.replace_window(
             &window,
             Layout::HSplit {
                 top: window.clone().into(),

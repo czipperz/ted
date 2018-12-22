@@ -33,13 +33,13 @@ impl Layout {
         }
     }
 
-    /// Replace the `selected_window` with a new layout.
-    pub fn replace_selected_window<L: Into<Layout>>(
+    /// Replace `window` with a new `Layout`.
+    pub fn replace_window<L: Into<Layout>>(
         &mut self,
-        selected_window: &Arc<Mutex<Window>>,
+        window: &Arc<Mutex<Window>>,
         new_layout: L,
     ) {
-        fn replace_selected_window(
+        fn replace_window(
             layout: &mut Layout,
             selected_window: &Arc<Mutex<Window>>,
             new_layout: Layout,
@@ -51,20 +51,20 @@ impl Layout {
                     }
                 }
                 Layout::VSplit { left, right } => {
-                    return replace_selected_window(left, selected_window, new_layout).and_then(
-                        |new_layout| replace_selected_window(right, selected_window, new_layout),
+                    return replace_window(left, selected_window, new_layout).and_then(
+                        |new_layout| replace_window(right, selected_window, new_layout),
                     );
                 }
                 Layout::HSplit { top, bottom } => {
-                    return replace_selected_window(top, selected_window, new_layout).and_then(
-                        |new_layout| replace_selected_window(bottom, selected_window, new_layout),
+                    return replace_window(top, selected_window, new_layout).and_then(
+                        |new_layout| replace_window(bottom, selected_window, new_layout),
                     );
                 }
             }
             *layout = new_layout;
             None
         }
-        replace_selected_window(self, selected_window, new_layout.into());
+        replace_window(self, window, new_layout.into());
     }
 
     pub fn first_window(&self) -> &Arc<Mutex<Window>> {

@@ -43,7 +43,7 @@ impl Command for GitDiffCommand {
             };
             let window = Arc::new(Mutex::new(Window::from(buffer)));
             let mut selected_frame = selected_frame.lock();
-            selected_frame.layout.replace_selected_window(&selected_window, window.clone());
+            selected_frame.layout.replace_window(&selected_window, window.clone());
             selected_frame.selected_window = window;
         }
         {

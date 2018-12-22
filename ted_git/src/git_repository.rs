@@ -25,7 +25,7 @@ impl Command for GitOpenRepositoryCommand {
         let window = git_open_repository(&repository_path)?;
         let window = Arc::new(Mutex::new(window));
         let mut selected_frame = selected_frame.lock();
-        selected_frame.layout.replace_selected_window(&selected_window, window.clone());
+        selected_frame.layout.replace_window(&selected_window, window.clone());
         selected_frame.selected_window = window;
         Ok(())
     }
