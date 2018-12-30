@@ -1,48 +1,33 @@
-use draw::*;
-use input::Input;
-use layout::Layout;
-use logger::*;
-use pancurses;
+use ted_core::*;
+use ted_core::draw::*;
+use pancurses_result as pancurses;
 use parking_lot::Mutex;
-use renderer::Renderer;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use window::Window;
 
 /// An implementation of [`Renderer`] for a curses backend.
 ///
 /// This struct is used to wrap the curses process.
 /// The backend is implemented via the `pancurses` crate.
 pub struct CursesRenderer {
-    window: pancurses::Window,
-    cursor_y: i32,
-    cursor_x: i32,
+    _print_log_on_destruction: PrintLogOnDestruction,
+    curses: pancurses::Curses,
+    cursor: pancurses::Point,
     stalling_escape: bool,
-}
-
-unsafe impl Send for CursesRenderer {}
-
-fn check(code: i32) -> Result<(), ()> {
-    if code == pancurses::ERR {
-        Err(())
-    } else {
-        Ok(())
-    }
 }
 
 impl CursesRenderer {
     /// Initialize the curses backend and wrap it in the CursesRenderer object.
     pub fn new() -> Result<Self, ()> {
-        let window = pancurses::initscr();
-        check(pancurses::cbreak())?;
-        check(pancurses::raw())?;
-        check(pancurses::noecho())?;
-        check(window.nodelay(true))?;
+        let mut curses = pancurses::initscr()?;
+        curses.set_input_buffering_mode(pancurses::InputBufferingMode::UnbufferedWithSignals)?;
+        curses.set_echo_input(false)?;
+        curses.window_mut().set_block_on_read(false)?;
         Ok(Self {
-            window,
-            cursor_y: 0,
-            cursor_x: 0,
+            _print_log_on_destruction: PrintLogOnDestruction,
+            curses,
+            cursor: (0, 0).into(),
             stalling_escape: false,
         })
     }
@@ -56,7 +41,7 @@ impl Renderer for CursesRenderer {
         messages: &mut VecDeque<String>,
         message_display_time: &mut Option<Instant>,
     ) -> Result<(), String> {
-        let (rows, columns) = self.window.get_max_yx();
+        let (rows, columns) = self.curses.window().size().into();
         let rows = rows as usize;
         let columns = columns as usize;
         draw(self, layout, selected_window, rows, columns)?;
@@ -103,14 +88,19 @@ impl Renderer for CursesRenderer {
             }
             None => (),
         }
-        check(self.window.mv(self.cursor_y as i32, self.cursor_x as i32))
+        self.curses
+            .window_mut()
+            .move_to(self.cursor)
             .map_err(|()| "Error: Curses mv()".to_string())?;
-        check(self.window.refresh()).map_err(|()| "Error: Curses refresh()".to_string())?;
+        self.curses
+            .window_mut()
+            .refresh()
+            .map_err(|()| "Error: Curses refresh()".to_string())?;
         Ok(())
     }
 
     fn getch(&mut self) -> Option<Input> {
-        match self.window.getch() {
+        match self.curses.window_mut().read_char() {
             Some(pancurses::Input::Character(c)) if c == 27 as char => {
                 self.stalling_escape = true;
                 self.getch()
@@ -123,7 +113,7 @@ impl Renderer for CursesRenderer {
                     ch,
                     c,
                     c as u32,
-                    pancurses::keyname(c as i32)
+                    self.curses.key_name(c as i32)
                 ));
                 Some(ch)
             }
@@ -176,7 +166,10 @@ fn convert_to_key(c: char, alt: bool) -> Input {
 
 impl DrawableRenderer for CursesRenderer {
     fn erase(&mut self) -> Result<(), String> {
-        check(self.window.erase()).map_err(|()| "Error: Curses erase()".to_string())
+        self.curses
+            .window_mut()
+            .erase()
+            .map_err(|()| "Error: Curses erase()".to_string())
     }
 
     fn putch(&mut self, y: usize, x: usize, ch: Character) -> Result<(), String> {
@@ -185,33 +178,31 @@ impl DrawableRenderer for CursesRenderer {
             Character::VLine => '|',
             Character::HLine => '-',
         };
-        check(self.window.mvaddch(y as i32, x as i32, c))
+        self.curses
+            .window_mut()
+            .move_put_char((y as i32, x as i32), c)
             .map_err(|()| "Error: Curses putch()".to_string())
     }
 
     fn set_attribute(&mut self, y: usize, x: usize, at: Attribute) -> Result<(), String> {
         match at {
             Attribute::SelectedCursor => {
-                self.cursor_y = y as i32;
-                self.cursor_x = x as i32;
+                self.cursor = (y as i32, x as i32).into();
                 Ok(())
             }
             Attribute::UnselectedCursor => Ok(()),
-            Attribute::Inverted => check(self.window.mvchgat(
-                y as i32,
-                x as i32,
-                1,
-                pancurses::Attribute::Reverse.into(),
-                0,
-            )).map_err(|()| "Error: Curses mvchgat()".to_string()),
+            Attribute::Inverted => self
+                .curses
+                .window_mut()
+                .move_change_attributes((y as i32, x as i32), 1, pancurses::Attribute::Reverse, 0)
+                .map_err(|()| "Error: Curses mvchgat()".to_string()),
         }
     }
 }
 
-/// Uninitialize the curses backend.
-impl Drop for CursesRenderer {
+struct PrintLogOnDestruction;
+impl Drop for PrintLogOnDestruction {
     fn drop(&mut self) {
-        pancurses::endwin();
         print_log();
     }
 }

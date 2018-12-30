@@ -8,3 +8,4 @@ parking_lot = "*"
 ted_core = { path = "ted_core" }
 ted_common_commands = { path = "ted_common_commands" }
 ted_user_cfg = { path = "ted_user_cfg" }
+ted_renderers = { path = "ted_renderers" }

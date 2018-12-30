@@ -20,12 +20,14 @@ extern crate parking_lot;
 extern crate ted_common_commands;
 extern crate ted_core;
 extern crate ted_user_cfg;
+extern crate ted_renderers;
 
 use parking_lot::Mutex;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use ted_core::*;
 use ted_user_cfg::*;
+use ted_renderers::*;
 
 fn main() {
     std::panic::set_hook(Box::new(|info| {

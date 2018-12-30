@@ -1,9 +1,9 @@
 [package]
-name = "ted_core"
+name = "ted_renderers"
 version = "0.1.0"
 authors = ["Czipperz <czipperz@gmail.com>"]
 
 [dependencies]
-lazy_static = "*"
+ted_core = { path = "../ted_core" }
+pancurses-result = "0.5.1"
 parking_lot = "*"
-by_address = "*"

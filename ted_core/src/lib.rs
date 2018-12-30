@@ -13,7 +13,6 @@
 #[macro_use]
 extern crate lazy_static;
 extern crate by_address;
-extern crate pancurses;
 extern crate parking_lot;
 
 #[macro_use]
@@ -25,8 +24,7 @@ mod frame;
 pub use frame::*;
 mod renderer;
 pub use renderer::*;
-mod curses_renderer;
-pub use curses_renderer::*;
+pub mod draw;
 mod debug_renderer;
 pub use debug_renderer::*;
 mod command;
@@ -53,4 +51,3 @@ pub use mode::*;
 // private modules
 mod buffer_contents;
 mod change;
-mod draw;
