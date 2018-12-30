@@ -1,10 +1,10 @@
-use ted_core::*;
-use ted_core::draw::*;
 use pancurses_result as pancurses;
 use parking_lot::Mutex;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
+use ted_core::draw::*;
+use ted_core::*;
 
 /// An implementation of [`Renderer`] for a curses backend.
 ///
