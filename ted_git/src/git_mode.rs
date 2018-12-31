@@ -56,10 +56,10 @@ fn create_git_mode() -> Arc<Mutex<Mode>> {
     let mode = Mode::new();
     {
         let mut key_map = mode.key_map.lock();
-        key_map.bind(vec![kbd!('g')], git_refresh_repository_command());
-        key_map.bind(vec![kbd!('a')], git_add_command());
-        key_map.bind(vec![kbd!('u')], git_unstage_command());
-        key_map.bind(vec![kbd!('d')], git_diff_command());
+        key_map.bind(vec![kbd("g")], git_refresh_repository_command());
+        key_map.bind(vec![kbd("a")], git_add_command());
+        key_map.bind(vec![kbd("u")], git_unstage_command());
+        key_map.bind(vec![kbd("d")], git_diff_command());
     }
     Arc::new(Mutex::new(mode))
 }

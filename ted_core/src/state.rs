@@ -1,6 +1,6 @@
 use command::*;
 use display::Display;
-use input::Input;
+use input::*;
 use insert_command::insert_command;
 use key_map::*;
 use logger::log;
@@ -89,22 +89,16 @@ impl State {
 }
 
 fn insert_key_behavior(input: Input) -> Result<Arc<Command>, Result<(), ()>> {
-    match input {
-        Input::Key {
-            key,
-            control: false,
-            alt: false,
-            function: false,
-        }
-            if is_displayable(key) =>
-        {
-            return Ok(insert_command(key));
-        }
-        input => {
-            log(format!("Invalid input {:?}", input));
-            return Err(Err(()));
+    if input.is_unmodified() {
+        match input.key {
+            Key::Key(c) if is_displayable(c) => {
+                return Ok(insert_command(c));
+            }
+            _ => (),
         }
     }
+    log(format!("Invalid input {:?}", input));
+    Err(Err(()))
 }
 
 fn is_displayable(c: char) -> bool {
@@ -123,10 +117,10 @@ mod tests {
         state
             .default_key_map
             .lock()
-            .bind(vec![kbd!('a')], command.clone());
+            .bind(vec![kbd("a")], command.clone());
         assert!(state.lookup(&mut vec![].into()).is_err());
         assert!(Arc::ptr_eq(
-            &state.lookup(&mut vec![kbd!('a')].into()).unwrap(),
+            &state.lookup(&mut vec![kbd("a")].into()).unwrap(),
             &command
         ));
     }
@@ -138,13 +132,11 @@ mod tests {
         state
             .default_key_map
             .lock()
-            .bind(vec![kbd!('a'), kbd!('b')], command.clone());
+            .bind(vec![kbd("a"), kbd("b")], command.clone());
         assert!(state.lookup(&mut vec![].into()).is_err());
-        assert!(state.lookup(&mut vec![kbd!('a')].into()).is_err());
+        assert!(state.lookup(&mut vec![kbd("a")].into()).is_err());
         assert!(Arc::ptr_eq(
-            &state
-                .lookup(&mut vec![kbd!('a'), kbd!('b')].into())
-                .unwrap(),
+            &state.lookup(&mut vec![kbd("a"), kbd("b")].into()).unwrap(),
             &command
         ));
     }
@@ -156,13 +148,11 @@ mod tests {
         state
             .default_key_map
             .lock()
-            .bind(vec![kbd!('a'), kbd!('a')], command.clone());
+            .bind(vec![kbd("a"), kbd("a")], command.clone());
         assert!(state.lookup(&mut vec![].into()).is_err());
-        assert!(state.lookup(&mut vec![kbd!('a')].into()).is_err());
+        assert!(state.lookup(&mut vec![kbd("a")].into()).is_err());
         assert!(Arc::ptr_eq(
-            &state
-                .lookup(&mut vec![kbd!('a'), kbd!('a')].into())
-                .unwrap(),
+            &state.lookup(&mut vec![kbd("a"), kbd("a")].into()).unwrap(),
             &command
         ));
     }
@@ -174,21 +164,19 @@ mod tests {
         state
             .default_key_map
             .lock()
-            .bind(vec![kbd!('a'), kbd!('b')], command.clone());
+            .bind(vec![kbd("a"), kbd("b")], command.clone());
         state
             .default_key_map
             .lock()
-            .map(vec![kbd!('b')], vec![kbd!('a'), kbd!('b')]);
+            .map(vec![kbd("b")], vec![kbd("a"), kbd("b")]);
         assert!(state.lookup(&mut vec![].into()).is_err());
-        assert!(state.lookup(&mut vec![kbd!('a')].into()).is_err());
+        assert!(state.lookup(&mut vec![kbd("a")].into()).is_err());
         assert!(Arc::ptr_eq(
-            &state
-                .lookup(&mut vec![kbd!('a'), kbd!('b')].into())
-                .unwrap(),
+            &state.lookup(&mut vec![kbd("a"), kbd("b")].into()).unwrap(),
             &command
         ));
         assert!(Arc::ptr_eq(
-            &state.lookup(&mut vec![kbd!('b')].into()).unwrap(),
+            &state.lookup(&mut vec![kbd("b")].into()).unwrap(),
             &command
         ));
     }
@@ -201,19 +189,19 @@ mod tests {
         let mode = Mode::new();
         mode.key_map
             .lock()
-            .bind(vec![kbd!('a')], command_mode.clone());
+            .bind(vec![kbd("a")], command_mode.clone());
         state
             .default_key_map
             .lock()
-            .bind(vec![kbd!('a')], command_global.clone());
+            .bind(vec![kbd("a")], command_global.clone());
         assert!(Arc::ptr_eq(
-            &state.lookup(&mut vec![kbd!('a')].into()).unwrap(),
+            &state.lookup(&mut vec![kbd("a")].into()).unwrap(),
             &command_global
         ));
         state.global_modes.push(Arc::new(Mutex::new(mode)));
         assert!(state.lookup(&mut vec![].into()).is_err());
         assert!(Arc::ptr_eq(
-            &state.lookup(&mut vec![kbd!('a')].into()).unwrap(),
+            &state.lookup(&mut vec![kbd("a")].into()).unwrap(),
             &command_mode
         ));
     }
@@ -221,7 +209,7 @@ mod tests {
     #[test]
     fn lookup_get_insert() {
         let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
-        let insert = state.lock().lookup(&mut vec![kbd!('a')].into()).unwrap();
+        let insert = state.lock().lookup(&mut vec![kbd("a")].into()).unwrap();
         insert.execute(state.clone()).unwrap();
         let buffer = state.lock().display.selected_window_buffer();
         assert_eq!(buffer.lock().to_string(), "a");

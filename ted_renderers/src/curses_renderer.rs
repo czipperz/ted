@@ -128,38 +128,29 @@ impl Renderer for CursesRenderer {
 }
 
 fn convert_to_key(c: char, alt: bool) -> Input {
-    if c == '\n'
-    /* 10 */
-    {
-        Input::Key {
-            key: c,
+    if c == '\n' {
+        Input {
             control: false,
             alt,
-            function: false,
+            key: Key::Key(c),
         }
-    } else if c == 0 as char
-    /* 0 */
-    {
-        Input::Key {
-            key: '@',
+    } else if c == 0 as char {
+        Input {
             control: true,
             alt,
-            function: false,
+            key: Key::Key('@'),
         }
     } else if c >= 1 as char && c <= 26 as char {
-        let key = (c as u8 - 1 + 'a' as u8) as char;
-        Input::Key {
-            key,
+        Input {
             control: true,
             alt,
-            function: false,
+            key: Key::Key((c as u8 - 1 + 'a' as u8) as char),
         }
     } else {
-        Input::Key {
-            key: c,
+        Input {
             control: false,
             alt,
-            function: false,
+            key: Key::Key(c),
         }
     }
 }
@@ -213,8 +204,8 @@ mod tests {
 
     #[test]
     fn convert_to_key_1() {
-        assert_ne!(convert_to_key(2 as char, true), kbd!(C - A - 'a'));
-        assert_eq!(convert_to_key(1 as char, true), kbd!(C - A - 'a'));
-        assert_eq!(convert_to_key(2 as char, false), kbd!(C - 'b'));
+        assert_ne!(convert_to_key(2 as char, true), kbd("C-A-a"));
+        assert_eq!(convert_to_key(1 as char, true), kbd("C-A-a"));
+        assert_eq!(convert_to_key(2 as char, false), kbd("C-b"));
     }
 }

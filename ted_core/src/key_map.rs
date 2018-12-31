@@ -171,16 +171,17 @@ impl Default for KeyMap {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use input::kbd;
 
     #[test]
     fn key_map_lookup_bound_key() {
         let mut key_map = KeyMap::default();
-        key_map.bind(vec![kbd!('g')], blank_command());
+        key_map.bind(vec![kbd("g")], blank_command());
         let key_map = Arc::new(Mutex::new(key_map));
-        let mut input = vec![kbd!('g')].into();
+        let mut input = vec![kbd("g")].into();
         assert!(KeyMap::lookup(&key_map, &mut input, true).is_ok());
         assert_eq!(input, vec![]);
-        let mut input = vec![kbd!('g')].into();
+        let mut input = vec![kbd("g")].into();
         assert!(KeyMap::lookup(&key_map, &mut input, false).is_ok());
         assert_eq!(input, vec![]);
     }
@@ -188,16 +189,16 @@ mod tests {
     #[test]
     fn key_map_lookup_unbound_key() {
         let key_map = Arc::new(Mutex::new(KeyMap::default()));
-        let mut input = vec![kbd!(C - 'x')].into();
+        let mut input = vec![kbd("C-x")].into();
         assert_eq!(
             KeyMap::lookup(&key_map, &mut input, true).unwrap_err(),
-            LookupError::UnboundInput(Some(kbd!(C - 'x')))
+            LookupError::UnboundInput(Some(kbd("C-x")))
         );
-        assert_eq!(input, vec![kbd!(C - 'x')]);
-        let mut input = vec![kbd!(C - 'x')].into();
+        assert_eq!(input, vec![kbd("C-x")]);
+        let mut input = vec![kbd("C-x")].into();
         assert_eq!(
             KeyMap::lookup(&key_map, &mut input, false).unwrap_err(),
-            LookupError::UnboundInput(Some(kbd!(C - 'x')))
+            LookupError::UnboundInput(Some(kbd("C-x")))
         );
         assert_eq!(input, vec![]);
     }

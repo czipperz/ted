@@ -94,10 +94,10 @@ mod tests {
     #[test]
     fn increment_1() {
         let state = Arc::new(Mutex::new(State::new(DebugRenderer::from(vec![
-            kbd!('a'),
-            kbd!('b'),
-            kbd!('c'),
-            kbd!('q'),
+            kbd("a"),
+            kbd("b"),
+            kbd("c"),
+            kbd("q"),
         ]))));
         {
             let selected_window = state.lock().display.selected_window();
@@ -236,13 +236,13 @@ mod tests {
         {
             let default_key_map = state.lock().default_key_map.clone();
             let mut default_key_map = default_key_map.lock();
-            default_key_map.bind(vec![kbd!('q')], close_ted_command());
+            default_key_map.bind(vec![kbd("q")], close_ted_command());
         }
         {
             let state = state.lock();
             unsafe { state.display.debug_renderer() }
                 .inputs
-                .push_back(kbd!('q'));
+                .push_back(kbd("q"));
         }
         increment(state.clone()).unwrap_err();
 
@@ -274,9 +274,7 @@ mod tests {
 
     #[test]
     fn increment_new_line() {
-        let state = Arc::new(Mutex::new(State::new(DebugRenderer::from(vec![kbd!(
-            '\n'
-        )]))));
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::from(vec![kbd("\n")]))));
         increment(state.clone()).unwrap();
         {
             let selected_window = state.lock().display.selected_window();
@@ -291,15 +289,15 @@ mod tests {
     #[test]
     fn increment_double_bind() {
         let state = Arc::new(Mutex::new(State::new(DebugRenderer::from(vec![
-            kbd!('a'),
-            kbd!('a'),
-            kbd!('b'),
+            kbd("a"),
+            kbd("a"),
+            kbd("b"),
         ]))));
         {
             let default_key_map = state.lock().default_key_map.clone();
             default_key_map
                 .lock()
-                .bind(vec![kbd!('a'), kbd!('b')], close_ted_command());
+                .bind(vec![kbd("a"), kbd("b")], close_ted_command());
         }
 
         increment(state.clone()).unwrap();
