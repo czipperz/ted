@@ -47,6 +47,8 @@ mod cursor;
 pub use cursor::*;
 mod mode;
 pub use mode::*;
+mod messages;
+pub use messages::*;
 
 // private modules
 mod buffer_contents;

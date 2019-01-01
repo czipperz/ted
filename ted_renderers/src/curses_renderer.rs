@@ -1,8 +1,6 @@
 use pancurses_result as pancurses;
 use parking_lot::Mutex;
-use std::collections::VecDeque;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
 use ted_core::draw::*;
 use ted_core::*;
 
@@ -38,55 +36,38 @@ impl Renderer for CursesRenderer {
         &mut self,
         layout: &Layout,
         selected_window: Option<&Arc<Mutex<Window>>>,
-        messages: &mut VecDeque<String>,
-        message_display_time: &mut Option<Instant>,
+        message: Option<&str>,
     ) -> Result<(), String> {
         let (rows, columns) = self.curses.window().size().into();
         let rows = rows as usize;
         let columns = columns as usize;
         draw(self, layout, selected_window, rows, columns)?;
-        match message_display_time.clone() {
-            Some(time) => {
-                if time.elapsed() > Duration::from_secs(10) {
-                    messages.pop_front();
-                    *message_display_time = None;
-                }
+        if let Some(message) = message {
+            self.set_attribute(rows - 3, 9, Attribute::Inverted)?;
+            self.putch(rows - 3, 9, Character::Character('.'))?;
+            self.set_attribute(rows - 2, 9, Attribute::Inverted)?;
+            self.putch(rows - 2, 9, Character::VLine)?;
+            for i in 10..=columns - 10 {
+                self.set_attribute(rows - 3, i, Attribute::Inverted)?;
+                self.putch(rows - 3, i, Character::HLine)?;
+                self.set_attribute(rows - 2, i, Attribute::Inverted)?;
+                self.putch(rows - 2, i, Character::Character(' '))?
             }
-            None => {
-                if !messages.is_empty() {
-                    *message_display_time = Some(Instant::now());
-                }
-            }
-        }
-        match messages.front() {
-            Some(message) => {
-                self.set_attribute(rows - 3, 9, Attribute::Inverted)?;
-                self.putch(rows - 3, 9, Character::Character('.'))?;
-                self.set_attribute(rows - 2, 9, Attribute::Inverted)?;
-                self.putch(rows - 2, 9, Character::VLine)?;
-                for i in 10..=columns - 10 {
-                    self.set_attribute(rows - 3, i, Attribute::Inverted)?;
-                    self.putch(rows - 3, i, Character::HLine)?;
-                    self.set_attribute(rows - 2, i, Attribute::Inverted)?;
-                    self.putch(rows - 2, i, Character::Character(' '))?
-                }
-                self.set_attribute(rows - 3, columns - 9, Attribute::Inverted)?;
-                self.putch(rows - 3, columns - 9, Character::Character('.'))?;
-                self.set_attribute(rows - 2, columns - 9, Attribute::Inverted)?;
-                self.putch(rows - 2, columns - 9, Character::VLine)?;
-                draw_window(
-                    self,
-                    message.chars(),
-                    false,
-                    None,
-                    None,
-                    rows - 2,
-                    10,
-                    1,
-                    columns - 20,
-                )?;
-            }
-            None => (),
+            self.set_attribute(rows - 3, columns - 9, Attribute::Inverted)?;
+            self.putch(rows - 3, columns - 9, Character::Character('.'))?;
+            self.set_attribute(rows - 2, columns - 9, Attribute::Inverted)?;
+            self.putch(rows - 2, columns - 9, Character::VLine)?;
+            draw_window(
+                self,
+                message.chars(),
+                false,
+                None,
+                None,
+                rows - 2,
+                10,
+                1,
+                columns - 20,
+            )?;
         }
         self.curses
             .window_mut()

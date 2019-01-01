@@ -47,7 +47,7 @@ fn main_loop(state: Arc<Mutex<State>>) {
                 return;
             } else {
                 let mut state = state.lock();
-                state.display.selected_frame.lock().add_message(message);
+                state.display.selected_frame.lock().messages.add(message);
                 state.display.show().unwrap();
             },
         }

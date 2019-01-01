@@ -1,9 +1,7 @@
 use input::Input;
 use layout::Layout;
 use parking_lot::Mutex;
-use std::collections::VecDeque;
 use std::sync::Arc;
-use std::time::Instant;
 use window::Window;
 
 /// A generic interface to render a graphical [`Frame`].
@@ -20,8 +18,7 @@ pub trait Renderer: Send {
         &mut self,
         layout: &Layout,
         selected_window: Option<&Arc<Mutex<Window>>>,
-        messages: &mut VecDeque<String>,
-        message_display_time: &mut Option<Instant>,
+        message: Option<&str>,
     ) -> Result<(), String>;
 
     /// Get the next user [`Input`] event if any.

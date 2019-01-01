@@ -5,7 +5,6 @@ use parking_lot::Mutex;
 use renderer::Renderer;
 use std::collections::VecDeque;
 use std::sync::Arc;
-use std::time::Instant;
 use window::Window;
 
 /// An implementation of [`Renderer`] for debugging.
@@ -124,8 +123,7 @@ impl Renderer for DebugRenderer {
         &mut self,
         layout: &Layout,
         selected_window: Option<&Arc<Mutex<Window>>>,
-        _messages: &mut VecDeque<String>,
-        _message_display_time: &mut Option<Instant>,
+        _message: Option<&str>,
     ) -> Result<(), String> {
         draw(self, layout, selected_window, 15, 20)?;
         Ok(())
