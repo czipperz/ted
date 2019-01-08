@@ -28,3 +28,18 @@ impl Command for CloseTedCommand {
         Err("Closed Successfully".to_string())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ted_core::DebugRenderer;
+
+    #[test]
+    fn close_ted_command_test() {
+        assert!(!was_closed_successfully());
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
+        let r = CloseTedCommand.execute(state);
+        assert!(r.is_err());
+        assert!(was_closed_successfully());
+    }
+}

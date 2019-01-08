@@ -19,7 +19,7 @@ impl CursesRenderer {
     /// Initialize the curses backend and wrap it in the CursesRenderer object.
     pub fn new() -> Result<Self, ()> {
         let mut curses = pancurses::initscr()?;
-        curses.set_input_buffering_mode(pancurses::InputBufferingMode::UnbufferedWithSignals)?;
+        curses.set_input_buffering_mode(pancurses::InputBufferingMode::UnbufferedNoSignals)?;
         curses.set_echo_input(false)?;
         curses.window_mut().set_block_on_read(false)?;
         Ok(Self {
