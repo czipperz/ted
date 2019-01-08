@@ -4,16 +4,19 @@ cd ~/ted || exit 1
 
 cargo build || exit 1
 
-if [ "$1" = "--doc" ]; then
-    tests=""
-else
-    tests="--tests"
-fi
-tests+=" -- -q"
-
 status=0
 for package in $(find . -maxdepth 1 -type d -name 'ted_*' | perl -pe 's|\./||' | sort) ted; do
-    RUST_BACKTRACE=1 cargo test -p $package $tests || status=1
+    RUST_BACKTRACE=1 cargo test -p $package --tests -- -q || status=1
 done
+
+if [ "$1" = "--doc" ]; then
+    if [ $status -ne 0 ]; then
+        exit $status;
+    fi
+
+    for package in $(find . -maxdepth 1 -type d -name 'ted_*' | perl -pe 's|\./||' | sort) ted; do
+        RUST_BACKTRACE=1 cargo test -p $package -- -q || status=1
+    done
+fi
 
 exit $status
