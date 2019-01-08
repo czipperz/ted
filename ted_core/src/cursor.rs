@@ -126,11 +126,12 @@ impl Default for Cursor {
 
 impl PartialEq for Cursor {
     fn eq(&self, other: &Self) -> bool {
-        self.location == other.location && match (self.state.upgrade(), other.state.upgrade()) {
-            (Some(s), Some(o)) => std::sync::Arc::ptr_eq(&s, &o),
-            (None, None) => true,
-            _ => false,
-        }
+        self.location == other.location
+            && match (self.state.upgrade(), other.state.upgrade()) {
+                (Some(s), Some(o)) => std::sync::Arc::ptr_eq(&s, &o),
+                (None, None) => true,
+                _ => false,
+            }
     }
 }
 

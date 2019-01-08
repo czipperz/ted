@@ -546,7 +546,8 @@ mod tests {
                 .insert_str(
                     26,
                     "\nNow I know my ABCs.  Next time wont you sing with me.",
-                ).unwrap();
+                )
+                .unwrap();
             assert_eq!(
                 format!("{}", *buffer),
                 "abcdefghijklmnopqrstuvwxyz\nNow I know my ABCs.  Next time wont you sing with me."
@@ -585,7 +586,8 @@ mod tests {
                 .insert_str(
                     0,
                     "a\nb\nc\nd\ne\nf\ng\nh\ni\nj\nk\nl\nm\nn\no\np\nq\nr\ns\nt\nu\nv\nw\nx\ny\nz",
-                ).unwrap();
+                )
+                .unwrap();
         }
         state.display.show().unwrap();
         assert_eq!(

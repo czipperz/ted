@@ -141,15 +141,19 @@ impl KeyMap {
         match inputs.pop_front() {
             Some(input) => {
                 match self.bindings.get(&input) {
-                    Some(KeyBind::SubMap(sub_map)) => if !inputs.is_empty() {
-                        return sub_map.lock().assign_(inputs, key_bind);
-                    },
-                    Some(KeyBind::Mapping(mapping)) => if !inputs.is_empty() {
-                        for m in mapping.into_iter().rev() {
-                            inputs.push_front(*m)
+                    Some(KeyBind::SubMap(sub_map)) => {
+                        if !inputs.is_empty() {
+                            return sub_map.lock().assign_(inputs, key_bind);
                         }
-                        return Err(key_bind);
-                    },
+                    }
+                    Some(KeyBind::Mapping(mapping)) => {
+                        if !inputs.is_empty() {
+                            for m in mapping.into_iter().rev() {
+                                inputs.push_front(*m)
+                            }
+                            return Err(key_bind);
+                        }
+                    }
                     _ => (),
                 }
                 self.bindings.insert(input, create_bind(inputs, key_bind));

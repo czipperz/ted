@@ -43,13 +43,15 @@ fn main_loop(state: Arc<Mutex<State>>) {
     loop {
         match increment(state.clone()) {
             Ok(()) => (),
-            Err(message) => if ted_common_commands::was_closed_successfully() {
-                return;
-            } else {
-                let mut state = state.lock();
-                state.display.selected_frame.lock().messages.add(message);
-                state.display.show().unwrap();
-            },
+            Err(message) => {
+                if ted_common_commands::was_closed_successfully() {
+                    return;
+                } else {
+                    let mut state = state.lock();
+                    state.display.selected_frame.lock().messages.add(message);
+                    state.display.show().unwrap();
+                }
+            }
         }
     }
 }

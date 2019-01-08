@@ -144,11 +144,13 @@ mod tests {
             left: Layout::HSplit {
                 top: correct.clone().into(),
                 bottom: Layout::default().into(),
-            }.into(),
+            }
+            .into(),
             right: Layout::HSplit {
                 top: Layout::default().into(),
                 bottom: Layout::default().into(),
-            }.into(),
+            }
+            .into(),
         };
         assert!(Arc::ptr_eq(layout.first_window(), &correct));
     }
@@ -160,11 +162,13 @@ mod tests {
             top: Layout::VSplit {
                 left: correct.clone().into(),
                 right: Layout::default().into(),
-            }.into(),
+            }
+            .into(),
             bottom: Layout::VSplit {
                 left: Layout::default().into(),
                 right: Layout::default().into(),
-            }.into(),
+            }
+            .into(),
         };
         assert!(Arc::ptr_eq(layout.first_window(), &correct));
     }
@@ -176,11 +180,13 @@ mod tests {
             left: Layout::HSplit {
                 top: Layout::default().into(),
                 bottom: Layout::default().into(),
-            }.into(),
+            }
+            .into(),
             right: Layout::HSplit {
                 top: Layout::default().into(),
                 bottom: correct.clone().into(),
-            }.into(),
+            }
+            .into(),
         };
         assert!(Arc::ptr_eq(layout.last_window(), &correct));
     }
@@ -192,11 +198,13 @@ mod tests {
             top: Layout::VSplit {
                 left: Layout::default().into(),
                 right: Layout::default().into(),
-            }.into(),
+            }
+            .into(),
             bottom: Layout::VSplit {
                 left: Layout::default().into(),
                 right: correct.clone().into(),
-            }.into(),
+            }
+            .into(),
         };
         assert!(Arc::ptr_eq(layout.last_window(), &correct));
     }

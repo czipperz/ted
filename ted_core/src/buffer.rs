@@ -279,7 +279,8 @@ impl Buffer {
                     .delete_region(
                         current_state.change.loc,
                         current_state.change.loc + current_state.change.len_chars,
-                    ).map_err(|()| "Error: Index out of bounds in Buffer::undo()".to_string())?;
+                    )
+                    .map_err(|()| "Error: Index out of bounds in Buffer::undo()".to_string())?;
             } else {
                 self.buffer_contents
                     .insert_str(current_state.change.loc, &current_state.change.s)
@@ -326,7 +327,8 @@ impl Buffer {
                         .delete_region(
                             next_state.change.loc,
                             next_state.change.loc + next_state.change.len_chars,
-                        ).map_err(|()| "Error: Index out of bounds in Buffer::redo()")?;
+                        )
+                        .map_err(|()| "Error: Index out of bounds in Buffer::redo()")?;
                 } else {
                     self.buffer_contents
                         .insert_str(next_state.change.loc, &next_state.change.s)

@@ -1,8 +1,8 @@
 use buffer::Buffer;
 use input::Input;
 use layout::Layout;
-use parking_lot::Mutex;
 use messages::Messages;
+use parking_lot::Mutex;
 use renderer::Renderer;
 use std::sync::Arc;
 use window::Window;
@@ -41,11 +41,8 @@ impl Frame {
         } else {
             None
         };
-        self.renderer.show(
-            &self.layout,
-            selected_window,
-            self.messages.poll(),
-        )
+        self.renderer
+            .show(&self.layout, selected_window, self.messages.poll())
     }
 
     pub fn getch(&mut self) -> Option<Input> {

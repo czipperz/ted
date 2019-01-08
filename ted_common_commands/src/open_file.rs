@@ -75,11 +75,9 @@ mod tests {
         open_file_command().execute(state.clone()).unwrap();
         let selected_window = state.lock().display.selected_window();
         let selected_window = selected_window.lock();
-        assert!(
-            selected_window
-                .cursor
-                .is_updated(&selected_window.buffer.lock())
-        );
+        assert!(selected_window
+            .cursor
+            .is_updated(&selected_window.buffer.lock()));
         assert_eq!(selected_window.cursor.get(), 0);
     }
 }

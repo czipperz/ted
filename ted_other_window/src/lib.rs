@@ -95,19 +95,15 @@ mod tests {
 
         let at_this = assert_at_window_command(window);
         assert!(at_this.execute(state.clone()).is_ok());
-        assert!(
-            with_other_window_clockwise(at_this)
-                .execute(state.clone())
-                .is_err()
-        );
+        assert!(with_other_window_clockwise(at_this)
+            .execute(state.clone())
+            .is_err());
 
         let at_other = assert_at_window_command(other);
         assert!(at_other.execute(state.clone()).is_err());
-        assert!(
-            with_other_window_clockwise(at_other)
-                .execute(state.clone())
-                .is_ok()
-        );
+        assert!(with_other_window_clockwise(at_other)
+            .execute(state.clone())
+            .is_ok());
     }
 
     #[test]
@@ -120,24 +116,21 @@ mod tests {
             right: Layout::HSplit {
                 top: other.clone().into(),
                 bottom: Layout::default().into(),
-            }.into(),
+            }
+            .into(),
         };
         let state = Arc::new(Mutex::new(state));
 
         let at_this = assert_at_window_command(this);
         assert!(at_this.execute(state.clone()).is_ok());
-        assert!(
-            with_other_window_clockwise(at_this)
-                .execute(state.clone())
-                .is_err()
-        );
+        assert!(with_other_window_clockwise(at_this)
+            .execute(state.clone())
+            .is_err());
 
         let at_other = assert_at_window_command(other);
         assert!(at_other.execute(state.clone()).is_err());
-        assert!(
-            with_other_window_clockwise(at_other)
-                .execute(state.clone())
-                .is_ok()
-        );
+        assert!(with_other_window_clockwise(at_other)
+            .execute(state.clone())
+            .is_ok());
     }
 }

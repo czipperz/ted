@@ -13,7 +13,7 @@ impl Messages {
             message_display_time: None,
         }
     }
-    
+
     pub fn add<S: ToString>(&mut self, message: S) {
         self.messages.push_back(message.to_string());
     }
