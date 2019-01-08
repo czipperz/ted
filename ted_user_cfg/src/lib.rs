@@ -47,6 +47,6 @@ pub fn setup_state(state: &mut State) {
     default_key_map.bind(vec![kbd("C-x"), kbd("C-o")], other_window_counter_clockwise_command());
     default_key_map.bind(vec![kbd("C-z")], undo_command());
     default_key_map.bind(vec![kbd("A-z")], redo_command());
-    default_key_map.bind(vec![kbd("BACKSPACE")], delete_backward_char_command());
+    default_key_map.bind(vec![kbd("Backspace")], delete_backward_char_command());
     default_key_map.bind(vec![kbd("C-@")], set_mark_command());
 }
