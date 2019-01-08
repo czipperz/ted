@@ -30,13 +30,21 @@ use ted_renderers::*;
 use ted_user_cfg::*;
 
 fn main() {
+    if let Err(e) = try_main() {
+        eprintln!("Error: {}", e);
+        std::process::exit(1);
+    }
+}
+
+fn try_main() -> Result<(), String> {
     std::panic::set_hook(Box::new(|info| {
         log(format!("{}", info));
     }));
     let mut state = State::new(CursesRenderer::new().unwrap());
-    setup_state(&mut state);
+    setup_state(&mut state)?;
     state.display.show().unwrap();
     main_loop(Arc::new(Mutex::new(state)));
+    Ok(())
 }
 
 fn main_loop(state: Arc<Mutex<State>>) {

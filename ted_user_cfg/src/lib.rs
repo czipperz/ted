@@ -12,7 +12,7 @@ use ted_kill_ring::*;
 use ted_mark::*;
 use ted_other_window::*;
 
-pub fn setup_state(state: &mut State) {
+pub fn setup_state(state: &mut State) -> Result<(), String> {
     let mut default_key_map = state.default_key_map.lock();
     default_key_map.bind(vec![kbd("C-a")], begin_of_line_command());
     default_key_map.bind(vec![kbd("C-b")], backward_char_command());
@@ -49,4 +49,5 @@ pub fn setup_state(state: &mut State) {
     default_key_map.bind(vec![kbd("A-z")], redo_command());
     default_key_map.bind(vec![kbd("Backspace")], delete_backward_char_command());
     default_key_map.bind(vec![kbd("C-@")], set_mark_command());
+    Ok(())
 }
