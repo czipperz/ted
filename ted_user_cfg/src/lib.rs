@@ -42,6 +42,7 @@ pub fn setup_state(state: &mut State) {
     default_key_map.bind(vec![kbd("C-x"), kbd("g")], git_open_repository_command());
     default_key_map.bind(vec![kbd("C-x"), kbd("n")], end_of_buffer_command());
     default_key_map.bind(vec![kbd("C-x"), kbd("p")], begin_of_buffer_command());
+    default_key_map.bind(vec![kbd("C-x"), kbd("C-s")], save_file_command());
     default_key_map.bind(vec![kbd("C-x"), kbd("o")], other_window_clockwise_command());
     default_key_map.bind(vec![kbd("C-x"), kbd("C-o")], other_window_counter_clockwise_command());
     default_key_map.bind(vec![kbd("C-z")], undo_command());

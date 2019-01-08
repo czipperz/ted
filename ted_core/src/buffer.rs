@@ -362,6 +362,13 @@ pub struct BufferName {
 }
 
 impl BufferName {
+    pub fn path_result(&self) -> Result<&Path, String> {
+        self.path
+            .as_ref()
+            .map(|x| x.as_path())
+            .ok_or_else(|| "Error: Buffer has no file path".to_string())
+    }
+
     pub fn parent(&self) -> Option<&Path> {
         self.path.as_ref().and_then(|p| p.parent())
     }
