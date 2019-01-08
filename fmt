@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ~/ted || exit 1
+cd "$(dirname "$0")" || exit 1
 
 for package in . $(find . -maxdepth 1 -type d -name 'ted_*' | perl -pe 's|\./||' | grep -v ted_user_cfg); do
     (cd "$package"; cargo fmt)

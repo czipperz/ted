@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cd ~/ted || exit 1
+cd "$(dirname "$0")" || exit 1
 
 cargo doc $(find -mindepth 1 -maxdepth 1 -type d | perl -pe 's|^\./||' | perl -pe 's|src|ted|' | grep -v target | grep -v .git | perl -pe 's|^|-p |' | sort | tr '\n' ' ') --no-deps --lib --bins || exit 1
