@@ -16,3 +16,48 @@ impl Command for InsertCommand {
         selected_window.insert(self.0)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use debug_renderer::*;
+
+    #[test]
+    fn insert_command_into_empty() {
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
+        let window = state.lock().display.selected_window();
+        let buffer = window.lock().buffer.clone();
+
+        insert_command(' ').execute(state.clone()).unwrap();
+        assert_eq!(buffer.lock().to_string(), " ");
+        assert_eq!(window.lock().cursor.get(), 1);
+    }
+
+    #[test]
+    fn insert_command_at_end() {
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
+        let window = state.lock().display.selected_window();
+        let buffer = window.lock().buffer.clone();
+
+        window.lock().insert(' ').unwrap();
+        assert_eq!(window.lock().cursor.get(), 1);
+
+        insert_command('x').execute(state.clone()).unwrap();
+        assert_eq!(buffer.lock().to_string(), " x");
+        assert_eq!(window.lock().cursor.get(), 2);
+    }
+
+    #[test]
+    fn insert_command_at_beginning() {
+        let state = Arc::new(Mutex::new(State::new(DebugRenderer::new())));
+        let window = state.lock().display.selected_window();
+        let buffer = window.lock().buffer.clone();
+
+        window.lock().insert(' ').unwrap();
+        window.lock().set_cursor(0);
+
+        insert_command('x').execute(state.clone()).unwrap();
+        assert_eq!(buffer.lock().to_string(), "x ");
+        assert_eq!(window.lock().cursor.get(), 1);
+    }
+}
