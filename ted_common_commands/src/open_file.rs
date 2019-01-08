@@ -1,11 +1,11 @@
 use parking_lot::Mutex;
 use std::fs::File;
 use std::io::{BufReader, Read};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use ted_core::*;
 
-pub fn open_file(path: PathBuf) -> Result<Buffer, String> {
+pub fn open_file(path: &Path) -> Result<Buffer, String> {
     fn check<O, E: ToString>(r: Result<O, E>) -> Result<O, String> {
         r.map_err(|e| e.to_string())
     }
@@ -45,6 +45,14 @@ pub fn open_file(path: PathBuf) -> Result<Buffer, String> {
     }
 }
 
+pub fn open_file_inplace(state: &Mutex<State>, path: &Path) -> Result<(), String> {
+    let buffer = open_file(path)?;
+    let window = Arc::new(Mutex::new(Window::from(buffer)));
+    let selected_frame = state.lock().display.selected_frame.clone();
+    selected_frame.lock().replace_selected_window(window);
+    Ok(())
+}
+
 #[derive(Debug)]
 pub struct OpenFileCommand;
 
@@ -57,11 +65,7 @@ pub fn open_file_command() -> Arc<OpenFileCommand> {
 
 impl Command for OpenFileCommand {
     fn execute(&self, state: Arc<Mutex<State>>) -> Result<(), String> {
-        let buffer = open_file("/home/czipperz/ted/src/main.rs".into())?;
-        let window = Arc::new(Mutex::new(Window::from(buffer)));
-        let selected_frame = state.lock().display.selected_frame.clone();
-        selected_frame.lock().replace_selected_window(window);
-        Ok(())
+        open_file_inplace(&*state, &PathBuf::from("/home/czipperz/ted/src/main.rs"))
     }
 }
 
