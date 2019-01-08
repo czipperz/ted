@@ -1,4 +1,5 @@
 use pancurses_result as pancurses;
+use pancurses::Chtype;
 use parking_lot::Mutex;
 use std::sync::Arc;
 use ted_core::draw::*;
