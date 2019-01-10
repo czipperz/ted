@@ -42,9 +42,23 @@ fn try_main() -> Result<(), String> {
     }));
     let mut state = State::new(CursesRenderer::new().unwrap());
     setup_state(&mut state)?;
-    state.display.show().unwrap();
-    main_loop(Arc::new(Mutex::new(state)));
+    let state = Arc::new(Mutex::new(state));
+    parse_parameters(&*state)?;
+    state.lock().display.show().unwrap();
+    main_loop(state);
     Ok(())
+}
+
+fn parse_parameters(state: &Mutex<State>) -> Result<(), String> {
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() == 1 {
+        Ok(())
+    } else if args.len() == 2 {
+        use std::path::PathBuf;
+        ted_common_commands::open_file_inplace(state, &PathBuf::from(&args[1]))
+    } else {
+        Err("Error: Too many arguments".to_string())
+    }
 }
 
 fn main_loop(state: Arc<Mutex<State>>) {
