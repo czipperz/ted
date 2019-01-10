@@ -1,3 +1,4 @@
+use self::pancurses::Chtype;
 use pancurses_result as pancurses;
 use parking_lot::Mutex;
 use std::sync::Arc;

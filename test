@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ~/ted || exit 1
+cd "$(dirname "$0")" || exit 1
 
 cargo build || exit 1
 
